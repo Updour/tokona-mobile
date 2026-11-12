@@ -126,7 +126,7 @@ class _ProductProcurementHistoryTabState extends ConsumerState<ProductProcuremen
         child: InkWell(
           borderRadius: BorderRadius.circular(12),
           onTap: () async {
-            await PurchaseDetailSheet.show(context, purchase: p);
+            await PurchaseDetailSheet.show(context, p);
             _loadHistory();
           },
           child: Padding(
@@ -277,3 +277,4 @@ class _ProductProcurementHistoryTabState extends ConsumerState<ProductProcuremen
     );
   }
 }
+
