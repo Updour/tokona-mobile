@@ -57,41 +57,59 @@ class BerandaBookingMonitorCard extends ConsumerWidget {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Row(
-          children: [
-            Container(
-              padding: const EdgeInsets.all(7),
-              decoration: BoxDecoration(
-                gradient: const LinearGradient(colors: [Color(0xFF0284C7), Color(0xFF0369A1)]),
-                borderRadius: BorderRadius.circular(10),
+        Expanded(
+          child: Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(7),
+                decoration: BoxDecoration(
+                  gradient: const LinearGradient(colors: [Color(0xFF0284C7), Color(0xFF0369A1)]),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: const Icon(Icons.bookmark_added_rounded, size: 17, color: Colors.white),
               ),
-              child: const Icon(Icons.bookmark_added_rounded, size: 17, color: Colors.white),
-            ),
-            const SizedBox(width: 8),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
+              const SizedBox(width: 8),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('Jadwal Ambil & Booking', style: AppTypography.headingSmall.copyWith(fontSize: 14, fontWeight: FontWeight.w800)),
-                    const SizedBox(width: 6),
-                    if (count > 0)
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1.5),
-                        decoration: BoxDecoration(
-                          color: const Color(0xFFE0F2FE),
-                          borderRadius: BorderRadius.circular(6),
-                          border: Border.all(color: const Color(0xFFBAE6FD)),
+                    Row(
+                      children: [
+                        Flexible(
+                          child: Text(
+                            'Jadwal Ambil & Booking',
+                            style: AppTypography.headingSmall.copyWith(fontSize: 13.5, fontWeight: FontWeight.w800),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
                         ),
-                        child: Text('$count Pesanan', style: const TextStyle(fontSize: 9, fontWeight: FontWeight.w800, color: Color(0xFF0369A1))),
-                      ),
+                        if (count > 0) ...[
+                          const SizedBox(width: 5),
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1.5),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFFE0F2FE),
+                              borderRadius: BorderRadius.circular(6),
+                              border: Border.all(color: const Color(0xFFBAE6FD)),
+                            ),
+                            child: Text('$count', style: const TextStyle(fontSize: 9, fontWeight: FontWeight.w800, color: Color(0xFF0369A1))),
+                          ),
+                        ],
+                      ],
+                    ),
+                    Text(
+                      'Stok diamankan untuk pelanggan',
+                      style: AppTypography.bodySmall.copyWith(fontSize: 10, color: AppColors.textSecondary),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
                   ],
                 ),
-                Text('Stok diamankan untuk pelanggan', style: AppTypography.bodySmall.copyWith(fontSize: 10.5, color: AppColors.textSecondary)),
-              ],
-            ),
-          ],
+              ),
+            ],
+          ),
         ),
+        const SizedBox(width: 6),
         if (count > 0)
           Row(
             mainAxisSize: MainAxisSize.min,
@@ -227,6 +245,8 @@ class BerandaBookingMonitorCard extends ConsumerWidget {
                 Text(
                   '📅 $dateStr • ${order.totalItemCount} item • ${CurrencyFormatter.format(order.finalAmount)}',
                   style: const TextStyle(fontSize: 10.5, color: AppColors.textSecondary, fontWeight: FontWeight.w500),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                 ),
               ],
             ),
@@ -252,11 +272,7 @@ class BerandaBookingMonitorCard extends ConsumerWidget {
                   HapticFeedback.lightImpact();
                   final restored = ref.read(heldCartProvider.notifier).restoreHeldCart(order.id);
                   if (restored != null) {
-                    ref.read(cartProvider.notifier).restoreCart(
-                          items: restored.items,
-                          discountAmount: restored.discountAmount,
-                          customerName: restored.customerName,
-                        );
+                    ref.read(cartProvider.notifier).restoreCart(items: restored.items, discountAmount: restored.discountAmount, customerName: restored.customerName);
                     PosCartBottomSheet.show(context);
                   }
                 },
@@ -264,14 +280,11 @@ class BerandaBookingMonitorCard extends ConsumerWidget {
                 child: Container(
                   padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4.5),
                   decoration: BoxDecoration(color: AppColors.primary, borderRadius: BorderRadius.circular(7)),
-                  child: const Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(Icons.play_arrow_rounded, size: 13, color: Colors.white),
-                      SizedBox(width: 2),
-                      Text('Buka', style: TextStyle(color: Colors.white, fontSize: 10.5, fontWeight: FontWeight.w800)),
-                    ],
-                  ),
+                  child: const Row(mainAxisSize: MainAxisSize.min, children: [
+                    Icon(Icons.play_arrow_rounded, size: 13, color: Colors.white),
+                    SizedBox(width: 2),
+                    Text('Buka', style: TextStyle(color: Colors.white, fontSize: 10.5, fontWeight: FontWeight.w800)),
+                  ]),
                 ),
               ),
             ],
