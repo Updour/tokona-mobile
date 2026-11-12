@@ -91,7 +91,7 @@ class _StockCardHistorySheetState extends ConsumerState<StockCardHistorySheet> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text('Kartu Riwayat Stok', style: AppTypography.headingSmall.copyWith(fontSize: 16), maxLines: 1, overflow: TextOverflow.ellipsis),
+                      Text('Riwayat Stok', style: AppTypography.headingSmall.copyWith(fontSize: 16), maxLines: 1, overflow: TextOverflow.ellipsis),
                       Text(widget.product.name, style: AppTypography.bodySmall.copyWith(fontSize: 11, fontWeight: FontWeight.w600), maxLines: 1, overflow: TextOverflow.ellipsis),
                     ],
                   ),

@@ -68,8 +68,7 @@ class BerandaHeaderBar extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final todayFormatted = _getTodayFormatted();
-    final notifications = ref.watch(notificationListProvider);
-    final totalNotifs = notifications.length;
+    final unreadNotifs = ref.watch(unreadNotificationCountProvider);
 
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -191,19 +190,19 @@ class BerandaHeaderBar extends ConsumerWidget {
                   Container(
                     padding: const EdgeInsets.all(7),
                     decoration: BoxDecoration(
-                      color: totalNotifs > 0 ? const Color(0xFFFEF2F2) : AppColors.surface,
+                      color: unreadNotifs > 0 ? const Color(0xFFFEF2F2) : AppColors.surface,
                       borderRadius: BorderRadius.circular(12),
                       border: Border.all(
-                        color: totalNotifs > 0 ? const Color(0xFFFECACA) : AppColors.border,
+                        color: unreadNotifs > 0 ? const Color(0xFFFECACA) : AppColors.border,
                       ),
                     ),
                     child: Icon(
-                      totalNotifs > 0 ? Icons.notifications_active_rounded : Icons.notifications_outlined,
-                      color: totalNotifs > 0 ? const Color(0xFFDC2626) : AppColors.textSecondary,
+                      unreadNotifs > 0 ? Icons.notifications_active_rounded : Icons.notifications_outlined,
+                      color: unreadNotifs > 0 ? const Color(0xFFDC2626) : AppColors.textSecondary,
                       size: 18,
                     ),
                   ),
-                  if (totalNotifs > 0)
+                  if (unreadNotifs > 0)
                     Positioned(
                       top: -3,
                       right: -3,
@@ -216,7 +215,7 @@ class BerandaHeaderBar extends ConsumerWidget {
                         ),
                         constraints: const BoxConstraints(minWidth: 14),
                         child: Text(
-                          totalNotifs > 9 ? '9+' : '$totalNotifs',
+                          unreadNotifs > 9 ? '9+' : '$unreadNotifs',
                           style: const TextStyle(color: Colors.white, fontSize: 8.5, fontWeight: FontWeight.w900),
                           textAlign: TextAlign.center,
                         ),

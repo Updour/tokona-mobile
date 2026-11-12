@@ -1,5 +1,9 @@
+import 'dart:convert';
+import 'dart:io';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
+import 'package:path/path.dart' as p;
+import 'package:path_provider/path_provider.dart';
 import 'package:tokona/core/utils/currency_formatter.dart';
 import 'package:tokona/features/dashboard/domain/models/app_notification_item.dart';
 import 'package:tokona/features/pos/presentation/controllers/held_cart_controller.dart';
@@ -153,3 +157,53 @@ int _priorityScore(AppNotificationType type) {
       return 20;
   }
 }
+
+class ReadNotificationIdsNotifier extends StateNotifier<Set<String>> {
+  ReadNotificationIdsNotifier() : super({}) {
+    _load();
+  }
+
+  Future<File> _getFile() async {
+    final docsDir = await getApplicationDocumentsDirectory();
+    return File(p.join(docsDir.path, 'tokona_read_notifications.json'));
+  }
+
+  Future<void> _load() async {
+    try {
+      final file = await _getFile();
+      if (await file.exists()) {
+        final content = await file.readAsString();
+        final list = (jsonDecode(content) as List).map((e) => e.toString()).toSet();
+        state = list;
+      }
+    } catch (_) {}
+  }
+
+  Future<void> markAsRead(String id) async {
+    if (state.contains(id)) return;
+    state = {...state, id};
+    _save();
+  }
+
+  Future<void> markAllAsRead(Iterable<String> ids) async {
+    state = {...state, ...ids};
+    _save();
+  }
+
+  Future<void> _save() async {
+    try {
+      final file = await _getFile();
+      await file.writeAsString(jsonEncode(state.toList()));
+    } catch (_) {}
+  }
+}
+
+final readNotificationIdsProvider = StateNotifierProvider<ReadNotificationIdsNotifier, Set<String>>((ref) {
+  return ReadNotificationIdsNotifier();
+});
+
+final unreadNotificationCountProvider = Provider<int>((ref) {
+  final notifs = ref.watch(notificationListProvider);
+  final readIds = ref.watch(readNotificationIdsProvider);
+  return notifs.where((n) => !readIds.contains(n.id)).length;
+});

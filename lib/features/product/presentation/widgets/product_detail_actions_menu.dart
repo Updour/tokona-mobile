@@ -75,7 +75,7 @@ class ProductDetailActionsMenu extends StatelessWidget {
               children: [
                 Icon(Icons.receipt_long_rounded, size: 18, color: Color(0xFF4F46E5)),
                 SizedBox(width: 10),
-                Text('Kartu Riwayat Stok', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13)),
+                Text('Riwayat Stok', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13)),
               ],
             ),
           ),
@@ -86,7 +86,7 @@ class ProductDetailActionsMenu extends StatelessWidget {
               children: [
                 Icon(Icons.add_shopping_cart_rounded, size: 18, color: Color(0xFF0284C7)),
                 SizedBox(width: 10),
-                Text('Beli / Restok Stok', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13)),
+                Text('Tambah Stok', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13)),
               ],
             ),
           ),

@@ -40,12 +40,16 @@ class BerandaTabView extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     ref.listen<List<AppNotificationItem>>(notificationListProvider, (prev, next) {
       if (next.isNotEmpty && (prev == null || prev.isEmpty || next.first.id != prev.first.id)) {
+        final readIds = ref.read(readNotificationIdsProvider);
+        if (readIds.contains(next.first.id)) return;
+
         WidgetsBinding.instance.addPostFrameCallback((_) {
           if (context.mounted) {
             InAppNotificationService.show(
               context,
               next.first,
               onTap: () {
+                ref.read(readNotificationIdsProvider.notifier).markAsRead(next.first.id);
                 switch (next.first.targetPayload) {
                   case 'kasbon':
                     KasbonDueMonitorSheet.show(context);

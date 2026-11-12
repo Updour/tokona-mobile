@@ -31,6 +31,7 @@ class _NotificationCenterSheetState extends ConsumerState<NotificationCenterShee
   String _selectedFilter = 'Semua';
 
   void _handleNotificationTap(AppNotificationItem item) {
+    ref.read(readNotificationIdsProvider.notifier).markAsRead(item.id);
     Navigator.of(context).pop();
     if (item.targetPayload == 'kasbon') KasbonDueMonitorSheet.show(context);
     if (item.targetPayload == 'stock') widget.onNavigateTab?.call(1);
@@ -40,6 +41,8 @@ class _NotificationCenterSheetState extends ConsumerState<NotificationCenterShee
   @override
   Widget build(BuildContext context) {
     final notifications = ref.watch(notificationListProvider);
+    final readIds = ref.watch(readNotificationIdsProvider);
+    final unreadCount = notifications.where((n) => !readIds.contains(n.id)).length;
 
     final filteredList = notifications.where((n) {
       if (_selectedFilter == 'Kasbon') return n.targetPayload == 'kasbon';
@@ -91,12 +94,22 @@ class _NotificationCenterSheetState extends ConsumerState<NotificationCenterShee
                     Text('Pusat Notifikasi Toko', style: AppTypography.headingSmall.copyWith(fontSize: 16)),
                     const SizedBox(height: 2),
                     Text(
-                      '${notifications.length} pemberitahuan operasional aktif',
+                      unreadCount > 0 ? '$unreadCount pesan belum dibaca' : 'Semua pesan sudah dibaca',
                       style: const TextStyle(fontSize: 11.5, color: AppColors.textSecondary),
                     ),
                   ],
                 ),
               ),
+              if (unreadCount > 0)
+                InkWell(
+                  onTap: () => ref.read(readNotificationIdsProvider.notifier).markAllAsRead(notifications.map((n) => n.id)),
+                  borderRadius: BorderRadius.circular(8),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    decoration: BoxDecoration(color: const Color(0xFFF0FDF4), borderRadius: BorderRadius.circular(8)),
+                    child: const Text('Tandai Dibaca', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: Color(0xFF16A34A))),
+                  ),
+                ),
               IconButton(
                 onPressed: () => Navigator.of(context).pop(),
                 icon: const Icon(Icons.close_rounded, size: 20, color: AppColors.textSecondary),
@@ -183,7 +196,7 @@ class _NotificationCenterSheetState extends ConsumerState<NotificationCenterShee
               child: ListView.separated(
                 itemCount: filteredList.length,
                 separatorBuilder: (_, __) => const SizedBox(height: 10),
-                itemBuilder: (ctx, i) => _buildNotificationCard(filteredList[i]),
+                itemBuilder: (ctx, i) => _buildNotificationCard(filteredList[i], readIds.contains(filteredList[i].id)),
               ),
             ),
         ],
@@ -205,17 +218,13 @@ class _NotificationCenterSheetState extends ConsumerState<NotificationCenterShee
         ),
         child: Text(
           '$label ($count)',
-          style: TextStyle(
-            fontSize: 11,
-            fontWeight: isSelected ? FontWeight.w700 : FontWeight.w600,
-            color: isSelected ? Colors.white : AppColors.textSecondary,
-          ),
+          style: TextStyle(fontSize: 11, fontWeight: isSelected ? FontWeight.w700 : FontWeight.w600, color: isSelected ? Colors.white : AppColors.textSecondary),
         ),
       ),
     );
   }
 
-  Widget _buildNotificationCard(AppNotificationItem item) {
+  Widget _buildNotificationCard(AppNotificationItem item, bool isRead) {
     return Material(
       color: Colors.transparent,
       child: InkWell(
@@ -224,9 +233,9 @@ class _NotificationCenterSheetState extends ConsumerState<NotificationCenterShee
         child: Container(
           padding: const EdgeInsets.all(12),
           decoration: BoxDecoration(
-            color: item.containerColor,
+            color: isRead ? const Color(0xFFF8FAFC) : item.containerColor,
             borderRadius: BorderRadius.circular(14),
-            border: Border.all(color: item.accentColor.withValues(alpha: 0.25)),
+            border: Border.all(color: isRead ? const Color(0xFFE2E8F0) : item.accentColor.withValues(alpha: 0.35)),
           ),
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -234,7 +243,7 @@ class _NotificationCenterSheetState extends ConsumerState<NotificationCenterShee
               Container(
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(10)),
-                child: Icon(item.icon, color: item.accentColor, size: 20),
+                child: Icon(item.icon, color: isRead ? AppColors.textMuted : item.accentColor, size: 20),
               ),
               const SizedBox(width: 12),
               Expanded(
@@ -246,31 +255,39 @@ class _NotificationCenterSheetState extends ConsumerState<NotificationCenterShee
                         Container(
                           padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                           decoration: BoxDecoration(
-                            color: item.accentColor.withValues(alpha: 0.12),
+                            color: item.accentColor.withValues(alpha: isRead ? 0.08 : 0.14),
                             borderRadius: BorderRadius.circular(4),
                           ),
                           child: Text(
                             item.categoryLabel,
-                            style: TextStyle(fontSize: 10, fontWeight: FontWeight.w800, color: item.accentColor),
+                            style: TextStyle(fontSize: 10, fontWeight: FontWeight.w800, color: isRead ? AppColors.textSecondary : item.accentColor),
                           ),
                         ),
+                        if (!isRead) ...[
+                          const SizedBox(width: 6),
+                          Container(
+                            width: 6,
+                            height: 6,
+                            decoration: const BoxDecoration(color: Color(0xFFDC2626), shape: BoxShape.circle),
+                          ),
+                        ],
                       ],
                     ),
                     const SizedBox(height: 4),
                     Text(
                       item.title,
-                      style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 13, color: AppColors.textPrimary),
+                      style: TextStyle(fontWeight: FontWeight.w700, fontSize: 13, color: isRead ? const Color(0xFF64748B) : AppColors.textPrimary),
                     ),
                     const SizedBox(height: 2),
                     Text(
                       item.body,
-                      style: const TextStyle(fontSize: 11.5, color: AppColors.textSecondary),
+                      style: TextStyle(fontSize: 11.5, color: isRead ? const Color(0xFF94A3B8) : AppColors.textSecondary),
                     ),
                   ],
                 ),
               ),
               const SizedBox(width: 8),
-              Icon(Icons.arrow_forward_ios_rounded, size: 13, color: item.accentColor),
+              Icon(Icons.arrow_forward_ios_rounded, size: 13, color: isRead ? const Color(0xFFCBD5E1) : item.accentColor),
             ],
           ),
         ),

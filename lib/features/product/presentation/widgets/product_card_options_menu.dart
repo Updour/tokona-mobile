@@ -74,7 +74,7 @@ class ProductCardOptionsMenu extends StatelessWidget {
               children: [
                 Icon(Icons.add_shopping_cart_rounded, size: 18, color: Color(0xFF0284C7)),
                 SizedBox(width: 10),
-                Text('Beli / Restok Barang', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13)),
+                Text('Tambah Stok', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13)),
               ],
             ),
           ),
