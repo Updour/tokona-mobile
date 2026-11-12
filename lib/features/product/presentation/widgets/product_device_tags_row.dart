@@ -70,7 +70,7 @@ class ProductDeviceTagsRow extends ConsumerWidget {
       badgeColor = const Color(0xFF0284C7);
       bgColor = const Color(0xFFE0F2FE);
       icon = Icons.local_shipping_rounded;
-      statusText = 'Dikirim';
+      statusText = 'OTW';
     } else if (item.isPreOrder) {
       badgeColor = const Color(0xFF7C3AED);
       bgColor = const Color(0xFFF3E8FF);

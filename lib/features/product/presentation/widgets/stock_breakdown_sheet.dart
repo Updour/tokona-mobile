@@ -223,7 +223,7 @@ class StockBreakdownSheet extends StatelessWidget {
               borderRadius: BorderRadius.circular(4),
             ),
             child: Text(
-              item.isShipping ? 'Dikirim (Resi)' : (item.isPreOrder ? 'PO' : 'Belanja'),
+              item.isShipping ? 'OTW (Ada Resi)' : (item.isPreOrder ? 'PO' : 'Belanja'),
               style: TextStyle(
                 fontSize: 9.5,
                 fontWeight: FontWeight.w800,
