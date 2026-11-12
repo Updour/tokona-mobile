@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
@@ -11,6 +12,7 @@ import 'package:tokona/features/product/presentation/controllers/product_control
 import 'package:tokona/features/purchase/data/repositories/purchase_repository.dart';
 import 'package:tokona/features/purchase/domain/models/purchase_model.dart';
 import 'package:tokona/features/purchase/presentation/controllers/purchase_controller.dart';
+import 'package:tokona/features/purchase/presentation/widgets/edit_purchase_invoice_dialog.dart';
 import 'package:tokona/features/purchase/presentation/widgets/purchase_detail_item_tile.dart';
 
 class PurchaseDetailSheet extends ConsumerWidget {
@@ -51,55 +53,6 @@ class PurchaseDetailSheet extends ConsumerWidget {
     }
   }
 
-  Future<void> _showEditInvoiceDialog(BuildContext context, WidgetRef ref) async {
-    final invController = TextEditingController(text: purchase.invoiceNumber);
-    final supplierController = TextEditingController(text: purchase.supplierName ?? '');
-    final notesController = TextEditingController(text: purchase.notes ?? '');
-
-    final saved = await showDialog<bool>(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: const Text('Edit No. Faktur & Toko', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700)),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            TextField(controller: invController, decoration: const InputDecoration(labelText: 'No. Faktur / Nota Toko', hintText: 'Contoh: INV-SHOPEE-991')),
-            const SizedBox(height: 10),
-            TextField(controller: supplierController, decoration: const InputDecoration(labelText: 'Nama Toko / Distributor', hintText: 'Contoh: Toko Jaya')),
-            const SizedBox(height: 10),
-            TextField(controller: notesController, decoration: const InputDecoration(labelText: 'Catatan Faktur (Opsional)')),
-          ],
-        ),
-        actions: [
-          TextButton(onPressed: () => Navigator.of(ctx).pop(false), child: const Text('Batal')),
-          ElevatedButton(
-            onPressed: () => Navigator.of(ctx).pop(true),
-            style: ElevatedButton.styleFrom(backgroundColor: AppColors.primary, foregroundColor: Colors.white),
-            child: const Text('Simpan'),
-          ),
-        ],
-      ),
-    );
-
-    if (saved == true && context.mounted) {
-      final storeId = ref.read(authProvider).currentStore?.id;
-      if (storeId != null) {
-        final success = await ref.read(purchaseControllerProvider.notifier).updatePurchaseInvoiceAndSupplier(
-          purchaseId: purchase.id,
-          invoiceNumber: invController.text.trim().isEmpty ? purchase.invoiceNumber : invController.text.trim(),
-          supplierName: supplierController.text.trim().isEmpty ? null : supplierController.text.trim(),
-          notes: notesController.text.trim().isEmpty ? null : notesController.text.trim(),
-          storeId: storeId,
-        );
-        if (success && context.mounted) {
-          AppToast.showSuccess(context, 'Info faktur & nama toko berhasil diperbarui');
-          Navigator.of(context).pop();
-        }
-      }
-    }
-  }
-
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final dateFormat = DateFormat('dd MMMM yyyy, HH:mm');
@@ -134,7 +87,7 @@ class PurchaseDetailSheet extends ConsumerWidget {
                 IconButton(
                   icon: const Icon(Icons.edit_outlined, color: AppColors.primary, size: 20),
                   tooltip: 'Edit No. Faktur & Toko',
-                  onPressed: () => _showEditInvoiceDialog(context, ref),
+                  onPressed: () => EditPurchaseInvoiceDialog.show(context, ref, purchase),
                 ),
                 IconButton(
                   icon: const Icon(Icons.close_rounded, color: AppColors.textMuted),
@@ -155,6 +108,7 @@ class PurchaseDetailSheet extends ConsumerWidget {
                     const SizedBox(height: 16),
                     _buildNotesCard(),
                   ],
+                  _buildProofPhoto(context),
                 ],
               ),
             ),
@@ -269,6 +223,44 @@ class PurchaseDetailSheet extends ConsumerWidget {
           const Text('Catatan Pembelian:', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: AppColors.textMuted)),
           const SizedBox(height: 4),
           Text(purchase.notes!, style: AppTypography.bodySmall.copyWith(color: AppColors.textPrimary)),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildProofPhoto(BuildContext context) {
+    if (purchase.imagePath == null || purchase.imagePath!.trim().isEmpty) return const SizedBox.shrink();
+    final file = File(purchase.imagePath!);
+    if (!file.existsSync()) return const SizedBox.shrink();
+
+    return Container(
+      margin: const EdgeInsets.only(top: 14),
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(color: AppColors.surface, borderRadius: BorderRadius.circular(12), border: Border.all(color: AppColors.border)),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Row(children: [
+            Icon(Icons.photo_camera_back_outlined, size: 16, color: AppColors.primary),
+            SizedBox(width: 6),
+            Text('Foto Nota / Faktur Terlampir', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 12.5)),
+          ]),
+          const SizedBox(height: 10),
+          GestureDetector(
+            onTap: () => showDialog(
+              context: context,
+              builder: (ctx) => Dialog(
+                backgroundColor: Colors.transparent,
+                child: InteractiveViewer(child: ClipRRect(borderRadius: BorderRadius.circular(12), child: Image.file(file))),
+              ),
+            ),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(10),
+              child: Image.file(file, height: 160, width: double.infinity, fit: BoxFit.cover),
+            ),
+          ),
+          const SizedBox(height: 6),
+          const Text('Ketuk foto untuk perbesar (zoom)', style: TextStyle(fontSize: 10, color: AppColors.textMuted)),
         ],
       ),
     );

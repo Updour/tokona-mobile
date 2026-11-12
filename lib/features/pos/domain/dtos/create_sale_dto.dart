@@ -9,6 +9,7 @@ class CreateSaleDto {
   final double cashPaid;
   final String paymentMethod;
   final String? notes;
+  final String? imagePath;
   final DateTime? dueDate;
   final List<CreateSaleItemDto> items;
 
@@ -21,6 +22,7 @@ class CreateSaleDto {
     required this.cashPaid,
     this.paymentMethod = 'CASH',
     this.notes,
+    this.imagePath,
     this.dueDate,
     required this.items,
   });

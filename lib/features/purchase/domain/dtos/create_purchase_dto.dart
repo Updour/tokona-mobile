@@ -16,6 +16,7 @@ class CreatePurchaseDto {
   final int? poDays;
   final DateTime? estimatedArrival;
   final String? notes;
+  final String? imagePath;
   final List<CreatePurchaseItemDto> items;
 
   const CreatePurchaseDto({
@@ -34,6 +35,7 @@ class CreatePurchaseDto {
     this.poDays,
     this.estimatedArrival,
     this.notes,
+    this.imagePath,
     required this.items,
   });
 

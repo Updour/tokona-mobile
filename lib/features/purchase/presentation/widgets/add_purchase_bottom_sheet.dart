@@ -4,6 +4,7 @@ import 'package:tokona/core/theme/app_colors.dart';
 import 'package:tokona/core/theme/app_typography.dart';
 import 'package:tokona/core/utils/currency_formatter.dart';
 import 'package:tokona/core/widgets/app_toast.dart';
+import 'package:tokona/core/widgets/proof_photo_picker.dart';
 import 'package:tokona/features/auth/presentation/controllers/auth_controller.dart';
 import 'package:tokona/features/product/presentation/controllers/product_controller.dart';
 import 'package:tokona/features/purchase/domain/dtos/create_purchase_dto.dart';
@@ -17,6 +18,7 @@ import 'package:tokona/features/purchase/presentation/widgets/purchase_item_list
 import 'package:tokona/features/purchase/presentation/widgets/purchase_payment_account_chips.dart';
 import 'package:tokona/features/purchase/presentation/widgets/purchase_product_selector.dart';
 import 'package:tokona/features/purchase/presentation/widgets/purchase_status_selector.dart';
+import 'package:tokona/features/purchase/presentation/widgets/purchase_submit_button.dart';
 import 'package:tokona/features/purchase/presentation/widgets/purchase_summary_card.dart';
 import 'package:tokona/features/purchase/presentation/widgets/purchase_supplier_field.dart';
 import 'package:tokona/features/supplier/domain/dtos/create_supplier_dto.dart';
@@ -53,6 +55,7 @@ class _AddPurchaseBottomSheetState extends ConsumerState<AddPurchaseBottomSheet>
   String _deviceTag = 'HP 1';
   String _paymentAccount = 'SeaBank';
   String _status = 'received';
+  String? _proofImagePath;
   int _poDays = 3;
 
   final List<CreatePurchaseItemDto> _items = [];
@@ -134,7 +137,9 @@ class _AddPurchaseBottomSheetState extends ConsumerState<AddPurchaseBottomSheet>
         serviceFee: _serviceFee, shippingFee: _shippingFee, status: _status,
         poDays: _status == 'pre_order' ? _poDays : null,
         estimatedArrival: _status == 'pre_order' ? DateTime.now().add(Duration(days: _poDays)) : null,
-        notes: _notesController.text.trim().isEmpty ? null : _notesController.text.trim(), items: _items,
+        notes: _notesController.text.trim().isEmpty ? null : _notesController.text.trim(),
+        imagePath: _proofImagePath,
+        items: _items,
       );
 
       final result = await ref.read(purchaseControllerProvider.notifier).recordPurchase(dto);
@@ -253,33 +258,18 @@ class _AddPurchaseBottomSheetState extends ConsumerState<AddPurchaseBottomSheet>
                         prefixIcon: Icon(Icons.description_outlined, size: 20),
                       ),
                     ),
+                    const SizedBox(height: 12),
+                    ProofPhotoPicker(
+                      imagePath: _proofImagePath,
+                      label: _purchaseType == 'online' ? 'Foto Bukti Nota / Faktur Marketplace' : 'Foto Nota Faktur / Fisik Barang',
+                      hint: 'Ambil foto kamera atau pilih galeri (opsional)',
+                      onImagePicked: (p) => setState(() => _proofImagePath = p),
+                    ),
                     const SizedBox(height: 16),
-                    if (_errorMessage != null) ...[
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-                        decoration: BoxDecoration(
-                          color: const Color(0xFFEF4444).withValues(alpha: 0.1),
-                          borderRadius: BorderRadius.circular(12),
-                          border: Border.all(color: const Color(0xFFEF4444).withValues(alpha: 0.3)),
-                        ),
-                        child: Row(children: [
-                          const Icon(Icons.error_outline, color: Color(0xFFEF4444), size: 18),
-                          const SizedBox(width: 8),
-                          Expanded(child: Text(_errorMessage!, style: const TextStyle(color: Color(0xFFEF4444), fontSize: 12, fontWeight: FontWeight.w600))),
-                        ]),
-                      ),
-                      const SizedBox(height: 12),
-                    ],
-                    ElevatedButton(
-                      onPressed: _isSubmitting ? null : _handleSubmit,
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.primary,
-                        padding: const EdgeInsets.symmetric(vertical: 14),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-                      ),
-                      child: _isSubmitting
-                          ? const SizedBox(height: 20, width: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
-                          : const Text('SIMPAN PEMBELIAN', style: TextStyle(color: Colors.white, fontWeight: FontWeight.w700)),
+                    PurchaseSubmitButton(
+                      isSubmitting: _isSubmitting,
+                      errorMessage: _errorMessage,
+                      onSubmit: _handleSubmit,
                     ),
                   ],
                 ),

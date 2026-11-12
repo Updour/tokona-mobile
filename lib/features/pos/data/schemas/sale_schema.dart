@@ -20,6 +20,7 @@ class SaleSchema {
       ${DatabaseTables.columnSalePaymentMethod} TEXT NOT NULL DEFAULT 'CASH',
       ${DatabaseTables.columnSaleStatus} TEXT NOT NULL DEFAULT 'COMPLETED',
       ${DatabaseTables.columnSaleNotes} TEXT,
+      ${DatabaseTables.columnSaleImagePath} TEXT,
       ${DatabaseTables.columnCreatedAt} TEXT NOT NULL,
       ${DatabaseTables.columnUpdatedAt} TEXT NOT NULL,
       ${DatabaseTables.columnSyncedAt} TEXT,

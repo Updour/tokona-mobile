@@ -59,6 +59,7 @@ class PurchaseRepository {
         status: dto.status, poDays: dto.poDays, estimatedArrival: dto.estimatedArrival,
         refundStatus: 'none', totalAmount: dto.itemsSubtotal,
         notes: dto.notes?.trim().isEmpty == true ? null : dto.notes?.trim(),
+        imagePath: dto.imagePath,
         items: const [], createdAt: now, updatedAt: now,
       );
 

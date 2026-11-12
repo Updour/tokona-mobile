@@ -54,6 +54,7 @@ class SaleController extends StateNotifier<SaleState> {
     required double cashPaid,
     String paymentMethod = 'CASH',
     String? notes,
+    String? imagePath,
     DateTime? dueDate,
   }) async {
     state = state.copyWith(isProcessing: true, clearError: true);
@@ -80,6 +81,7 @@ class SaleController extends StateNotifier<SaleState> {
         cashPaid: cashPaid,
         paymentMethod: paymentMethod,
         notes: notes,
+        imagePath: imagePath,
         dueDate: dueDate,
         items: items,
       );

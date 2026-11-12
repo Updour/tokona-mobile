@@ -16,6 +16,7 @@ class SaleModel {
   final String paymentMethod;
   final String status;
   final String? notes;
+  final String? imagePath;
   final DateTime? dueDate;
   final List<SaleItemModel> items;
   final DateTime createdAt;
@@ -37,6 +38,7 @@ class SaleModel {
     this.paymentMethod = 'CASH',
     this.status = 'COMPLETED',
     this.notes,
+    this.imagePath,
     this.dueDate,
     this.items = const [],
     required this.createdAt,
@@ -82,6 +84,7 @@ class SaleModel {
       paymentMethod: map[DatabaseTables.columnSalePaymentMethod] as String? ?? 'CASH',
       status: map[DatabaseTables.columnSaleStatus] as String? ?? 'COMPLETED',
       notes: map[DatabaseTables.columnSaleNotes] as String?,
+      imagePath: map[DatabaseTables.columnSaleImagePath] as String?,
       dueDate: map[DatabaseTables.columnSaleDueDate] != null
           ? DateTime.tryParse(map[DatabaseTables.columnSaleDueDate] as String)
           : null,
@@ -110,6 +113,7 @@ class SaleModel {
       DatabaseTables.columnSalePaymentMethod: paymentMethod,
       DatabaseTables.columnSaleStatus: status,
       DatabaseTables.columnSaleNotes: notes,
+      DatabaseTables.columnSaleImagePath: imagePath,
       DatabaseTables.columnSaleDueDate: dueDate?.toIso8601String(),
       DatabaseTables.columnCreatedAt: createdAt.toIso8601String(),
       DatabaseTables.columnUpdatedAt: updatedAt.toIso8601String(),
@@ -132,6 +136,7 @@ class SaleModel {
     String? paymentMethod,
     String? status,
     String? notes,
+    String? imagePath,
     DateTime? dueDate,
     List<SaleItemModel>? items,
     DateTime? createdAt,
@@ -153,6 +158,7 @@ class SaleModel {
       paymentMethod: paymentMethod ?? this.paymentMethod,
       status: status ?? this.status,
       notes: notes ?? this.notes,
+      imagePath: imagePath ?? this.imagePath,
       dueDate: dueDate ?? this.dueDate,
       items: items ?? this.items,
       createdAt: createdAt ?? this.createdAt,

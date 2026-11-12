@@ -109,6 +109,7 @@ class DatabaseTables {
   static const String columnPurchaseRefundStatus = 'refund_status';
   static const String columnPurchaseTotalAmount = 'total_amount';
   static const String columnPurchaseNotes = 'notes';
+  static const String columnPurchaseImagePath = 'image_path';
 
   static const String columnPurchaseItemPurchaseId = 'purchase_id';
   static const String columnPurchaseItemProductId = 'product_id';
@@ -136,6 +137,7 @@ class DatabaseTables {
   static const String columnSaleStatus = 'status';
   static const String columnSaleNotes = 'notes';
   static const String columnSaleDueDate = 'due_date';
+  static const String columnSaleImagePath = 'image_path';
 
   static const String columnSaleItemSaleId = 'sale_id';
   static const String columnSaleItemProductId = 'product_id';

@@ -20,6 +20,7 @@ class PurchaseModel {
   final String refundStatus;
   final double totalAmount;
   final String? notes;
+  final String? imagePath;
   final List<PurchaseItemModel> items;
   final DateTime createdAt;
   final DateTime updatedAt;
@@ -44,6 +45,7 @@ class PurchaseModel {
     this.refundStatus = 'none',
     required this.totalAmount,
     this.notes,
+    this.imagePath,
     this.items = const [],
     required this.createdAt,
     required this.updatedAt,
@@ -80,6 +82,7 @@ class PurchaseModel {
       refundStatus: map[DatabaseTables.columnPurchaseRefundStatus] as String? ?? 'none',
       totalAmount: (map[DatabaseTables.columnPurchaseTotalAmount] as num).toDouble(),
       notes: map[DatabaseTables.columnPurchaseNotes] as String?,
+      imagePath: map[DatabaseTables.columnPurchaseImagePath] as String?,
       items: items,
       createdAt: DateTime.parse(map[DatabaseTables.columnCreatedAt] as String),
       updatedAt: DateTime.parse(map[DatabaseTables.columnUpdatedAt] as String),
@@ -109,6 +112,7 @@ class PurchaseModel {
       DatabaseTables.columnPurchaseRefundStatus: refundStatus,
       DatabaseTables.columnPurchaseTotalAmount: totalAmount,
       DatabaseTables.columnPurchaseNotes: notes,
+      DatabaseTables.columnPurchaseImagePath: imagePath,
       DatabaseTables.columnCreatedAt: createdAt.toIso8601String(),
       DatabaseTables.columnUpdatedAt: updatedAt.toIso8601String(),
       DatabaseTables.columnSyncedAt: syncedAt?.toIso8601String(),
@@ -134,6 +138,7 @@ class PurchaseModel {
     String? refundStatus,
     double? totalAmount,
     String? notes,
+    String? imagePath,
     List<PurchaseItemModel>? items,
     DateTime? createdAt,
     DateTime? updatedAt,
@@ -158,6 +163,7 @@ class PurchaseModel {
       refundStatus: refundStatus ?? this.refundStatus,
       totalAmount: totalAmount ?? this.totalAmount,
       notes: notes ?? this.notes,
+      imagePath: imagePath ?? this.imagePath,
       items: items ?? this.items,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,

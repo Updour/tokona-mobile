@@ -58,6 +58,7 @@ class SaleRepository {
         paymentMethod: dto.paymentMethod,
         status: 'COMPLETED',
         notes: dto.notes?.trim().isEmpty == true ? null : dto.notes?.trim(),
+        imagePath: dto.imagePath,
         dueDate: dto.dueDate,
         items: const [],
         createdAt: now,

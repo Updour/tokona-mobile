@@ -5,6 +5,7 @@ import 'package:tokona/core/theme/app_colors.dart';
 import 'package:tokona/core/theme/app_typography.dart';
 import 'package:tokona/core/utils/currency_formatter.dart';
 import 'package:tokona/core/widgets/app_toast.dart';
+import 'package:tokona/core/widgets/proof_photo_picker.dart';
 import 'package:tokona/features/auth/presentation/controllers/auth_controller.dart';
 import 'package:tokona/features/customer/domain/models/customer_model.dart';
 import 'package:tokona/features/payment/domain/models/payment_account_model.dart';
@@ -42,6 +43,7 @@ class _PosCartBottomSheetState extends ConsumerState<PosCartBottomSheet> {
   PaymentAccountModel? _selectedAccount;
   CustomerModel? _selectedCustomer;
   bool _isKasbonSelected = false;
+  String? _paymentProofPath;
   DateTime _selectedDueDate = DateTime.now().add(const Duration(days: 7));
 
   @override
@@ -98,6 +100,7 @@ class _PosCartBottomSheetState extends ConsumerState<PosCartBottomSheet> {
           cart: cart,
           cashPaid: _isKasbonSelected ? 0 : cashPaid,
           paymentMethod: _isKasbonSelected ? 'KASBON' : (activeAccount?.name ?? 'Kas Tunai'),
+          imagePath: _paymentProofPath,
           dueDate: _isKasbonSelected ? _selectedDueDate : null,
         );
 
@@ -180,6 +183,17 @@ class _PosCartBottomSheetState extends ConsumerState<PosCartBottomSheet> {
                       selectedDueDate: _selectedDueDate,
                       onDueDateChanged: (d) => setState(() => _selectedDueDate = d),
                     ),
+                  const SizedBox(height: 10),
+                  ProofPhotoPicker(
+                    imagePath: _paymentProofPath,
+                    label: _isKasbonSelected
+                        ? 'Foto Nota Kasbon / Tanda Tangan'
+                        : (_selectedAccount != null && _selectedAccount!.type != 'cash'
+                            ? 'Foto Bukti Transfer ${_selectedAccount!.name}'
+                            : 'Foto Bukti Pembayaran / Struk'),
+                    hint: 'Ambil foto kamera atau pilih galeri (opsional)',
+                    onImagePicked: (p) => setState(() => _paymentProofPath = p),
+                  ),
                   const SizedBox(height: 16),
                   PosCheckoutButton(
                     isProcessing: saleState.isProcessing,
