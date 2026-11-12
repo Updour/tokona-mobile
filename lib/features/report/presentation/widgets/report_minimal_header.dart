@@ -13,6 +13,7 @@ class ReportMinimalHeader extends StatelessWidget {
   final VoidCallback onOpenFilter;
   final VoidCallback onRefresh;
   final VoidCallback onOpenReportTypes;
+  final VoidCallback? onOpenExport;
 
   const ReportMinimalHeader({
     super.key,
@@ -26,6 +27,7 @@ class ReportMinimalHeader extends StatelessWidget {
     required this.onOpenFilter,
     required this.onRefresh,
     required this.onOpenReportTypes,
+    this.onOpenExport,
   });
 
   @override
@@ -185,6 +187,15 @@ class ReportMinimalHeader extends StatelessWidget {
           tooltip: 'Semua Jenis Laporan Toko',
           onTap: onOpenReportTypes,
         ),
+        if (onOpenExport != null) ...[
+          const SizedBox(width: 6),
+          _buildActionPill(
+            icon: Icons.table_chart_rounded,
+            color: const Color(0xFF059669),
+            tooltip: 'Ekspor Excel & WhatsApp',
+            onTap: onOpenExport!,
+          ),
+        ],
       ],
     );
   }

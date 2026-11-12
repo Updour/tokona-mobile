@@ -12,6 +12,7 @@ import 'package:tokona/features/report/presentation/widgets/report_minimal_heade
 import 'package:tokona/features/report/presentation/widgets/report_profit_chart.dart';
 import 'package:tokona/features/report/presentation/widgets/report_top_products_list.dart';
 import 'package:tokona/features/report/presentation/widgets/report_types_bottom_sheet.dart';
+import 'package:tokona/features/report/presentation/widgets/report_export_bottom_sheet.dart';
 
 class LaporanTabView extends ConsumerStatefulWidget {
   const LaporanTabView({super.key});
@@ -101,6 +102,7 @@ class _LaporanTabViewState extends ConsumerState<LaporanTabView> {
               }
             },
             onOpenReportTypes: () => ReportTypesBottomSheet.show(context),
+            onOpenExport: () => ReportExportBottomSheet.show(context),
           ),
           const SizedBox(height: 6),
           ReportDateFilterBar(

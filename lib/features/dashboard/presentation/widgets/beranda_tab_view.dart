@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:tokona/core/services/in_app_notification_service.dart';
+import 'package:tokona/core/services/native_push_notification_service.dart';
 import 'package:tokona/core/theme/app_colors.dart';
 import 'package:tokona/features/auth/domain/models/store_model.dart';
 import 'package:tokona/features/auth/domain/models/user_model.dart';
@@ -45,6 +46,7 @@ class BerandaTabView extends ConsumerWidget {
 
         WidgetsBinding.instance.addPostFrameCallback((_) {
           if (context.mounted) {
+            NativePushNotificationService.requestPermission();
             InAppNotificationService.show(
               context,
               next.first,

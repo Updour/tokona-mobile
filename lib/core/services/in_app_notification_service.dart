@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:tokona/core/services/native_push_notification_service.dart';
 import 'package:tokona/features/dashboard/domain/models/app_notification_item.dart';
 import 'package:tokona/features/dashboard/presentation/widgets/notification_banner_widget.dart';
 
@@ -31,6 +32,12 @@ class InAppNotificationService {
     }
 
     HapticFeedback.mediumImpact();
+    NativePushNotificationService.showPushNotification(
+      id: item.id.hashCode,
+      title: item.title,
+      body: item.body,
+      trackingKey: item.id,
+    );
 
     final overlay = Overlay.maybeOf(context);
     if (overlay == null) return;
