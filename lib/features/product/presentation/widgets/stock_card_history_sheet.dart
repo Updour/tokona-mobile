@@ -5,6 +5,7 @@ import 'package:tokona/core/theme/app_typography.dart';
 import 'package:tokona/features/product/data/repositories/stock_repository.dart';
 import 'package:tokona/features/product/domain/models/product_model.dart';
 import 'package:tokona/features/product/domain/models/stock_mutation_model.dart';
+import 'package:tokona/features/product/presentation/widgets/product_procurement_history_tab.dart';
 import 'package:tokona/features/product/presentation/widgets/stock_adjustment_sheet.dart';
 import 'package:tokona/features/product/presentation/widgets/stock_mutation_tile.dart';
 
@@ -30,6 +31,7 @@ class StockCardHistorySheet extends ConsumerStatefulWidget {
 }
 
 class _StockCardHistorySheetState extends ConsumerState<StockCardHistorySheet> {
+  int _currentTabIndex = 0;
   List<StockMutationModel> _mutations = [];
   bool _isLoading = true;
   String _selectedFilter = 'Semua';
@@ -43,20 +45,12 @@ class _StockCardHistorySheetState extends ConsumerState<StockCardHistorySheet> {
   Future<void> _loadMutations() async {
     setState(() => _isLoading = true);
     final list = await ref.read(stockRepositoryProvider).getMutationsByProduct(widget.product.id);
-    if (mounted) {
-      setState(() {
-        _mutations = list;
-        _isLoading = false;
-      });
-    }
+    if (mounted) setState(() { _mutations = list; _isLoading = false; });
   }
 
   List<StockMutationModel> get _filteredList {
-    if (_selectedFilter == 'Masuk (+)') {
-      return _mutations.where((m) => m.isIn).toList();
-    } else if (_selectedFilter == 'Keluar (-)') {
-      return _mutations.where((m) => m.isOut).toList();
-    }
+    if (_selectedFilter == 'Masuk (+)') return _mutations.where((m) => m.isIn).toList();
+    if (_selectedFilter == 'Keluar (-)') return _mutations.where((m) => m.isOut).toList();
     return _mutations;
   }
 
@@ -78,11 +72,7 @@ class _StockCardHistorySheetState extends ConsumerState<StockCardHistorySheet> {
         child: Column(
           children: [
             Center(
-              child: Container(
-                width: 40,
-                height: 4,
-                decoration: BoxDecoration(color: AppColors.border, borderRadius: BorderRadius.circular(2)),
-              ),
+              child: Container(width: 40, height: 4, decoration: BoxDecoration(color: AppColors.border, borderRadius: BorderRadius.circular(2))),
             ),
             const SizedBox(height: 14),
             Row(
@@ -91,7 +81,7 @@ class _StockCardHistorySheetState extends ConsumerState<StockCardHistorySheet> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text('Riwayat Stok', style: AppTypography.headingSmall.copyWith(fontSize: 16), maxLines: 1, overflow: TextOverflow.ellipsis),
+                      Text('Riwayat & Siklus Barang', style: AppTypography.headingSmall.copyWith(fontSize: 16), maxLines: 1, overflow: TextOverflow.ellipsis),
                       Text(widget.product.name, style: AppTypography.bodySmall.copyWith(fontSize: 11, fontWeight: FontWeight.w600), maxLines: 1, overflow: TextOverflow.ellipsis),
                     ],
                   ),
@@ -105,31 +95,95 @@ class _StockCardHistorySheetState extends ConsumerState<StockCardHistorySheet> {
               ],
             ),
             const SizedBox(height: 12),
-            _buildStockSummaryCard(stockStr),
+            _buildSegmentedTabs(),
             const SizedBox(height: 12),
-            _buildFilterRow(),
-            const SizedBox(height: 12),
-            Expanded(
-              child: RefreshIndicator(
-                onRefresh: _loadMutations,
-                color: AppColors.primary,
-                child: _isLoading
-                    ? const Center(child: CircularProgressIndicator())
-                    : _filteredList.isEmpty
-                        ? _buildEmptyState()
-                        : ListView.builder(
-                            itemCount: _filteredList.length,
-                            itemBuilder: (context, index) {
-                              return StockMutationTile(
-                                mutation: _filteredList[index],
-                                baseUnit: widget.product.baseUnit,
-                              );
-                            },
-                          ),
+            if (_currentTabIndex == 0) ...[
+              _buildStockSummaryCard(stockStr),
+              const SizedBox(height: 10),
+              _buildFilterRow(),
+              const SizedBox(height: 10),
+              Expanded(
+                child: RefreshIndicator(
+                  onRefresh: _loadMutations,
+                  color: AppColors.primary,
+                  child: _isLoading
+                      ? const Center(child: CircularProgressIndicator())
+                      : _filteredList.isEmpty
+                          ? _buildEmptyState()
+                          : ListView.builder(
+                              itemCount: _filteredList.length,
+                              itemBuilder: (context, index) => StockMutationTile(mutation: _filteredList[index], baseUnit: widget.product.baseUnit),
+                            ),
+                ),
               ),
-            ),
+            ] else ...[
+              Expanded(
+                child: ProductProcurementHistoryTab(
+                  productId: widget.product.id,
+                  productName: widget.product.name,
+                  baseUnit: widget.product.baseUnit,
+                ),
+              ),
+            ],
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _buildSegmentedTabs() {
+    return Container(
+      decoration: BoxDecoration(color: AppColors.surfaceInput, borderRadius: BorderRadius.circular(10)),
+      padding: const EdgeInsets.all(3),
+      child: Row(
+        children: [
+          Expanded(
+            child: InkWell(
+              onTap: () => setState(() => _currentTabIndex = 0),
+              borderRadius: BorderRadius.circular(8),
+              child: Container(
+                padding: const EdgeInsets.symmetric(vertical: 6),
+                decoration: BoxDecoration(
+                  color: _currentTabIndex == 0 ? AppColors.surface : Colors.transparent,
+                  borderRadius: BorderRadius.circular(8),
+                  boxShadow: _currentTabIndex == 0 ? [BoxShadow(color: Colors.black.withValues(alpha: 0.05), blurRadius: 4)] : null,
+                ),
+                alignment: Alignment.center,
+                child: Text(
+                  'Mutasi Fisik',
+                  style: TextStyle(
+                    fontSize: 11.5,
+                    fontWeight: _currentTabIndex == 0 ? FontWeight.w700 : FontWeight.w500,
+                    color: _currentTabIndex == 0 ? AppColors.primary : AppColors.textSecondary,
+                  ),
+                ),
+              ),
+            ),
+          ),
+          Expanded(
+            child: InkWell(
+              onTap: () => setState(() => _currentTabIndex = 1),
+              borderRadius: BorderRadius.circular(8),
+              child: Container(
+                padding: const EdgeInsets.symmetric(vertical: 6),
+                decoration: BoxDecoration(
+                  color: _currentTabIndex == 1 ? AppColors.surface : Colors.transparent,
+                  borderRadius: BorderRadius.circular(8),
+                  boxShadow: _currentTabIndex == 1 ? [BoxShadow(color: Colors.black.withValues(alpha: 0.05), blurRadius: 4)] : null,
+                ),
+                alignment: Alignment.center,
+                child: Text(
+                  'Riwayat PO & Belanja',
+                  style: TextStyle(
+                    fontSize: 11.5,
+                    fontWeight: _currentTabIndex == 1 ? FontWeight.w700 : FontWeight.w500,
+                    color: _currentTabIndex == 1 ? AppColors.primary : AppColors.textSecondary,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -150,7 +204,7 @@ class _StockCardHistorySheetState extends ConsumerState<StockCardHistorySheet> {
               const Icon(Icons.inventory_2_outlined, size: 16, color: AppColors.primary),
               const SizedBox(width: 7),
               Text(
-                'Stok: $stockStr ${widget.product.baseUnit}',
+                'Stok Fisik: $stockStr ${widget.product.baseUnit}',
                 style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w800, color: AppColors.textPrimary),
               ),
             ],
@@ -225,10 +279,7 @@ class _StockCardHistorySheetState extends ConsumerState<StockCardHistorySheet> {
                 child: const Icon(Icons.history_toggle_off_rounded, size: 36, color: AppColors.textMuted),
               ),
               const SizedBox(height: 12),
-              const Text(
-                'Belum Ada Mutasi Stok',
-                style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: AppColors.textPrimary),
-              ),
+              const Text('Belum Ada Mutasi Stok', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: AppColors.textPrimary)),
               const SizedBox(height: 4),
               Text(
                 'Setiap penjualan, pembelian, atau penyesuaian stok akan tercatat otomatis di kartu stok ini.',
@@ -242,4 +293,3 @@ class _StockCardHistorySheetState extends ConsumerState<StockCardHistorySheet> {
     );
   }
 }
-

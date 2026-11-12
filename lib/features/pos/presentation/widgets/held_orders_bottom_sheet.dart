@@ -31,11 +31,7 @@ class HeldOrdersBottomSheet extends ConsumerWidget {
         builder: (dialogCtx) => AlertDialog(
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
           title: const Text('Ganti Keranjang Aktif?'),
-          content: Text(
-            'Keranjang kasir saat ini memiliki ${activeCart.totalItemCount} barang. '
-            'Melanjutkan pesanan ini akan menimpa keranjang aktif.',
-            style: AppTypography.bodySmall,
-          ),
+          content: Text('Keranjang kasir saat ini memiliki ${activeCart.totalItemCount} barang. Melanjutkan pesanan ini akan menimpa keranjang aktif.', style: AppTypography.bodySmall),
           actions: [
             TextButton(onPressed: () => Navigator.of(dialogCtx).pop(), child: const Text('Batal')),
             ElevatedButton(
@@ -57,11 +53,7 @@ class HeldOrdersBottomSheet extends ConsumerWidget {
   void _executeRestore(BuildContext context, WidgetRef ref, HeldCartModel order) {
     final restored = ref.read(heldCartProvider.notifier).restoreHeldCart(order.id);
     if (restored != null) {
-      ref.read(cartProvider.notifier).restoreCart(
-            items: restored.items,
-            discountAmount: restored.discountAmount,
-            customerName: restored.customerName,
-          );
+      ref.read(cartProvider.notifier).restoreCart(items: restored.items, discountAmount: restored.discountAmount, customerName: restored.customerName);
       Navigator.of(context).pop();
       AppToast.showSuccess(context, 'Pesanan ${restored.customerName ?? 'pelanggan'} dimuat kembali');
       PosCartBottomSheet.show(context);
@@ -150,7 +142,7 @@ class HeldOrdersBottomSheet extends ConsumerWidget {
           const SizedBox(height: 10),
           Text('Belum Ada Pesanan Ditahan', style: AppTypography.labelMedium),
           const SizedBox(height: 3),
-          Text('Gunakan tombol Tahan di keranjang kasir untuk memarkir antrean / booking', style: AppTypography.bodySmall, textAlign: TextAlign.center),
+          Text('Gunakan tombol Tahan di keranjang kasir untuk memarkir pesanan', style: AppTypography.bodySmall, textAlign: TextAlign.center),
         ],
       ),
     );
@@ -195,7 +187,7 @@ class HeldOrdersBottomSheet extends ConsumerWidget {
                           Icon(isDelivery ? Icons.two_wheeler_rounded : Icons.storefront_rounded, size: 11, color: isDelivery ? const Color(0xFFB45309) : const Color(0xFF0F766E)),
                           const SizedBox(width: 3),
                           Text(
-                            isDelivery ? 'Dianterin' : 'Diambil di Rumah/Toko',
+                            isDelivery ? 'Dianterin' : 'Ambil Toko',
                             style: TextStyle(fontSize: 9.5, fontWeight: FontWeight.w700, color: isDelivery ? const Color(0xFFB45309) : const Color(0xFF0F766E)),
                           ),
                         ],
@@ -234,8 +226,17 @@ class HeldOrdersBottomSheet extends ConsumerWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text('${order.totalItemCount} jenis (${order.totalQuantity.toStringAsFixed(0)} pcs) • ${currency.format(order.finalAmount)}', style: const TextStyle(fontSize: 11.5, fontWeight: FontWeight.w600)),
+              Expanded(
+                child: Text(
+                  '${order.totalItemCount} jenis (${order.totalQuantity.toStringAsFixed(0)} pcs) • ${currency.format(order.finalAmount)}',
+                  style: const TextStyle(fontSize: 11.5, fontWeight: FontWeight.w700, color: Color(0xFF0F766E)),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+              const SizedBox(width: 8),
               Row(
+                mainAxisSize: MainAxisSize.min,
                 children: [
                   if (order.customerPhone != null && order.customerPhone!.isNotEmpty)
                     IconButton(

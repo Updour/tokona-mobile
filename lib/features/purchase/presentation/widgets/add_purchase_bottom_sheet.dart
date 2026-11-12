@@ -9,6 +9,7 @@ import 'package:tokona/features/product/presentation/controllers/product_control
 import 'package:tokona/features/purchase/domain/dtos/create_purchase_dto.dart';
 import 'package:tokona/features/purchase/domain/dtos/create_purchase_item_dto.dart';
 import 'package:tokona/features/purchase/presentation/controllers/purchase_controller.dart';
+import 'package:tokona/features/purchase/presentation/widgets/add_purchase_header.dart';
 import 'package:tokona/features/purchase/presentation/widgets/purchase_channel_selector.dart';
 import 'package:tokona/features/purchase/presentation/widgets/purchase_device_chips.dart';
 import 'package:tokona/features/purchase/presentation/widgets/purchase_fee_inputs.dart';
@@ -18,6 +19,9 @@ import 'package:tokona/features/purchase/presentation/widgets/purchase_product_s
 import 'package:tokona/features/purchase/presentation/widgets/purchase_status_selector.dart';
 import 'package:tokona/features/purchase/presentation/widgets/purchase_summary_card.dart';
 import 'package:tokona/features/purchase/presentation/widgets/purchase_supplier_field.dart';
+import 'package:tokona/features/supplier/domain/dtos/create_supplier_dto.dart';
+import 'package:tokona/features/supplier/domain/models/supplier_model.dart';
+import 'package:tokona/features/supplier/presentation/controllers/supplier_controller.dart';
 
 class AddPurchaseBottomSheet extends ConsumerStatefulWidget {
   const AddPurchaseBottomSheet({super.key});
@@ -56,6 +60,15 @@ class _AddPurchaseBottomSheetState extends ConsumerState<AddPurchaseBottomSheet>
   String? _errorMessage;
 
   @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final store = ref.read(authProvider).currentStore;
+      if (store != null) ref.read(supplierListProvider.notifier).loadSuppliers(store.id);
+    });
+  }
+
+  @override
   void dispose() {
     _supplierController.dispose();
     _invoiceController.dispose();
@@ -89,10 +102,33 @@ class _AddPurchaseBottomSheetState extends ConsumerState<AddPurchaseBottomSheet>
     });
 
     try {
+      String? effectiveSupplierId = _supplierId;
+      final rawSupplierName = _supplierController.text.trim();
+      if (rawSupplierName.isNotEmpty) {
+        final suppliers = ref.read(supplierListProvider).suppliers;
+        final match = suppliers.where((s) => s.name.trim().toLowerCase() == rawSupplierName.toLowerCase()).firstOrNull;
+        if (match != null) {
+          effectiveSupplierId = match.id;
+        } else {
+          try {
+            final created = await ref.read(supplierRepositoryProvider).createSupplier(
+              store.id,
+              CreateSupplierDto(
+                name: rawSupplierName,
+                type: _purchaseType,
+                platform: _purchaseType == 'online' ? _platform : null,
+              ),
+            );
+            effectiveSupplierId = created.id;
+            ref.read(supplierListProvider.notifier).loadSuppliers(store.id);
+          } catch (_) {}
+        }
+      }
+
       final dto = CreatePurchaseDto(
         storeId: store.id, userId: user.id,
         invoiceNumber: _invoiceController.text.trim().isEmpty ? null : _invoiceController.text.trim(),
-        supplierId: _supplierId, supplierName: _supplierController.text.trim().isEmpty ? null : _supplierController.text.trim(),
+        supplierId: effectiveSupplierId, supplierName: rawSupplierName.isEmpty ? null : rawSupplierName,
         purchaseType: _purchaseType, platform: _purchaseType == 'online' ? _platform : null,
         deviceTag: _purchaseType == 'online' ? _deviceTag : null, paymentAccount: _paymentAccount,
         serviceFee: _serviceFee, shippingFee: _shippingFee, status: _status,
@@ -138,40 +174,7 @@ class _AddPurchaseBottomSheetState extends ConsumerState<AddPurchaseBottomSheet>
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Padding(
-              padding: const EdgeInsets.fromLTRB(20, 12, 20, 0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Center(
-                    child: Container(width: 40, height: 4, decoration: BoxDecoration(color: AppColors.border, borderRadius: BorderRadius.circular(2))),
-                  ),
-                  const SizedBox(height: 12),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text('Catat Pembelian Barang', style: AppTypography.headingSmall.copyWith(fontSize: 16), maxLines: 1, overflow: TextOverflow.ellipsis),
-                            const SizedBox(height: 2),
-                            Text('Pemasok offline dan online', style: AppTypography.bodySmall.copyWith(fontSize: 11), maxLines: 1, overflow: TextOverflow.ellipsis),
-                          ],
-                        ),
-                      ),
-                      IconButton(
-                        onPressed: () => Navigator.of(context).pop(),
-                        icon: const Icon(Icons.close_rounded, size: 20, color: AppColors.textSecondary),
-                        padding: EdgeInsets.zero,
-                        constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 10),
-                  const Divider(height: 1),
-                ],
-              ),
-            ),
+            const AddPurchaseHeader(),
             Flexible(
               child: SingleChildScrollView(
                 padding: const EdgeInsets.fromLTRB(20, 14, 20, 24),
@@ -259,15 +262,11 @@ class _AddPurchaseBottomSheetState extends ConsumerState<AddPurchaseBottomSheet>
                           borderRadius: BorderRadius.circular(12),
                           border: Border.all(color: const Color(0xFFEF4444).withValues(alpha: 0.3)),
                         ),
-                        child: Row(
-                          children: [
-                            const Icon(Icons.error_outline, color: Color(0xFFEF4444), size: 18),
-                            const SizedBox(width: 8),
-                            Expanded(
-                              child: Text(_errorMessage!, style: const TextStyle(color: Color(0xFFEF4444), fontSize: 12, fontWeight: FontWeight.w600)),
-                            ),
-                          ],
-                        ),
+                        child: Row(children: [
+                          const Icon(Icons.error_outline, color: Color(0xFFEF4444), size: 18),
+                          const SizedBox(width: 8),
+                          Expanded(child: Text(_errorMessage!, style: const TextStyle(color: Color(0xFFEF4444), fontSize: 12, fontWeight: FontWeight.w600))),
+                        ]),
                       ),
                       const SizedBox(height: 12),
                     ],

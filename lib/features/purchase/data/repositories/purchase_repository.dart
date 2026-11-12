@@ -168,6 +168,12 @@ class PurchaseRepository {
     return _hydrateItems(db, await purchaseDao.getByStoreId(db, storeId, limit: limit, offset: offset));
   }
 
+  Future<List<PurchaseModel>> getPurchasesByProduct(String productId, {int limit = 50}) async {
+    final db = await appDatabase.database;
+    final list = await purchaseDao.getByProductId(db, productId, limit: limit);
+    return _hydrateItems(db, list);
+  }
+
   Future<Map<String, double>> getProductDeviceBreakdown(String productId) async {
     final db = await appDatabase.database;
     final rows = await db.rawQuery('''
@@ -206,12 +212,7 @@ class PurchaseRepository {
     required DateTime now,
     String? deviceTag,
   }) async {
-    final rows = await txn.query(
-      DatabaseTables.products,
-      where: '${DatabaseTables.columnId} = ?',
-      whereArgs: [productId],
-      limit: 1,
-    );
+    final rows = await txn.query(DatabaseTables.products, where: '${DatabaseTables.columnId} = ?', whereArgs: [productId], limit: 1);
     if (rows.isEmpty) return;
 
     final currentProduct = ProductModel.fromMap(rows.first);
@@ -244,12 +245,7 @@ class PurchaseRepository {
       updateData[DatabaseTables.columnProductDeviceTag] = combinedDeviceTag;
     }
 
-    await txn.update(
-      DatabaseTables.products,
-      updateData,
-      where: '${DatabaseTables.columnId} = ?',
-      whereArgs: [productId],
-    );
+    await txn.update(DatabaseTables.products, updateData, where: '${DatabaseTables.columnId} = ?', whereArgs: [productId]);
 
     await const StockMutationDao().insert(
       txn,

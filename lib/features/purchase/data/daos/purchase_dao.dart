@@ -113,4 +113,16 @@ class PurchaseDao {
     );
     return rows.map((r) => PurchaseModel.fromMap(r)).toList();
   }
+
+  Future<List<PurchaseModel>> getByProductId(DatabaseExecutor db, String productId, {int limit = 50}) async {
+    final rows = await db.rawQuery('''
+      SELECT DISTINCT p.*
+      FROM ${DatabaseTables.purchases} p
+      INNER JOIN ${DatabaseTables.purchaseItems} pi ON p.${DatabaseTables.columnId} = pi.${DatabaseTables.columnPurchaseItemPurchaseId}
+      WHERE pi.${DatabaseTables.columnPurchaseItemProductId} = ?
+      ORDER BY p.${DatabaseTables.columnCreatedAt} DESC
+      LIMIT ?
+    ''', [productId, limit]);
+    return rows.map((r) => PurchaseModel.fromMap(r)).toList();
+  }
 }
