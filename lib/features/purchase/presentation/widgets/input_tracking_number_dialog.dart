@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:tokona/core/theme/app_colors.dart';
 import 'package:tokona/core/theme/app_typography.dart';
+import 'package:tokona/features/purchase/data/services/courier_service.dart';
 
 class InputTrackingNumberDialog extends StatefulWidget {
   final String? currentResi;
@@ -40,32 +41,92 @@ class InputTrackingNumberDialog extends StatefulWidget {
 }
 
 class _InputTrackingNumberDialogState extends State<InputTrackingNumberDialog> {
-  late final TextEditingController _controller;
-  static const List<String> _couriers = ['SPX', 'J&T', 'JNE', 'SiCepat', 'Anteraja', 'Kurir Toko'];
+  late final TextEditingController _courierController;
+  late final TextEditingController _resiController;
+  List<String> _couriers = CourierService.defaultCouriers;
 
   @override
   void initState() {
     super.initState();
-    _controller = TextEditingController(text: widget.currentResi ?? '');
+    final raw = widget.currentResi ?? '';
+    _courierController = TextEditingController(text: _parseCourier(raw));
+    _resiController = TextEditingController(text: _parseResiOnly(raw));
+    _loadCouriers();
+  }
+
+  Future<void> _loadCouriers() async {
+    final list = await CourierService.getCouriers();
+    if (mounted) setState(() => _couriers = list);
+  }
+
+  String _parseCourier(String raw) {
+    final trimmed = raw.trim();
+    if (trimmed.isEmpty) return '';
+    final bracket = RegExp(r'^\[([^\]]+)\]').firstMatch(trimmed);
+    if (bracket != null) return bracket.group(1)?.trim() ?? '';
+    final dash = RegExp(r'^([A-Za-z0-9\s&]+)\s*-\s*([A-Za-z0-9]+)$').firstMatch(trimmed);
+    if (dash != null) return dash.group(1)?.trim() ?? '';
+    return '';
+  }
+
+  String _parseResiOnly(String raw) {
+    final trimmed = raw.trim();
+    if (trimmed.isEmpty) return '';
+    final bracket = RegExp(r'^\[[^\]]+\]\s*(.*)$').firstMatch(trimmed);
+    if (bracket != null) return bracket.group(1)?.trim() ?? '';
+    final dash = RegExp(r'^[A-Za-z0-9\s&]+\s*-\s*([A-Za-z0-9]+)$').firstMatch(trimmed);
+    if (dash != null) return dash.group(2)?.trim() ?? '';
+    return trimmed;
   }
 
   @override
   void dispose() {
-    _controller.dispose();
+    _courierController.dispose();
+    _resiController.dispose();
     super.dispose();
   }
 
-  void _applyCourierPrefix(String courier) {
-    final cur = _controller.text.trim();
-    final regex = RegExp(r'^\[[^\]]+\]\s*');
-    final clean = cur.replaceFirst(regex, '');
-    _controller.text = '[$courier] $clean';
-    _controller.selection = TextSelection.fromPosition(TextPosition(offset: _controller.text.length));
+  void _selectCourier(String courier) {
+    final current = _courierController.text.trim();
+    if (current.toLowerCase() == courier.toLowerCase()) {
+      _courierController.clear();
+    } else {
+      _courierController.text = courier;
+    }
     setState(() {});
+  }
+
+  Future<void> _handleDeleteCourier(String courier) async {
+    await CourierService.deleteCourier(courier);
+    _loadCouriers();
+  }
+
+  void _submit() {
+    final courier = _courierController.text.trim();
+    final resi = _resiController.text.trim();
+
+    if (courier.isNotEmpty) {
+      CourierService.saveCourier(courier);
+    }
+
+    String result;
+    if (courier.isNotEmpty && resi.isNotEmpty) {
+      result = '[$courier] $resi';
+    } else if (resi.isNotEmpty) {
+      result = resi;
+    } else if (courier.isNotEmpty) {
+      result = '[$courier]';
+    } else {
+      result = '';
+    }
+
+    Navigator.of(context).pop(result);
   }
 
   @override
   Widget build(BuildContext context) {
+    final currentCourier = _courierController.text.trim().toLowerCase();
+
     return Dialog(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       backgroundColor: AppColors.surface,
@@ -107,21 +168,49 @@ class _InputTrackingNumberDialogState extends State<InputTrackingNumberDialog> {
               ],
             ),
             const SizedBox(height: 16),
-            const Text('Pilih Ekspedisi / Kurir Cepat:', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: AppColors.textSecondary)),
+            TextField(
+              controller: _courierController,
+              decoration: InputDecoration(
+                labelText: 'Ekspedisi / Kurir (Bebas / Dinamis)',
+                hintText: 'Misal: J&T Cargo, SPX, JNE, Indah Cargo...',
+                hintStyle: const TextStyle(fontSize: 12, color: AppColors.textMuted),
+                prefixIcon: const Icon(Icons.local_shipping_outlined, size: 20),
+                suffixIcon: _courierController.text.isNotEmpty
+                    ? IconButton(
+                        icon: const Icon(Icons.clear_rounded, size: 18),
+                        onPressed: () {
+                          _courierController.clear();
+                          setState(() {});
+                        },
+                      )
+                    : null,
+                filled: true,
+                fillColor: AppColors.surfaceInput,
+                border: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: const BorderSide(color: AppColors.border)),
+                contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 11),
+              ),
+              onChanged: (_) => setState(() {}),
+            ),
             const SizedBox(height: 6),
             SingleChildScrollView(
               scrollDirection: Axis.horizontal,
               child: Row(
                 children: _couriers.map((c) {
+                  final isSelected = currentCourier == c.toLowerCase();
                   return Padding(
                     padding: const EdgeInsets.only(right: 6),
-                    child: ActionChip(
-                      label: Text(c, style: const TextStyle(fontSize: 10.5, fontWeight: FontWeight.w700)),
-                      padding: const EdgeInsets.symmetric(horizontal: 4),
-                      visualDensity: VisualDensity.compact,
+                    child: InputChip(
+                      label: Text(c, style: TextStyle(fontSize: 10.5, fontWeight: FontWeight.w700, color: isSelected ? Colors.white : AppColors.textPrimary)),
+                      selected: isSelected,
+                      selectedColor: const Color(0xFF0F766E),
                       backgroundColor: const Color(0xFFF1F5F9),
                       side: BorderSide.none,
-                      onPressed: () => _applyCourierPrefix(c),
+                      padding: const EdgeInsets.symmetric(horizontal: 4),
+                      visualDensity: VisualDensity.compact,
+                      onPressed: () => _selectCourier(c),
+                      onDeleted: () => _handleDeleteCourier(c),
+                      deleteIcon: const Icon(Icons.close_rounded, size: 13),
+                      deleteIconColor: isSelected ? Colors.white70 : AppColors.textMuted,
                     ),
                   );
                 }).toList(),
@@ -129,19 +218,19 @@ class _InputTrackingNumberDialogState extends State<InputTrackingNumberDialog> {
             ),
             const SizedBox(height: 12),
             TextField(
-              controller: _controller,
+              controller: _resiController,
               autofocus: true,
               textCapitalization: TextCapitalization.characters,
               decoration: InputDecoration(
                 labelText: 'Nomor Resi / AWB',
-                hintText: 'Contoh: [SPX] SPXID048123490',
+                hintText: 'Contoh: JTC8291038491 / SPXID02918',
                 hintStyle: const TextStyle(fontSize: 12, color: AppColors.textMuted),
                 prefixIcon: const Icon(Icons.confirmation_number_outlined, size: 20),
-                suffixIcon: _controller.text.isNotEmpty
+                suffixIcon: _resiController.text.isNotEmpty
                     ? IconButton(
                         icon: const Icon(Icons.clear_rounded, size: 18),
                         onPressed: () {
-                          _controller.clear();
+                          _resiController.clear();
                           setState(() {});
                         },
                       )
@@ -170,10 +259,7 @@ class _InputTrackingNumberDialogState extends State<InputTrackingNumberDialog> {
                   const Spacer(),
                 const SizedBox(width: 8),
                 ElevatedButton(
-                  onPressed: () {
-                    final resi = _controller.text.trim();
-                    Navigator.of(context).pop(resi);
-                  },
+                  onPressed: _submit,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFF0F766E),
                     foregroundColor: Colors.white,
