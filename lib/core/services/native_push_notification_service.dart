@@ -45,3 +45,4 @@ class NativePushNotificationService {
     _recentlyPushedIds.clear();
   }
 }
+

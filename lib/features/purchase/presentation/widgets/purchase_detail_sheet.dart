@@ -153,6 +153,10 @@ class PurchaseDetailSheet extends ConsumerWidget {
             const SizedBox(height: 7),
             _buildInfoRow('Akun Kas / Pembayaran', purchase.paymentAccount!),
           ],
+          if (purchase.trackingNumber != null && purchase.trackingNumber!.isNotEmpty) ...[
+            const SizedBox(height: 7),
+            _buildInfoRow('No. Resi Pengiriman', '📦 ${purchase.trackingNumber!}'),
+          ],
         ],
       ),
     );

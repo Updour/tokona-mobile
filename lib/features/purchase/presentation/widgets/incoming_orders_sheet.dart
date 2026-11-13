@@ -10,6 +10,7 @@ import 'package:tokona/features/purchase/domain/models/purchase_model.dart';
 import 'package:tokona/features/purchase/presentation/controllers/active_orders_controller.dart';
 import 'package:tokona/features/purchase/presentation/widgets/incoming_order_card.dart';
 import 'package:tokona/features/purchase/presentation/widgets/incoming_orders_filter_sheet.dart';
+import 'package:tokona/features/purchase/presentation/widgets/input_tracking_number_dialog.dart';
 import 'package:tokona/features/purchase/presentation/widgets/refund_monitor_sheet.dart';
 
 class IncomingOrdersSheet extends ConsumerStatefulWidget {
@@ -87,18 +88,40 @@ class _IncomingOrdersSheetState extends ConsumerState<IncomingOrdersSheet> {
   }
 
   Future<void> _handleMarkShipped(PurchaseModel p) async {
-    final ok = await AppDialog.showConfirmation(
+    final resi = await InputTrackingNumberDialog.show(
       context,
-      title: 'Update Status Pengiriman',
-      message: 'Supplier sudah mengirim paket ${p.invoiceNumber} (sudah ada resi)? Ubah ke "Dalam Pengiriman".',
-      confirmText: 'Ya, Sudah Ada Resi',
-      icon: Icons.local_shipping_outlined,
+      currentResi: p.trackingNumber,
+      invoiceNumber: p.invoiceNumber,
+      supplierName: p.supplierName,
     );
-    if (ok == true && mounted) {
+    if (resi != null && mounted) {
       final sId = ref.read(authProvider).currentStore?.id;
       if (sId != null) {
-        await ref.read(activeOrdersProvider.notifier).markAsShipped(p.id, sId);
-        if (mounted) AppToast.showSuccess(context, 'Status diubah ke Dalam Pengiriman');
+        final tracking = resi.trim().isNotEmpty ? resi.trim() : null;
+        await ref.read(activeOrdersProvider.notifier).markAsShipped(p.id, sId, trackingNumber: tracking);
+        if (mounted) {
+          AppToast.showSuccess(
+            context,
+            tracking != null ? 'Pesanan dikirim • Resi: $tracking' : 'Status diubah ke Dalam Pengiriman',
+          );
+        }
+      }
+    }
+  }
+
+  Future<void> _handleEditTracking(PurchaseModel p) async {
+    final resi = await InputTrackingNumberDialog.show(
+      context,
+      currentResi: p.trackingNumber,
+      invoiceNumber: p.invoiceNumber,
+      supplierName: p.supplierName,
+      isUpdateOnly: true,
+    );
+    if (resi != null && mounted) {
+      final sId = ref.read(authProvider).currentStore?.id;
+      if (sId != null) {
+        await ref.read(activeOrdersProvider.notifier).updateTrackingNumber(p.id, sId, resi.trim());
+        if (mounted) AppToast.showSuccess(context, 'No. resi berhasil diperbarui');
       }
     }
   }
@@ -234,6 +257,7 @@ class _IncomingOrdersSheetState extends ConsumerState<IncomingOrdersSheet> {
                               onConfirmArrival: () => _handleConfirmArrival(item),
                               onCancel: () => _handleCancel(item),
                               onMarkShipped: item.isPreOrder ? () => _handleMarkShipped(item) : null,
+                              onEditTracking: item.isShipping ? () => _handleEditTracking(item) : null,
                             );
                           },
                         ),

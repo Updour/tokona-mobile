@@ -29,18 +29,25 @@ class PurchaseDao {
     String id, {
     required String status,
     String? refundStatus,
+    String? trackingNumber,
     DateTime? updatedAt,
   }) async {
     final values = <String, dynamic>{
       DatabaseTables.columnPurchaseStatus: status,
       DatabaseTables.columnUpdatedAt: (updatedAt ?? DateTime.now()).toIso8601String(),
     };
-    if (refundStatus != null) {
-      values[DatabaseTables.columnPurchaseRefundStatus] = refundStatus;
-    }
+    if (refundStatus != null) values[DatabaseTables.columnPurchaseRefundStatus] = refundStatus;
+    if (trackingNumber != null) values[DatabaseTables.columnPurchaseTrackingNumber] = trackingNumber;
+    await db.update(DatabaseTables.purchases, values, where: '${DatabaseTables.columnId} = ?', whereArgs: [id]);
+  }
+
+  Future<void> updateTrackingNumber(DatabaseExecutor db, String id, String trackingNumber) async {
     await db.update(
       DatabaseTables.purchases,
-      values,
+      {
+        DatabaseTables.columnPurchaseTrackingNumber: trackingNumber,
+        DatabaseTables.columnUpdatedAt: DateTime.now().toIso8601String(),
+      },
       where: '${DatabaseTables.columnId} = ?',
       whereArgs: [id],
     );

@@ -157,6 +157,7 @@ class AppDatabase {
     await _addColumnIfNotExists(db, DatabaseTables.purchases, DatabaseTables.columnPurchaseEstimatedArrival, 'TEXT');
     await _addColumnIfNotExists(db, DatabaseTables.purchases, DatabaseTables.columnPurchaseRefundStatus, "TEXT DEFAULT 'none'");
     await _addColumnIfNotExists(db, DatabaseTables.purchases, DatabaseTables.columnPurchaseImagePath, 'TEXT');
+    await _addColumnIfNotExists(db, DatabaseTables.purchases, DatabaseTables.columnPurchaseTrackingNumber, 'TEXT');
     await _addColumnIfNotExists(db, DatabaseTables.sales, DatabaseTables.columnSaleCustomerId, 'TEXT');
     await _addColumnIfNotExists(db, DatabaseTables.sales, DatabaseTables.columnSaleStatus, "TEXT DEFAULT 'COMPLETED'");
     await _addColumnIfNotExists(db, DatabaseTables.sales, DatabaseTables.columnSaleDueDate, 'TEXT');

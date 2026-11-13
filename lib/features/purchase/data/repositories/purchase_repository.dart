@@ -60,6 +60,7 @@ class PurchaseRepository {
         refundStatus: 'none', totalAmount: dto.itemsSubtotal,
         notes: dto.notes?.trim().isEmpty == true ? null : dto.notes?.trim(),
         imagePath: dto.imagePath,
+        trackingNumber: dto.trackingNumber,
         items: const [], createdAt: now, updatedAt: now,
       );
 
@@ -122,9 +123,14 @@ class PurchaseRepository {
     });
   }
 
-  Future<void> markAsShipped(String purchaseId) async {
+  Future<void> markAsShipped(String purchaseId, {String? trackingNumber}) async {
     final db = await appDatabase.database;
-    await purchaseDao.updateStatus(db, purchaseId, status: 'shipping', updatedAt: DateTime.now());
+    await purchaseDao.updateStatus(db, purchaseId, status: 'shipping', trackingNumber: trackingNumber, updatedAt: DateTime.now());
+  }
+
+  Future<void> updateTrackingNumber(String purchaseId, String trackingNumber) async {
+    final db = await appDatabase.database;
+    await purchaseDao.updateTrackingNumber(db, purchaseId, trackingNumber);
   }
 
   Future<void> cancelPurchase(String purchaseId) async {
@@ -251,17 +257,10 @@ class PurchaseRepository {
     await const StockMutationDao().insert(
       txn,
       StockMutationModel(
-        id: IdGenerator.generateId(prefix: 'MUT'),
-        storeId: currentProduct.storeId,
-        productId: productId,
-        productName: currentProduct.name,
-        type: 'in',
-        quantity: addedQtyBase,
-        previousStock: currentStock,
-        currentStock: newStock,
-        reason: 'purchase',
-        notes: 'Pembelian Belanja Stok',
-        createdAt: now,
+        id: IdGenerator.generateId(prefix: 'MUT'), storeId: currentProduct.storeId,
+        productId: productId, productName: currentProduct.name, type: 'in',
+        quantity: addedQtyBase, previousStock: currentStock, currentStock: newStock,
+        reason: 'purchase', notes: 'Pembelian Belanja Stok', createdAt: now,
       ),
     );
   }

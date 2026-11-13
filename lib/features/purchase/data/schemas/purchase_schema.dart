@@ -25,6 +25,7 @@ class PurchaseSchema {
       ${DatabaseTables.columnPurchaseTotalAmount} REAL NOT NULL DEFAULT 0.0,
       ${DatabaseTables.columnPurchaseNotes} TEXT,
       ${DatabaseTables.columnPurchaseImagePath} TEXT,
+      ${DatabaseTables.columnPurchaseTrackingNumber} TEXT,
       ${DatabaseTables.columnCreatedAt} TEXT NOT NULL,
       ${DatabaseTables.columnUpdatedAt} TEXT NOT NULL,
       ${DatabaseTables.columnSyncedAt} TEXT,

@@ -31,8 +31,13 @@ class ActiveOrdersController extends StateNotifier<List<PurchaseModel>> {
     _ref.read(paymentAccountListProvider.notifier).loadAccounts(storeId);
   }
 
-  Future<void> markAsShipped(String purchaseId, String storeId) async {
-    await _repository.markAsShipped(purchaseId);
+  Future<void> markAsShipped(String purchaseId, String storeId, {String? trackingNumber}) async {
+    await _repository.markAsShipped(purchaseId, trackingNumber: trackingNumber);
+    await loadOrders(storeId);
+  }
+
+  Future<void> updateTrackingNumber(String purchaseId, String storeId, String trackingNumber) async {
+    await _repository.updateTrackingNumber(purchaseId, trackingNumber);
     await loadOrders(storeId);
   }
 

@@ -162,7 +162,14 @@ class _ProductProcurementHistoryTabState extends ConsumerState<ProductProcuremen
                   ],
                 ),
                 const SizedBox(height: 4),
-                Text('No. Faktur: ${p.invoiceNumber}', style: const TextStyle(fontSize: 10, color: AppColors.textMuted, fontFamily: 'monospace')),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text('No. Faktur: ${p.invoiceNumber}', style: const TextStyle(fontSize: 10, color: AppColors.textMuted, fontFamily: 'monospace')),
+                    if (p.trackingNumber != null && p.trackingNumber!.isNotEmpty)
+                      Text('📦 Resi: ${p.trackingNumber}', style: const TextStyle(fontSize: 10, color: Color(0xFF0F766E), fontWeight: FontWeight.w600, fontFamily: 'monospace')),
+                  ],
+                ),
                 const Divider(height: 14),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,

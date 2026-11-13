@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:tokona/core/theme/app_colors.dart';
 import 'package:tokona/core/theme/app_typography.dart';
 import 'package:tokona/core/utils/currency_formatter.dart';
+import 'package:tokona/core/widgets/app_toast.dart';
 import 'package:tokona/features/purchase/domain/models/purchase_model.dart';
 
 class IncomingOrderCard extends StatelessWidget {
@@ -9,6 +11,7 @@ class IncomingOrderCard extends StatelessWidget {
   final VoidCallback onConfirmArrival;
   final VoidCallback onCancel;
   final VoidCallback? onMarkShipped;
+  final VoidCallback? onEditTracking;
 
   const IncomingOrderCard({
     super.key,
@@ -16,6 +19,7 @@ class IncomingOrderCard extends StatelessWidget {
     required this.onConfirmArrival,
     required this.onCancel,
     this.onMarkShipped,
+    this.onEditTracking,
   });
 
   @override
@@ -141,6 +145,72 @@ class IncomingOrderCard extends StatelessWidget {
               ],
             ),
           ),
+          if (p.trackingNumber != null && p.trackingNumber!.isNotEmpty) ...[
+            const SizedBox(height: 6),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+              decoration: BoxDecoration(
+                color: const Color(0xFFF0FDF4),
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: const Color(0xFFBBF7D0)),
+              ),
+              child: Row(
+                children: [
+                  const Icon(Icons.confirmation_number_outlined, size: 13, color: Color(0xFF15803D)),
+                  const SizedBox(width: 6),
+                  Expanded(
+                    child: Text(
+                      'Resi: ${p.trackingNumber}',
+                      style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: Color(0xFF166534), fontFamily: 'monospace'),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.copy_rounded, size: 14, color: Color(0xFF15803D)),
+                    constraints: const BoxConstraints(minWidth: 24, minHeight: 24),
+                    padding: EdgeInsets.zero,
+                    tooltip: 'Salin Resi',
+                    onPressed: () {
+                      Clipboard.setData(ClipboardData(text: p.trackingNumber!));
+                      AppToast.showSuccess(context, 'No. resi disalin');
+                    },
+                  ),
+                  if (onEditTracking != null) ...[
+                    const SizedBox(width: 2),
+                    IconButton(
+                      icon: const Icon(Icons.edit_outlined, size: 14, color: Color(0xFF15803D)),
+                      constraints: const BoxConstraints(minWidth: 24, minHeight: 24),
+                      padding: EdgeInsets.zero,
+                      tooltip: 'Edit Resi',
+                      onPressed: onEditTracking,
+                    ),
+                  ],
+                ],
+              ),
+            ),
+          ] else if (!isPo && onEditTracking != null) ...[
+            const SizedBox(height: 6),
+            InkWell(
+              onTap: onEditTracking,
+              borderRadius: BorderRadius.circular(8),
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFF1F5F9),
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: const Color(0xFFE2E8F0)),
+                ),
+                child: const Row(
+                  children: [
+                    Icon(Icons.add_circle_outline_rounded, size: 13, color: Color(0xFF0F766E)),
+                    SizedBox(width: 6),
+                    Text('+ Input No. Resi Pengiriman', style: TextStyle(fontSize: 10.5, fontWeight: FontWeight.w700, color: Color(0xFF0F766E))),
+                  ],
+                ),
+              ),
+            ),
+          ],
           const SizedBox(height: 10),
           Row(
             children: [
