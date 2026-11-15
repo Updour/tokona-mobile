@@ -3,16 +3,22 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:tokona/core/theme/app_colors.dart';
 import 'package:tokona/core/theme/app_typography.dart';
 import 'package:tokona/features/auth/presentation/controllers/auth_controller.dart';
+import 'package:tokona/features/pos/presentation/controllers/sale_history_controller.dart';
+import 'package:tokona/features/purchase/presentation/controllers/active_orders_controller.dart';
+import 'package:tokona/features/purchase/presentation/controllers/purchase_controller.dart';
 import 'package:tokona/features/report/domain/models/report_filter_type.dart';
 import 'package:tokona/features/report/presentation/controllers/report_controller.dart';
-import 'package:tokona/features/report/presentation/widgets/report_date_filter_bar.dart';
+import 'package:tokona/features/report/presentation/widgets/report_active_po_list_section.dart';
+import 'package:tokona/features/report/presentation/widgets/report_export_bottom_sheet.dart';
 import 'package:tokona/features/report/presentation/widgets/report_filter_sheet.dart';
 import 'package:tokona/features/report/presentation/widgets/report_kpi_cards.dart';
 import 'package:tokona/features/report/presentation/widgets/report_minimal_header.dart';
 import 'package:tokona/features/report/presentation/widgets/report_profit_chart.dart';
+import 'package:tokona/features/report/presentation/widgets/report_purchases_list_section.dart';
+import 'package:tokona/features/report/presentation/widgets/report_sales_list_section.dart';
+import 'package:tokona/features/report/presentation/widgets/report_segmented_nav.dart';
 import 'package:tokona/features/report/presentation/widgets/report_top_products_list.dart';
 import 'package:tokona/features/report/presentation/widgets/report_types_bottom_sheet.dart';
-import 'package:tokona/features/report/presentation/widgets/report_export_bottom_sheet.dart';
 
 class LaporanTabView extends ConsumerStatefulWidget {
   const LaporanTabView({super.key});
@@ -25,16 +31,24 @@ class _LaporanTabViewState extends ConsumerState<LaporanTabView> {
   final TextEditingController _searchController = TextEditingController();
   bool _isSearching = false;
   String _searchQuery = '';
+  int _currentTabIndex = 0;
 
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      final store = ref.read(authProvider).currentStore;
-      if (store != null) {
-        ref.read(reportControllerProvider.notifier).loadReport(store.id);
-      }
+      _loadAllData();
     });
+  }
+
+  void _loadAllData() {
+    final store = ref.read(authProvider).currentStore;
+    if (store != null) {
+      ref.read(reportControllerProvider.notifier).loadReport(store.id);
+      ref.read(saleHistoryControllerProvider.notifier).loadSales(store.id);
+      ref.read(purchaseControllerProvider.notifier).loadPurchases(store.id);
+      ref.read(activeOrdersProvider.notifier).loadOrders(store.id);
+    }
   }
 
   @override
@@ -68,6 +82,7 @@ class _LaporanTabViewState extends ConsumerState<LaporanTabView> {
   Widget build(BuildContext context) {
     final store = ref.watch(authProvider).currentStore;
     final reportState = ref.watch(reportControllerProvider);
+    final activeOrders = ref.watch(activeOrdersProvider);
 
     final filteredProducts = _searchQuery.trim().isEmpty
         ? reportState.topProducts
@@ -80,9 +95,7 @@ class _LaporanTabViewState extends ConsumerState<LaporanTabView> {
 
     return RefreshIndicator(
       onRefresh: () async {
-        if (store != null) {
-          await ref.read(reportControllerProvider.notifier).loadReport(store.id);
-        }
+        if (store != null) _loadAllData();
       },
       child: ListView(
         padding: const EdgeInsets.fromLTRB(16, 10, 16, 32),
@@ -97,47 +110,68 @@ class _LaporanTabViewState extends ConsumerState<LaporanTabView> {
             onSearchChanged: (val) => setState(() => _searchQuery = val),
             onOpenFilter: _openFilterSheet,
             onRefresh: () {
-              if (store != null) {
-                ref.read(reportControllerProvider.notifier).loadReport(store.id);
-              }
+              if (store != null) _loadAllData();
             },
             onOpenReportTypes: () => ReportTypesBottomSheet.show(context),
             onOpenExport: () => ReportExportBottomSheet.show(context),
           ),
-          const SizedBox(height: 6),
-          ReportDateFilterBar(
-            selectedFilter: reportState.selectedFilter,
-            onFilterSelected: (filter) {
-              if (store != null) {
-                ref.read(reportControllerProvider.notifier).changeFilter(store.id, filter);
-              }
-            },
+          const SizedBox(height: 8),
+          ReportSegmentedNav(
+            currentIndex: _currentTabIndex,
+            onTabSelected: (idx) => setState(() => _currentTabIndex = idx),
+            activePoCount: activeOrders.length,
           ),
           const SizedBox(height: 14),
-          if (reportState.isLoading &&
-              reportState.summary.transactionCount == 0 &&
-              reportState.summary.totalRevenue == 0)
-            const Padding(
-              padding: EdgeInsets.symmetric(vertical: 60),
-              child: Center(child: CircularProgressIndicator(color: AppColors.primary)),
+          if (_currentTabIndex == 0)
+            _buildSummaryTab(reportState, filteredProducts)
+          else if (_currentTabIndex == 1)
+            ReportSalesListSection(
+              startDate: reportState.startDate,
+              endDate: reportState.endDate,
+              searchQuery: _searchQuery,
             )
-          else ...[
-            if (reportState.summary.transactionCount == 0 &&
-                reportState.summary.totalPurchaseSpend == 0 &&
-                reportState.summary.totalRevenue == 0)
-              _buildEmptyState()
-            else ...[
-              ReportKpiCards(summary: reportState.summary),
-              if (reportState.dailyTrends.isNotEmpty && _searchQuery.isEmpty) ...[
-                const SizedBox(height: 16),
-                ReportProfitChart(points: reportState.dailyTrends),
-              ],
-              const SizedBox(height: 16),
-              ReportTopProductsList(items: filteredProducts),
-            ],
-          ],
+          else if (_currentTabIndex == 2)
+            ReportPurchasesListSection(
+              startDate: reportState.startDate,
+              endDate: reportState.endDate,
+              searchQuery: _searchQuery,
+            )
+          else
+            ReportActivePoListSection(
+              searchQuery: _searchQuery,
+            ),
         ],
       ),
+    );
+  }
+
+  Widget _buildSummaryTab(ReportState reportState, List<dynamic> filteredProducts) {
+    if (reportState.isLoading &&
+        reportState.summary.transactionCount == 0 &&
+        reportState.summary.totalRevenue == 0) {
+      return const Padding(
+        padding: EdgeInsets.symmetric(vertical: 60),
+        child: Center(child: CircularProgressIndicator(color: AppColors.primary)),
+      );
+    }
+
+    if (reportState.summary.transactionCount == 0 &&
+        reportState.summary.totalPurchaseSpend == 0 &&
+        reportState.summary.totalRevenue == 0) {
+      return _buildEmptyState();
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        ReportKpiCards(summary: reportState.summary),
+        if (reportState.dailyTrends.isNotEmpty && _searchQuery.isEmpty) ...[
+          const SizedBox(height: 16),
+          ReportProfitChart(points: reportState.dailyTrends),
+        ],
+        const SizedBox(height: 16),
+        ReportTopProductsList(items: filteredProducts.cast()),
+      ],
     );
   }
 
