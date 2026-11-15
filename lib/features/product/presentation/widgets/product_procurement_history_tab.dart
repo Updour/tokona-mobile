@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:tokona/core/theme/app_colors.dart';
 import 'package:tokona/core/theme/app_typography.dart';
 import 'package:tokona/core/utils/currency_formatter.dart';
+import 'package:tokona/core/widgets/app_toast.dart';
 import 'package:tokona/features/purchase/data/repositories/purchase_repository.dart';
 import 'package:tokona/features/purchase/domain/models/purchase_model.dart';
 import 'package:tokona/features/purchase/presentation/widgets/purchase_detail_sheet.dart';
@@ -83,18 +85,11 @@ class _ProductProcurementHistoryTabState extends ConsumerState<ProductProcuremen
           return Padding(
             padding: const EdgeInsets.only(right: 6),
             child: ChoiceChip(
-              label: Text(f),
-              selected: isSelected,
-              visualDensity: VisualDensity.compact,
+              label: Text(f), selected: isSelected, visualDensity: VisualDensity.compact,
               padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 0),
               materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-              labelStyle: TextStyle(
-                fontSize: 10.5,
-                fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
-                color: isSelected ? Colors.white : AppColors.textPrimary,
-              ),
-              selectedColor: AppColors.primary,
-              backgroundColor: AppColors.surfaceInput,
+              labelStyle: TextStyle(fontSize: 10.5, fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500, color: isSelected ? Colors.white : AppColors.textPrimary),
+              selectedColor: AppColors.primary, backgroundColor: AppColors.surfaceInput,
               side: BorderSide(color: isSelected ? Colors.transparent : AppColors.border),
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
               onSelected: (_) => setState(() => _selectedFilter = f),
@@ -165,9 +160,35 @@ class _ProductProcurementHistoryTabState extends ConsumerState<ProductProcuremen
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text('No. Faktur: ${p.invoiceNumber}', style: const TextStyle(fontSize: 10, color: AppColors.textMuted, fontFamily: 'monospace')),
-                    if (p.trackingNumber != null && p.trackingNumber!.isNotEmpty)
-                      Text('📦 Resi: ${p.trackingNumber}', style: const TextStyle(fontSize: 10, color: Color(0xFF0F766E), fontWeight: FontWeight.w600, fontFamily: 'monospace')),
+                    Flexible(
+                      child: Text('No. Faktur: ${p.invoiceNumber}', style: const TextStyle(fontSize: 10, color: AppColors.textMuted, fontFamily: 'monospace'), overflow: TextOverflow.ellipsis),
+                    ),
+                    if (p.trackingNumber != null && p.trackingNumber!.isNotEmpty) ...[
+                      const SizedBox(width: 6),
+                      InkWell(
+                        onTap: () {
+                          Clipboard.setData(ClipboardData(text: p.trackingNumber!));
+                          AppToast.showSuccess(context, 'No. resi disalin: ${p.trackingNumber}');
+                        },
+                        borderRadius: BorderRadius.circular(4),
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1.5),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFF0FDF4),
+                            borderRadius: BorderRadius.circular(4),
+                            border: Border.all(color: const Color(0xFFBBF7D0)),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text('📦 ${p.trackingNumber}', style: const TextStyle(fontSize: 9.5, color: Color(0xFF0F766E), fontWeight: FontWeight.w700, fontFamily: 'monospace')),
+                              const SizedBox(width: 3),
+                              const Icon(Icons.copy_rounded, size: 10, color: Color(0xFF0F766E)),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ],
                   ],
                 ),
                 const Divider(height: 14),
@@ -215,32 +236,20 @@ class _ProductProcurementHistoryTabState extends ConsumerState<ProductProcuremen
   }
 
   Widget _buildStatusBadge(PurchaseModel p) {
-    Color bg;
-    Color fg;
-    IconData icon;
-    String label;
-
-    if (p.isCancelled) {
-      bg = const Color(0xFFEF4444).withValues(alpha: 0.12);
-      fg = const Color(0xFFEF4444);
-      icon = Icons.cancel_rounded;
-      label = 'Batal';
-    } else if (p.isPreOrder) {
-      bg = const Color(0xFF8B5CF6).withValues(alpha: 0.12);
-      fg = const Color(0xFF7C3AED);
-      icon = Icons.hourglass_top_rounded;
-      label = p.poDays != null ? 'PO ${p.poDays}h' : 'PO';
-    } else if (p.isShipping) {
-      bg = const Color(0xFF0284C7).withValues(alpha: 0.12);
-      fg = const Color(0xFF0284C7);
-      icon = Icons.local_shipping_rounded;
-      label = 'OTW / Dikirim';
-    } else {
-      bg = const Color(0xFF10B981).withValues(alpha: 0.12);
-      fg = const Color(0xFF059669);
-      icon = Icons.check_circle_outline_rounded;
-      label = 'Diterima';
-    }
+    final Color bg = p.isCancelled
+        ? const Color(0xFFEF4444).withValues(alpha: 0.12)
+        : (p.isPreOrder
+            ? const Color(0xFF8B5CF6).withValues(alpha: 0.12)
+            : (p.isShipping ? const Color(0xFF0284C7).withValues(alpha: 0.12) : const Color(0xFF10B981).withValues(alpha: 0.12)));
+    final Color fg = p.isCancelled
+        ? const Color(0xFFEF4444)
+        : (p.isPreOrder ? const Color(0xFF7C3AED) : (p.isShipping ? const Color(0xFF0284C7) : const Color(0xFF059669)));
+    final IconData icon = p.isCancelled
+        ? Icons.cancel_rounded
+        : (p.isPreOrder ? Icons.hourglass_top_rounded : (p.isShipping ? Icons.local_shipping_rounded : Icons.check_circle_outline_rounded));
+    final String label = p.isCancelled
+        ? 'Batal'
+        : (p.isPreOrder ? (p.poDays != null ? 'PO ${p.poDays}h' : 'PO') : (p.isShipping ? 'OTW / Dikirim' : 'Diterima'));
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2.5),

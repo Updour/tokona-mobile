@@ -223,72 +223,64 @@ class HeldOrdersBottomSheet extends ConsumerWidget {
             Text(order.note!, style: const TextStyle(fontSize: 11, color: AppColors.textSecondary, fontStyle: FontStyle.italic)),
           ],
           const SizedBox(height: 6),
+          Text(
+            '${order.totalItemCount} jenis (${order.totalQuantity.toStringAsFixed(0)} pcs) • ${currency.format(order.finalAmount)}',
+            style: const TextStyle(fontSize: 11.5, fontWeight: FontWeight.w700, color: Color(0xFF0F766E)),
+            maxLines: 1, overflow: TextOverflow.ellipsis,
+          ),
+          const SizedBox(height: 6),
           Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            mainAxisAlignment: MainAxisAlignment.end,
             children: [
-              Expanded(
-                child: Text(
-                  '${order.totalItemCount} jenis (${order.totalQuantity.toStringAsFixed(0)} pcs) • ${currency.format(order.finalAmount)}',
-                  style: const TextStyle(fontSize: 11.5, fontWeight: FontWeight.w700, color: Color(0xFF0F766E)),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
+              if (order.customerPhone != null && order.customerPhone!.isNotEmpty)
+                IconButton(
+                  icon: const Icon(Icons.chat_bubble_outline_rounded, color: Color(0xFF059669), size: 18),
+                  tooltip: 'Hubungi WA',
+                  constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
+                  padding: const EdgeInsets.all(4),
+                  onPressed: () {
+                    final method = isDelivery ? 'diantar' : 'diambil di toko/rumah';
+                    final msg = 'Halo Kak ${order.customerName ?? ""}, barang pesanannya di Tokona sudah siap $method ya!';
+                    WhatsAppService.sendReceipt(phone: order.customerPhone!, message: msg);
+                  },
                 ),
+              if (order.plannedDate != null)
+                IconButton(
+                  icon: const Icon(Icons.calendar_month_outlined, color: Color(0xFFD97706), size: 18),
+                  tooltip: 'Simpan ke Kalender HP',
+                  constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
+                  padding: const EdgeInsets.all(4),
+                  onPressed: () {
+                    CalendarService.addEventToCalendar(
+                      title: 'Pesanan: ${order.customerName ?? "Pelanggan"} (${order.deliveryMethodLabel})',
+                      description: 'Barang: ${order.items.map((i) => i.product.name).join(", ")}',
+                      plannedDate: order.plannedDate!,
+                    );
+                  },
+                ),
+              IconButton(
+                icon: const Icon(Icons.delete_outline_rounded, color: AppColors.error, size: 18),
+                tooltip: 'Hapus pesanan',
+                constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
+                padding: const EdgeInsets.all(4),
+                onPressed: () {
+                  ref.read(heldCartProvider.notifier).removeHeldCart(order.id);
+                  AppToast.showSuccess(context, 'Pesanan booking dihapus');
+                },
               ),
-              const SizedBox(width: 8),
-              Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  if (order.customerPhone != null && order.customerPhone!.isNotEmpty)
-                    IconButton(
-                      icon: const Icon(Icons.chat_bubble_outline_rounded, color: Color(0xFF059669), size: 18),
-                      tooltip: 'Hubungi WA',
-                      constraints: const BoxConstraints(),
-                      padding: const EdgeInsets.all(4),
-                      onPressed: () {
-                        final method = isDelivery ? 'diantar' : 'diambil di toko/rumah';
-                        final msg = 'Halo Kak ${order.customerName ?? ""}, barang pesanannya di Tokona sudah siap $method ya!';
-                        WhatsAppService.sendReceipt(phone: order.customerPhone!, message: msg);
-                      },
-                    ),
-                  if (order.plannedDate != null)
-                    IconButton(
-                      icon: const Icon(Icons.calendar_month_outlined, color: Color(0xFFD97706), size: 18),
-                      tooltip: 'Simpan ke Kalender HP',
-                      constraints: const BoxConstraints(),
-                      padding: const EdgeInsets.all(4),
-                      onPressed: () {
-                        CalendarService.addEventToCalendar(
-                          title: 'Pesanan: ${order.customerName ?? "Pelanggan"} (${order.deliveryMethodLabel})',
-                          description: 'Barang: ${order.items.map((i) => i.product.name).join(", ")}',
-                          plannedDate: order.plannedDate!,
-                        );
-                      },
-                    ),
-                  IconButton(
-                    icon: const Icon(Icons.delete_outline_rounded, color: AppColors.error, size: 18),
-                    tooltip: 'Hapus pesanan',
-                    constraints: const BoxConstraints(),
-                    padding: const EdgeInsets.all(4),
-                    onPressed: () {
-                      ref.read(heldCartProvider.notifier).removeHeldCart(order.id);
-                      AppToast.showSuccess(context, 'Pesanan booking dihapus');
-                    },
-                  ),
-                  const SizedBox(width: 4),
-                  ElevatedButton.icon(
-                    onPressed: () => _restoreOrder(context, ref, order),
-                    icon: const Icon(Icons.play_arrow_rounded, size: 15),
-                    label: const Text('Buka', style: TextStyle(fontSize: 11.5, fontWeight: FontWeight.w700)),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.primary,
-                      foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                      minimumSize: Size.zero,
-                      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                    ),
-                  ),
-                ],
+              const SizedBox(width: 6),
+              ElevatedButton.icon(
+                onPressed: () => _restoreOrder(context, ref, order),
+                icon: const Icon(Icons.play_arrow_rounded, size: 15),
+                label: const Text('Buka', style: TextStyle(fontSize: 11.5, fontWeight: FontWeight.w700)),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.primary,
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
+                  minimumSize: Size.zero,
+                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                ),
               ),
             ],
           ),

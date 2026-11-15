@@ -9,6 +9,8 @@ import 'package:tokona/features/payment/presentation/controllers/payment_account
 import 'package:tokona/features/payment/presentation/widgets/payment_account_management_sheet.dart';
 import 'package:tokona/features/pos/presentation/controllers/sale_history_controller.dart';
 import 'package:tokona/features/product/presentation/controllers/product_controller.dart';
+import 'package:tokona/features/purchase/presentation/controllers/active_orders_controller.dart';
+import 'package:tokona/features/purchase/presentation/widgets/purchase_history_sheet.dart';
 import 'package:tokona/features/report/presentation/controllers/report_controller.dart';
 
 class BerandaSwipeableCards extends ConsumerStatefulWidget {
@@ -37,6 +39,7 @@ class _BerandaSwipeableCardsState extends ConsumerState<BerandaSwipeableCards> {
     final totalBalance = ref.watch(totalStoreBalanceProvider);
     final saleState = ref.watch(saleHistoryControllerProvider);
     final productState = ref.watch(productListProvider);
+    final activeOrders = ref.watch(activeOrdersProvider);
 
     final currency = NumberFormat.currency(locale: 'id_ID', symbol: 'Rp ', decimalDigits: 0);
     final kasbonSales = saleState.sales.where((s) => s.isKasbon && !s.isVoided);
@@ -122,13 +125,26 @@ class _BerandaSwipeableCardsState extends ConsumerState<BerandaSwipeableCards> {
                 footerRightValue: '${alerts.outOfStockCount} Item',
                 onTap: () => widget.onNavigateTab?.call(1),
               ),
+              _buildCardWrapper(
+                gradient: const [Color(0xFF0D9488), Color(0xFF065F46)],
+                icon: Icons.shopping_cart_checkout_rounded,
+                badgeText: activeOrders.isNotEmpty ? '${activeOrders.length} PESANAN OTW' : 'KULAKAN BERJALAN',
+                badgeBg: Colors.white.withValues(alpha: 0.2),
+                title: 'Total Belanja Kulakan Toko',
+                mainValue: currency.format(reportState.summary.totalPurchaseSpend),
+                footerLeftLabel: 'Dalam Kirim',
+                footerLeftValue: '${activeOrders.length} Pesanan',
+                footerRightLabel: '',
+                footerRightValue: 'Buka Riwayat >',
+                onTap: () => PurchaseHistorySheet.show(context),
+              ),
             ],
           ),
         ),
         const SizedBox(height: 10),
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
-          children: List.generate(4, (index) {
+          children: List.generate(5, (index) {
             final isActive = _currentPage == index;
             return AnimatedContainer(
               duration: const Duration(milliseconds: 250),

@@ -142,7 +142,8 @@ class _IncomingOrdersSheetState extends ConsumerState<IncomingOrdersSheet> {
         final matchInv = p.invoiceNumber.toLowerCase().contains(_searchQuery);
         final matchSup = p.supplierName?.toLowerCase().contains(_searchQuery) ?? false;
         final matchItem = p.items.any((i) => (i.productName ?? '').toLowerCase().contains(_searchQuery));
-        if (!matchInv && !matchSup && !matchItem) return false;
+        final matchTracking = p.trackingNumber?.toLowerCase().contains(_searchQuery) ?? false;
+        if (!matchInv && !matchSup && !matchItem && !matchTracking) return false;
       }
       return true;
     }).toList();

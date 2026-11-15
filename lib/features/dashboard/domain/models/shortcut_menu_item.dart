@@ -27,7 +27,7 @@ class AppShortcutRegistry {
     'kasir',
     'jadwal_wa',
     'jatuh_tempo',
-    'tutup_toko',
+    'riwayat_kulakan',
     'katalog',
     'tambah_produk',
     'restok',

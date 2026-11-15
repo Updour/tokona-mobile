@@ -227,6 +227,35 @@ class BerandaActiveOrdersCard extends ConsumerWidget {
                     child: Text(p.platform!, style: const TextStyle(fontSize: 9.5, fontWeight: FontWeight.w600, color: Color(0xFF6D28D9))),
                   ),
                 ],
+                if (p.trackingNumber != null && p.trackingNumber!.isNotEmpty) ...[
+                  const SizedBox(width: 4),
+                  InkWell(
+                    onTap: () {
+                      Clipboard.setData(ClipboardData(text: p.trackingNumber!));
+                      AppToast.showSuccess(context, 'No. resi disalin');
+                    },
+                    borderRadius: BorderRadius.circular(5),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 2),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFF0FDF4),
+                        borderRadius: BorderRadius.circular(5),
+                        border: Border.all(color: const Color(0xFFBBF7D0)),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const Icon(Icons.confirmation_number_outlined, size: 10, color: Color(0xFF15803D)),
+                          const SizedBox(width: 3),
+                          Text(
+                            p.trackingNumber!,
+                            style: const TextStyle(fontSize: 9.5, fontWeight: FontWeight.w700, color: Color(0xFF15803D), fontFamily: 'monospace'),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
               ],
             ),
           ),

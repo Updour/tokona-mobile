@@ -219,20 +219,33 @@ class _ProductDetailInventoryInfoCardState extends ConsumerState<ProductDetailIn
     Widget? trailing,
   }) {
     return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Icon(icon, size: 16, color: AppColors.textSecondary),
         const SizedBox(width: 8),
         Text(label, style: const TextStyle(fontSize: 12, color: AppColors.textSecondary)),
-        const Spacer(),
-        if (badge != null) ...[
-          badge,
-          const SizedBox(width: 8),
-        ],
-        Text(
-          value,
-          style: const TextStyle(fontSize: 12.5, fontWeight: FontWeight.w700, color: AppColors.textPrimary),
+        const SizedBox(width: 8),
+        Expanded(
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: [
+              if (badge != null) ...[
+                badge,
+                const SizedBox(width: 6),
+              ],
+              Flexible(
+                child: Text(
+                  value,
+                  style: const TextStyle(fontSize: 12.5, fontWeight: FontWeight.w700, color: AppColors.textPrimary),
+                  textAlign: TextAlign.end,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+              if (trailing != null) trailing,
+            ],
+          ),
         ),
-        if (trailing != null) trailing,
       ],
     );
   }

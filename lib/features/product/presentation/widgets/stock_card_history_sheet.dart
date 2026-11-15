@@ -199,16 +199,22 @@ class _StockCardHistorySheetState extends ConsumerState<StockCardHistorySheet> {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Row(
-            children: [
-              const Icon(Icons.inventory_2_outlined, size: 16, color: AppColors.primary),
-              const SizedBox(width: 7),
-              Text(
-                'Stok Fisik: $stockStr ${widget.product.baseUnit}',
-                style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w800, color: AppColors.textPrimary),
+              Expanded(
+                child: Row(
+                  children: [
+                    const Icon(Icons.inventory_2_outlined, size: 16, color: AppColors.primary),
+                    const SizedBox(width: 7),
+                    Flexible(
+                      child: Text(
+                        'Stok Fisik: $stockStr ${widget.product.baseUnit}',
+                        style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w800, color: AppColors.textPrimary),
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                  ],
+                ),
               ),
-            ],
-          ),
+              const SizedBox(width: 8),
           InkWell(
             onTap: () async {
               final result = await StockAdjustmentSheet.show(context, product: widget.product);
@@ -238,30 +244,33 @@ class _StockCardHistorySheetState extends ConsumerState<StockCardHistorySheet> {
 
   Widget _buildFilterRow() {
     final filters = ['Semua', 'Masuk (+)', 'Keluar (-)'];
-    return Row(
-      children: filters.map((f) {
-        final isSelected = _selectedFilter == f;
-        return Padding(
-          padding: const EdgeInsets.only(right: 6),
-          child: ChoiceChip(
-            label: Text(f),
-            selected: isSelected,
-            visualDensity: VisualDensity.compact,
-            padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 0),
-            materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-            labelStyle: TextStyle(
-              fontSize: 10.5,
-              fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
-              color: isSelected ? Colors.white : AppColors.textPrimary,
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      child: Row(
+        children: filters.map((f) {
+          final isSelected = _selectedFilter == f;
+          return Padding(
+            padding: const EdgeInsets.only(right: 6),
+            child: ChoiceChip(
+              label: Text(f),
+              selected: isSelected,
+              visualDensity: VisualDensity.compact,
+              padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 0),
+              materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+              labelStyle: TextStyle(
+                fontSize: 10.5,
+                fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
+                color: isSelected ? Colors.white : AppColors.textPrimary,
+              ),
+              selectedColor: AppColors.primary,
+              backgroundColor: AppColors.surfaceInput,
+              side: BorderSide(color: isSelected ? Colors.transparent : AppColors.border),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
+              onSelected: (_) => setState(() => _selectedFilter = f),
             ),
-            selectedColor: AppColors.primary,
-            backgroundColor: AppColors.surfaceInput,
-            side: BorderSide(color: isSelected ? Colors.transparent : AppColors.border),
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
-            onSelected: (_) => setState(() => _selectedFilter = f),
-          ),
-        );
-      }).toList(),
+          );
+        }).toList(),
+      ),
     );
   }
 

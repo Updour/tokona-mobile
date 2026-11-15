@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:tokona/core/theme/app_colors.dart';
@@ -99,7 +100,7 @@ class PurchaseDetailSheet extends ConsumerWidget {
             Expanded(
               child: ListView(
                 children: [
-                  _buildHeaderInfoCard(dateFormat),
+                  _buildHeaderInfoCard(context, dateFormat),
                   const SizedBox(height: 16),
                   _buildItemsSection(),
                   const SizedBox(height: 16),
@@ -132,7 +133,7 @@ class PurchaseDetailSheet extends ConsumerWidget {
     );
   }
 
-  Widget _buildHeaderInfoCard(DateFormat dateFormat) {
+  Widget _buildHeaderInfoCard(BuildContext context, DateFormat dateFormat) {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(color: AppColors.surfaceInput, borderRadius: BorderRadius.circular(12), border: Border.all(color: AppColors.border)),
@@ -155,7 +156,14 @@ class PurchaseDetailSheet extends ConsumerWidget {
           ],
           if (purchase.trackingNumber != null && purchase.trackingNumber!.isNotEmpty) ...[
             const SizedBox(height: 7),
-            _buildInfoRow('No. Resi Pengiriman', '📦 ${purchase.trackingNumber!}'),
+            InkWell(
+              borderRadius: BorderRadius.circular(6),
+              onTap: () {
+                Clipboard.setData(ClipboardData(text: purchase.trackingNumber!));
+                AppToast.showSuccess(context, 'No. resi disalin: ${purchase.trackingNumber}');
+              },
+              child: _buildInfoRow('No. Resi Pengiriman', '📦 ${purchase.trackingNumber!} (Salin)'),
+            ),
           ],
         ],
       ),

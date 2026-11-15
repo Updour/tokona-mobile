@@ -285,6 +285,6 @@ class PurchaseRepository {
     const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
     final rng = Random();
     final randomSuffix = List.generate(4, (_) => chars[rng.nextInt(chars.length)]).join();
-    return 'INV-$shopTag-$prodTag-$dateStr-$randomSuffix';
+    return 'PUR-$shopTag-$prodTag-$dateStr-$randomSuffix';
   }
 }

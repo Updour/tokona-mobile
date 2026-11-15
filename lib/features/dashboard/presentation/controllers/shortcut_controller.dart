@@ -32,6 +32,9 @@ class ShortcutController extends StateNotifier<List<String>> {
             .where((id) => AppShortcutRegistry.findById(id) != null)
             .toList();
         if (validList.isNotEmpty) {
+          if (!validList.contains('riwayat_kulakan')) {
+            validList.add('riwayat_kulakan');
+          }
           state = validList;
           return;
         }
