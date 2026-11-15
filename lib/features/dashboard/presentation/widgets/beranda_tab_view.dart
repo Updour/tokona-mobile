@@ -10,8 +10,9 @@ import 'package:tokona/features/backup/presentation/controllers/scheduled_backup
 import 'package:tokona/features/customer/presentation/widgets/kasbon_due_monitor_sheet.dart';
 import 'package:tokona/features/dashboard/domain/models/app_notification_item.dart';
 import 'package:tokona/features/dashboard/presentation/controllers/notification_controller.dart';
-import 'package:tokona/features/dashboard/presentation/widgets/beranda_booking_monitor_card.dart';
 import 'package:tokona/features/dashboard/presentation/widgets/beranda_active_orders_card.dart';
+import 'package:tokona/features/dashboard/presentation/widgets/beranda_booking_monitor_card.dart';
+import 'package:tokona/features/dashboard/presentation/widgets/beranda_business_metrics_section.dart';
 import 'package:tokona/features/dashboard/presentation/widgets/beranda_header_bar.dart';
 import 'package:tokona/features/dashboard/presentation/widgets/beranda_quick_shortcuts.dart';
 import 'package:tokona/features/dashboard/presentation/widgets/beranda_swipeable_cards.dart';
@@ -107,6 +108,8 @@ class BerandaTabView extends ConsumerWidget {
           BerandaSwipeableCards(onNavigateTab: onNavigateTab),
           const SizedBox(height: 14),
           BerandaQuickShortcuts(onNavigateTab: onNavigateTab),
+          const SizedBox(height: 16),
+          BerandaBusinessMetricsSection(onNavigateTab: onNavigateTab),
           const SizedBox(height: 16),
           const DailySalesChartCard(),
           const SizedBox(height: 14),
