@@ -30,6 +30,7 @@ class LaporanTabView extends ConsumerStatefulWidget {
 
 class _LaporanTabViewState extends ConsumerState<LaporanTabView> {
   final TextEditingController _searchController = TextEditingController();
+  late final PageController _pageController;
   bool _isSearching = false;
   String _searchQuery = '';
   int _currentTabIndex = 0;
@@ -37,6 +38,7 @@ class _LaporanTabViewState extends ConsumerState<LaporanTabView> {
   @override
   void initState() {
     super.initState();
+    _pageController = PageController(initialPage: _currentTabIndex);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _loadAllData();
     });
@@ -55,6 +57,7 @@ class _LaporanTabViewState extends ConsumerState<LaporanTabView> {
   @override
   void dispose() {
     _searchController.dispose();
+    _pageController.dispose();
     super.dispose();
   }
 
@@ -79,6 +82,16 @@ class _LaporanTabViewState extends ConsumerState<LaporanTabView> {
     );
   }
 
+  void _handleTabSelected(int idx) {
+    if (_currentTabIndex == idx) return;
+    setState(() => _currentTabIndex = idx);
+    _pageController.animateToPage(
+      idx,
+      duration: const Duration(milliseconds: 320),
+      curve: Curves.easeOutCubic,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final store = ref.watch(authProvider).currentStore;
@@ -98,50 +111,61 @@ class _LaporanTabViewState extends ConsumerState<LaporanTabView> {
       onRefresh: () async {
         if (store != null) _loadAllData();
       },
-      child: ListView(
-        padding: const EdgeInsets.fromLTRB(16, 10, 16, 32),
+      child: Column(
         children: [
-          ReportMinimalHeader(
-            activeFilterLabel: reportState.activeFilterLabel,
-            isFilterActive: reportState.selectedFilter != ReportFilterType.today,
-            isLoading: reportState.isLoading,
-            isSearching: _isSearching,
-            searchController: _searchController,
-            onSearchToggled: (val) => setState(() => _isSearching = val),
-            onSearchChanged: (val) => setState(() => _searchQuery = val),
-            onOpenFilter: _openFilterSheet,
-            onRefresh: () {
-              if (store != null) _loadAllData();
-            },
-            onOpenReportTypes: () => ReportTypesBottomSheet.show(context),
-            onOpenExport: () => ReportExportBottomSheet.show(context),
-          ),
-          const SizedBox(height: 8),
-          ReportSegmentedNav(
-            currentIndex: _currentTabIndex,
-            onTabSelected: (idx) => setState(() => _currentTabIndex = idx),
-            activePoCount: activeOrders.length,
-          ),
-          const SizedBox(height: 14),
-          AnimatedSwitcher(
-            duration: const Duration(milliseconds: 280),
-            switchInCurve: Curves.easeOutCubic,
-            switchOutCurve: Curves.easeInCubic,
-            transitionBuilder: (child, animation) {
-              return FadeTransition(
-                opacity: animation,
-                child: SlideTransition(
-                  position: Tween<Offset>(
-                    begin: const Offset(0.04, 0.0),
-                    end: Offset.zero,
-                  ).animate(animation),
-                  child: child,
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 10, 16, 0),
+            child: Column(
+              children: [
+                ReportMinimalHeader(
+                  activeFilterLabel: reportState.activeFilterLabel,
+                  isFilterActive: reportState.selectedFilter != ReportFilterType.today,
+                  isLoading: reportState.isLoading,
+                  isSearching: _isSearching,
+                  searchController: _searchController,
+                  onSearchToggled: (val) => setState(() => _isSearching = val),
+                  onSearchChanged: (val) => setState(() => _searchQuery = val),
+                  onOpenFilter: _openFilterSheet,
+                  onRefresh: () {
+                    if (store != null) _loadAllData();
+                  },
+                  onOpenReportTypes: () => ReportTypesBottomSheet.show(context),
+                  onOpenExport: () => ReportExportBottomSheet.show(context),
                 ),
-              );
-            },
-            child: KeyedSubtree(
-              key: ValueKey<int>(_currentTabIndex),
-              child: _buildCurrentTabContent(reportState, filteredProducts),
+                const SizedBox(height: 10),
+                ReportSegmentedNav(
+                  currentIndex: _currentTabIndex,
+                  onTabSelected: _handleTabSelected,
+                  activePoCount: activeOrders.length,
+                ),
+                const SizedBox(height: 8),
+              ],
+            ),
+          ),
+          Expanded(
+            child: PageView(
+              controller: _pageController,
+              onPageChanged: (idx) {
+                if (_currentTabIndex != idx) {
+                  setState(() => _currentTabIndex = idx);
+                }
+              },
+              children: [
+                _buildPageContainer(_buildSummaryTab(reportState, filteredProducts)),
+                _buildPageContainer(ReportSalesListSection(
+                  startDate: reportState.startDate,
+                  endDate: reportState.endDate,
+                  searchQuery: _searchQuery,
+                )),
+                _buildPageContainer(ReportPurchasesListSection(
+                  startDate: reportState.startDate,
+                  endDate: reportState.endDate,
+                  searchQuery: _searchQuery,
+                )),
+                _buildPageContainer(ReportActivePoListSection(
+                  searchQuery: _searchQuery,
+                )),
+              ],
             ),
           ),
         ],
@@ -149,26 +173,12 @@ class _LaporanTabViewState extends ConsumerState<LaporanTabView> {
     );
   }
 
-  Widget _buildCurrentTabContent(ReportState reportState, List<dynamic> filteredProducts) {
-    if (_currentTabIndex == 0) {
-      return _buildSummaryTab(reportState, filteredProducts);
-    } else if (_currentTabIndex == 1) {
-      return ReportSalesListSection(
-        startDate: reportState.startDate,
-        endDate: reportState.endDate,
-        searchQuery: _searchQuery,
-      );
-    } else if (_currentTabIndex == 2) {
-      return ReportPurchasesListSection(
-        startDate: reportState.startDate,
-        endDate: reportState.endDate,
-        searchQuery: _searchQuery,
-      );
-    } else {
-      return ReportActivePoListSection(
-        searchQuery: _searchQuery,
-      );
-    }
+  Widget _buildPageContainer(Widget child) {
+    return SingleChildScrollView(
+      physics: const AlwaysScrollableScrollPhysics(parent: BouncingScrollPhysics()),
+      padding: const EdgeInsets.fromLTRB(16, 6, 16, 32),
+      child: child,
+    );
   }
 
   Widget _buildSummaryTab(ReportState reportState, List<dynamic> filteredProducts) {
