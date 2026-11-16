@@ -13,9 +13,10 @@ class ProductDeviceTagsRow extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final activeOrders = ref.watch(activeOrdersProvider);
     final inTransitList = InTransitDeviceItem.fromActiveOrders(activeOrders, product.id);
-    final physicalTags = product.deviceTags;
 
-    if (physicalTags.isEmpty && inTransitList.isEmpty) {
+    // Badge perangkat fisik yang sudah diterima tidak ditampilkan di kartu produk
+    // sesuai preferensi agar daftar produk tetap bersih (hanya tampil di detail/riwayat produk).
+    if (inTransitList.isEmpty) {
       return const SizedBox.shrink();
     }
 
@@ -26,10 +27,7 @@ class ProductDeviceTagsRow extends ConsumerWidget {
         physics: const BouncingScrollPhysics(),
         child: Row(
           mainAxisSize: MainAxisSize.min,
-          children: [
-            ...physicalTags.map((tag) => _buildPhysicalBadge(tag)),
-            ...inTransitList.map((item) => _buildInTransitBadge(item)),
-          ],
+          children: inTransitList.map((item) => _buildInTransitBadge(item)).toList(),
         ),
       ),
     );

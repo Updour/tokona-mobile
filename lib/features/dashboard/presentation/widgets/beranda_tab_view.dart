@@ -7,6 +7,7 @@ import 'package:tokona/core/theme/app_colors.dart';
 import 'package:tokona/features/auth/domain/models/store_model.dart';
 import 'package:tokona/features/auth/domain/models/user_model.dart';
 import 'package:tokona/features/backup/presentation/controllers/scheduled_backup_controller.dart';
+import 'package:tokona/features/customer/presentation/controllers/customer_controller.dart';
 import 'package:tokona/features/customer/presentation/widgets/kasbon_due_monitor_sheet.dart';
 import 'package:tokona/features/dashboard/domain/models/app_notification_item.dart';
 import 'package:tokona/features/dashboard/presentation/controllers/notification_controller.dart';
@@ -96,6 +97,7 @@ class BerandaTabView extends ConsumerWidget {
             ref.read(paymentAccountListProvider.notifier).loadAccounts(store!.id),
             ref.read(saleHistoryControllerProvider.notifier).loadSales(store!.id),
             ref.read(activeOrdersProvider.notifier).loadOrders(store!.id),
+            ref.read(customerListProvider.notifier).loadCustomers(store!.id),
           ]);
         }
       },

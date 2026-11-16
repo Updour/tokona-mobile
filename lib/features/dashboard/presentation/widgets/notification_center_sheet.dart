@@ -50,6 +50,7 @@ class _NotificationCenterSheetState extends ConsumerState<NotificationCenterShee
 
     final filteredList = notifications.where((n) {
       if (_selectedFilter == 'Kasbon') return n.targetPayload == 'kasbon';
+      if (_selectedFilter == 'Paylater') return n.targetPayload == 'paylater';
       if (_selectedFilter == 'Stok') return n.targetPayload == 'stock';
       if (_selectedFilter == 'Booking') return n.targetPayload == 'booking';
       return true;
@@ -129,6 +130,8 @@ class _NotificationCenterSheetState extends ConsumerState<NotificationCenterShee
                 _buildFilterChip('Semua', notifications.length),
                 const SizedBox(width: 6),
                 _buildFilterChip('Kasbon', notifications.where((n) => n.targetPayload == 'kasbon').length),
+                const SizedBox(width: 6),
+                _buildFilterChip('Paylater', notifications.where((n) => n.targetPayload == 'paylater').length),
                 const SizedBox(width: 6),
                 _buildFilterChip('Stok', notifications.where((n) => n.targetPayload == 'stock').length),
                 const SizedBox(width: 6),

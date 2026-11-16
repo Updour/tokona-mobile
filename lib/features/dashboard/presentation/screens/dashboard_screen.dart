@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:tokona/core/theme/app_colors.dart';
 import 'package:tokona/core/widgets/app_toast.dart';
 import 'package:tokona/features/auth/presentation/controllers/auth_controller.dart';
+import 'package:tokona/features/customer/presentation/controllers/customer_controller.dart';
 import 'package:tokona/features/dashboard/presentation/widgets/akun_tab_view.dart';
 import 'package:tokona/features/dashboard/presentation/widgets/beranda_tab_view.dart';
 import 'package:tokona/features/dashboard/presentation/widgets/custom_floating_bottom_nav.dart';
@@ -35,6 +36,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
         ref.read(productListProvider.notifier).loadProducts(storeId);
         ref.read(reportControllerProvider.notifier).loadReport(storeId);
         ref.read(saleHistoryControllerProvider.notifier).loadSales(storeId);
+        ref.read(customerListProvider.notifier).loadCustomers(storeId);
       }
     });
   }
@@ -84,6 +86,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
         ref.read(productListProvider.notifier).loadProducts(next);
         ref.read(reportControllerProvider.notifier).loadReport(next);
         ref.read(saleHistoryControllerProvider.notifier).loadSales(next);
+        ref.read(customerListProvider.notifier).loadCustomers(next);
       }
     });
 

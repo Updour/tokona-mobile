@@ -5,6 +5,7 @@ import 'package:intl/intl.dart';
 import 'package:tokona/core/providers/alert_notification_provider.dart';
 import 'package:tokona/core/theme/app_colors.dart';
 import 'package:tokona/features/auth/presentation/controllers/auth_controller.dart';
+import 'package:tokona/features/customer/presentation/controllers/customer_controller.dart';
 import 'package:tokona/features/customer/presentation/widgets/kasbon_due_monitor_sheet.dart';
 import 'package:tokona/features/dashboard/presentation/widgets/swipeable_card_item.dart';
 import 'package:tokona/features/payment/presentation/controllers/payment_account_controller.dart';
@@ -113,10 +114,13 @@ class _BerandaSwipeableCardsState extends ConsumerState<BerandaSwipeableCards> {
     final purchaseState = ref.watch(purchaseControllerProvider);
     final productState = ref.watch(productListProvider);
     final activeOrders = ref.watch(activeOrdersProvider);
+    final customerState = ref.watch(customerListProvider);
 
     final currency = NumberFormat.currency(locale: 'id_ID', symbol: 'Rp ', decimalDigits: 0);
     final kasbonSales = saleState.sales.where((s) => s.isKasbon && !s.isVoided).toList();
-    final totalKasbonAmount = kasbonSales.fold(0.0, (acc, s) => acc + s.finalAmount);
+    final salesKasbonAmount = kasbonSales.fold(0.0, (acc, s) => acc + s.finalAmount);
+    final customersKasbonAmount = customerState.customers.fold<double>(0.0, (acc, c) => acc + c.receivableBalance);
+    final totalKasbonAmount = salesKasbonAmount > 0 ? salesKasbonAmount : customersKasbonAmount;
 
     final txCount = reportState.summary.transactionCount;
     final avgBasket = txCount > 0 ? reportState.summary.totalRevenue / txCount : 0.0;
