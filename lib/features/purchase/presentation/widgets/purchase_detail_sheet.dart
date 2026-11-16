@@ -93,7 +93,7 @@ class PurchaseDetailSheet extends ConsumerWidget {
             Expanded(
               child: ListView(
                 children: [
-                  _buildHeaderInfoCard(context, dateFormat),
+                  _buildHeaderInfoCard(context, ref, dateFormat),
                   const SizedBox(height: 16),
                   _buildItemsSection(context),
                   const SizedBox(height: 16),
@@ -121,7 +121,7 @@ class PurchaseDetailSheet extends ConsumerWidget {
     );
   }
 
-  Widget _buildHeaderInfoCard(BuildContext context, DateFormat dateFormat) {
+  Widget _buildHeaderInfoCard(BuildContext context, WidgetRef ref, DateFormat dateFormat) {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(color: AppColors.surfaceInput, borderRadius: BorderRadius.circular(12), border: Border.all(color: AppColors.border)),
