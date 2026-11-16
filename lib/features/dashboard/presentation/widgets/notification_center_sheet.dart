@@ -6,7 +6,9 @@ import 'package:tokona/core/theme/app_typography.dart';
 import 'package:tokona/features/customer/presentation/widgets/kasbon_due_monitor_sheet.dart';
 import 'package:tokona/features/dashboard/domain/models/app_notification_item.dart';
 import 'package:tokona/features/dashboard/presentation/controllers/notification_controller.dart';
+import 'package:tokona/features/payment/presentation/widgets/payment_account_management_sheet.dart';
 import 'package:tokona/features/pos/presentation/widgets/scheduled_reminder_sheet.dart';
+import 'package:tokona/features/purchase/presentation/widgets/incoming_orders_sheet.dart';
 
 class NotificationCenterSheet extends ConsumerStatefulWidget {
   final ValueChanged<int>? onNavigateTab;
@@ -36,6 +38,8 @@ class _NotificationCenterSheetState extends ConsumerState<NotificationCenterShee
     if (item.targetPayload == 'kasbon') KasbonDueMonitorSheet.show(context);
     if (item.targetPayload == 'stock') widget.onNavigateTab?.call(1);
     if (item.targetPayload == 'booking') ScheduledReminderSheet.show(context, initialTab: 0);
+    if (item.targetPayload == 'incoming') IncomingOrdersSheet.show(context);
+    if (item.targetPayload == 'paylater') PaymentAccountManagementSheet.show(context);
   }
 
   @override

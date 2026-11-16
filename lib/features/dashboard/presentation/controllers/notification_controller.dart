@@ -134,6 +134,22 @@ final notificationListProvider = Provider<List<AppNotificationItem>>((ref) {
     ));
   }
 
+  // 5. Pengingat Tagihan Paylater (SPayLater / GoPay / Akulaku) setiap tgl 29 s/d 01
+  final currentDay = now.day;
+  final lastDayOfMonth = DateTime(now.year, now.month + 1, 0).day;
+  final isPaylaterBillingWindow = (currentDay >= (lastDayOfMonth - 2)) || (currentDay == 1);
+
+  if (isPaylaterBillingWindow) {
+    items.add(AppNotificationItem(
+      id: 'paylater_bill_${now.year}_${now.month}_$currentDay',
+      title: '💳 Pengingat Tagihan Paylater (Jatuh Tempo Tgl 1)',
+      body: 'Waktunya cek & siapkan dana tagihan SPayLater/Paylater belanja modal toko.',
+      type: AppNotificationType.paylaterBill,
+      createdAt: now,
+      targetPayload: 'paylater',
+    ));
+  }
+
   // Sort: High priority first
   items.sort((a, b) => _priorityScore(b.type).compareTo(_priorityScore(a.type)));
   return items;
@@ -145,6 +161,8 @@ int _priorityScore(AppNotificationType type) {
       return 100;
     case AppNotificationType.bookingReady:
       return 90;
+    case AppNotificationType.paylaterBill:
+      return 85;
     case AppNotificationType.stockEmpty:
       return 80;
     case AppNotificationType.purchaseRefund:

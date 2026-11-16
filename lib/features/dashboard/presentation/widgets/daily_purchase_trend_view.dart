@@ -259,3 +259,4 @@ class _DailyPurchaseTrendViewState extends State<DailyPurchaseTrendView> with Si
     );
   }
 }
+

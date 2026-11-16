@@ -146,6 +146,25 @@ class AppShortcutRegistry {
       description: 'Monitor alokasi stok per perangkat kasir',
     ),
 
+    ShortcutMenuItem(
+      id: 'dana_refund',
+      label: 'Dana Refund',
+      category: 'Produk & Inventaris',
+      icon: Icons.currency_exchange_rounded,
+      iconColor: Color(0xFFE11D48),
+      bgColor: Color(0xFFFFE4E6),
+      description: 'Pantau pengembalian dana marketplace Shopee/TikTok',
+    ),
+    ShortcutMenuItem(
+      id: 'hp_belanja',
+      label: 'HP Belanja',
+      category: 'Produk & Inventaris',
+      icon: Icons.phone_android_rounded,
+      iconColor: Color(0xFF0D9488),
+      bgColor: Color(0xFFCCFBF1),
+      description: 'Kelola HP / akun marketplace pengadaan stok',
+    ),
+
     // --- Kategori Keuangan & Laporan ---
     ShortcutMenuItem(
       id: 'laba_rugi',

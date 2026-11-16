@@ -16,8 +16,10 @@ import 'package:tokona/features/product/presentation/widgets/add_product_bottom_
 import 'package:tokona/features/product/presentation/widgets/category_type_sheet.dart';
 import 'package:tokona/features/product/presentation/widgets/device_stock_monitoring_sheet.dart';
 import 'package:tokona/features/purchase/presentation/widgets/add_purchase_bottom_sheet.dart';
+import 'package:tokona/features/purchase/presentation/widgets/device_management_sheet.dart';
 import 'package:tokona/features/purchase/presentation/widgets/incoming_orders_sheet.dart';
 import 'package:tokona/features/purchase/presentation/widgets/purchase_history_sheet.dart';
+import 'package:tokona/features/purchase/presentation/widgets/refund_monitor_sheet.dart';
 import 'package:tokona/features/supplier/presentation/widgets/supplier_list_bottom_sheet.dart';
 
 class ShortcutActionDispatcher {
@@ -86,6 +88,12 @@ class ShortcutActionDispatcher {
           selectedDeviceTag: null,
           onSelectDevice: (_) {},
         );
+        break;
+      case 'dana_refund':
+        RefundMonitorSheet.show(context);
+        break;
+      case 'hp_belanja':
+        DeviceManagementSheet.show(context);
         break;
       case 'laba_rugi':
         onNavigateTab?.call(3);

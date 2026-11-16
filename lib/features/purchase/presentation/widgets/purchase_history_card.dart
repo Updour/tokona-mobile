@@ -23,6 +23,8 @@ class PurchaseHistoryCard extends StatelessWidget {
     Color cardBg = AppColors.surface;
     Color borderColor = AppColors.border;
 
+    final isReceived = purchase.status == 'received';
+
     if (purchase.status == 'shipping') {
       cardBg = const Color(0xFFF0F9FF);
       borderColor = const Color(0xFFBAE6FD);
@@ -32,6 +34,9 @@ class PurchaseHistoryCard extends StatelessWidget {
     } else if (purchase.status == 'cancelled') {
       cardBg = const Color(0xFFFEF2F2);
       borderColor = const Color(0xFFFECACA);
+    } else if (isReceived) {
+      cardBg = const Color(0xFFF8FAFC);
+      borderColor = const Color(0xFFE2E8F0);
     }
 
     return InkWell(
@@ -101,13 +106,17 @@ class PurchaseHistoryCard extends StatelessWidget {
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1.5),
                     decoration: BoxDecoration(
-                      color: const Color(0xFF6366F1).withValues(alpha: 0.1),
+                      color: isReceived ? const Color(0xFFE2E8F0) : const Color(0xFF6366F1).withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(4),
-                      border: Border.all(color: const Color(0xFF6366F1).withValues(alpha: 0.3)),
+                      border: Border.all(color: isReceived ? const Color(0xFFCBD5E1) : const Color(0xFF6366F1).withValues(alpha: 0.3)),
                     ),
                     child: Text(
                       '📱 ${purchase.deviceTag!}',
-                      style: const TextStyle(fontSize: 9.5, fontWeight: FontWeight.w700, color: Color(0xFF6366F1)),
+                      style: TextStyle(
+                        fontSize: 9.5,
+                        fontWeight: FontWeight.w700,
+                        color: isReceived ? const Color(0xFF64748B) : const Color(0xFF6366F1),
+                      ),
                     ),
                   ),
                 ],
@@ -246,10 +255,13 @@ class PurchaseHistoryCard extends StatelessWidget {
 
   Widget _buildChannelBadge() {
     final isOnline = purchase.isOnline;
+    final isReceived = purchase.status == 'received';
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
       decoration: BoxDecoration(
-        color: isOnline ? const Color(0xFFEDE9FE) : AppColors.surfaceInput,
+        color: isReceived
+            ? const Color(0xFFF1F5F9)
+            : (isOnline ? const Color(0xFFEDE9FE) : AppColors.surfaceInput),
         borderRadius: BorderRadius.circular(6),
       ),
       child: Row(
@@ -258,7 +270,7 @@ class PurchaseHistoryCard extends StatelessWidget {
           Icon(
             isOnline ? Icons.shopping_bag_outlined : Icons.store_outlined,
             size: 12,
-            color: isOnline ? const Color(0xFF7C3AED) : AppColors.textMuted,
+            color: isReceived ? const Color(0xFF94A3B8) : (isOnline ? const Color(0xFF7C3AED) : AppColors.textMuted),
           ),
           const SizedBox(width: 4),
           Text(
@@ -266,7 +278,7 @@ class PurchaseHistoryCard extends StatelessWidget {
             style: TextStyle(
               fontSize: 10,
               fontWeight: FontWeight.w600,
-              color: isOnline ? const Color(0xFF6D28D9) : AppColors.textSecondary,
+              color: isReceived ? const Color(0xFF64748B) : (isOnline ? const Color(0xFF6D28D9) : AppColors.textSecondary),
             ),
           ),
         ],

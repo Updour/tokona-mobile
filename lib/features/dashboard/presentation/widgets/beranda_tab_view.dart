@@ -66,6 +66,9 @@ class BerandaTabView extends ConsumerWidget {
                   case 'incoming':
                     IncomingOrdersSheet.show(context);
                     break;
+                  case 'paylater':
+                    PaymentAccountManagementSheet.show(context);
+                    break;
                 }
               },
             );

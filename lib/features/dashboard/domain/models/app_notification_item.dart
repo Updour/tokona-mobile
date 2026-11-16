@@ -8,6 +8,7 @@ enum AppNotificationType {
   stockLow,
   bookingReady,
   purchaseRefund,
+  paylaterBill,
   generalInfo,
 }
 
@@ -44,6 +45,8 @@ class AppNotificationItem {
         return 'Pesanan Booking';
       case AppNotificationType.purchaseRefund:
         return 'Refund Belanja';
+      case AppNotificationType.paylaterBill:
+        return 'Tagihan Paylater';
       case AppNotificationType.generalInfo:
         return 'Informasi Toko';
     }
@@ -56,6 +59,7 @@ class AppNotificationItem {
         return const Color(0xFFDC2626);
       case AppNotificationType.kasbonDueSoon:
       case AppNotificationType.stockLow:
+      case AppNotificationType.paylaterBill:
         return const Color(0xFFD97706);
       case AppNotificationType.bookingReady:
         return const Color(0xFF0D9488);
@@ -73,6 +77,7 @@ class AppNotificationItem {
         return const Color(0xFFFEF2F2);
       case AppNotificationType.kasbonDueSoon:
       case AppNotificationType.stockLow:
+      case AppNotificationType.paylaterBill:
         return const Color(0xFFFEF3C7);
       case AppNotificationType.bookingReady:
         return const Color(0xFFCCFBF1);
@@ -97,6 +102,8 @@ class AppNotificationItem {
         return Icons.delivery_dining_rounded;
       case AppNotificationType.purchaseRefund:
         return Icons.assignment_return_rounded;
+      case AppNotificationType.paylaterBill:
+        return Icons.credit_card_rounded;
       case AppNotificationType.generalInfo:
         return Icons.notifications_active_rounded;
     }
