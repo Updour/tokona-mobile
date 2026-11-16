@@ -19,109 +19,141 @@ class ProductDetailPriceTiersSection extends StatelessWidget {
     final sortedTiers = [...product.priceTiers]..sort((a, b) => a.minQuantity.compareTo(b.minQuantity));
 
     return Container(
-      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: AppColors.surface,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AppColors.border),
+        border: Border.all(color: AppColors.border.withValues(alpha: 0.8)),
+        boxShadow: [
+          BoxShadow(
+            color: const Color(0xFF0F172A).withValues(alpha: 0.04),
+            blurRadius: 10,
+            offset: const Offset(0, 2),
+          ),
+        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            children: [
-              Container(
-                padding: const EdgeInsets.all(6),
-                decoration: BoxDecoration(
-                  color: AppColors.secondary.withOpacity(0.12),
-                  borderRadius: BorderRadius.circular(8),
+          // Header
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 14, 16, 12),
+            child: Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(6),
+                  decoration: BoxDecoration(
+                    color: AppColors.secondary.withOpacity(0.12),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: const Icon(
+                    Icons.sell_outlined,
+                    color: AppColors.secondary,
+                    size: 16,
+                  ),
                 ),
-                child: const Icon(
-                  Icons.local_offer_outlined,
-                  color: AppColors.secondary,
-                  size: 18,
-                ),
-              ),
-              const SizedBox(width: 10),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text('Harga Grosir / Kuantitas', style: AppTypography.labelMedium),
-                    const SizedBox(height: 2),
-                    Text('Berlaku otomatis di kasir sesuai jumlah pembelian', style: AppTypography.bodySmall),
-                  ],
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 12),
-          ...sortedTiers.map((tier) {
-            final unitLabel = tier.unitName?.isNotEmpty == true ? tier.unitName! : product.baseUnit;
-            final qtyText = tier.minQuantity.toStringAsFixed(tier.minQuantity.truncateToDouble() == tier.minQuantity ? 0 : 1);
-            final discount = product.baseSellingPrice > tier.price ? product.baseSellingPrice - tier.price : 0.0;
-            final percent = product.baseSellingPrice > 0 ? ((discount / product.baseSellingPrice) * 100).round() : 0;
-
-            return Container(
-              margin: const EdgeInsets.only(bottom: 8),
-              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 11),
-              decoration: BoxDecoration(
-                color: AppColors.surfaceElevated,
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: AppColors.secondary.withOpacity(0.18)),
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Row(
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 4.5),
-                        decoration: BoxDecoration(
-                          color: AppColors.secondary.withOpacity(0.15),
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: Text(
-                          '≥ $qtyText $unitLabel',
-                          style: AppTypography.bodySmall.copyWith(
-                            color: AppColors.secondary,
-                            fontWeight: FontWeight.w700,
-                            fontSize: 12,
-                          ),
-                        ),
+                      Text('Harga Grosir / Kuantitas', style: AppTypography.labelMedium.copyWith(fontSize: 13.5)),
+                      const SizedBox(height: 2),
+                      Text(
+                        'Otomatis terpotong di kasir saat beli kuantitas tertentu',
+                        style: AppTypography.bodySmall.copyWith(fontSize: 11),
                       ),
-                      if (discount > 0) ...[
-                        const SizedBox(width: 8),
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2.5),
-                          decoration: BoxDecoration(
-                            color: AppColors.success.withValues(alpha: 0.12),
-                            borderRadius: BorderRadius.circular(6),
-                          ),
-                          child: Text(
-                            'Hemat ${CurrencyFormatter.format(discount)} ($percent%)',
-                            style: const TextStyle(
-                              color: AppColors.success,
-                              fontWeight: FontWeight.w700,
-                              fontSize: 10.5,
-                            ),
-                          ),
-                        ),
-                      ],
                     ],
                   ),
-                  Text(
-                    CurrencyFormatter.format(tier.price),
-                    style: AppTypography.headingSmall.copyWith(
-                      fontSize: 14,
-                      color: AppColors.textPrimary,
-                      fontWeight: FontWeight.w800,
-                    ),
+                ),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                  decoration: BoxDecoration(
+                    color: AppColors.secondary.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(10),
                   ),
-                ],
-              ),
-            );
-          }),
+                  child: Text(
+                    '${product.priceTiers.length} Tingkat',
+                    style: const TextStyle(fontSize: 10.5, fontWeight: FontWeight.w700, color: AppColors.secondary),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const Divider(height: 1, color: AppColors.border),
+          // Items
+          ListView.separated(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            padding: const EdgeInsets.all(12),
+            itemCount: sortedTiers.length,
+            separatorBuilder: (_, __) => const SizedBox(height: 8),
+            itemBuilder: (context, index) {
+              final tier = sortedTiers[index];
+              final unitLabel = tier.unitName?.isNotEmpty == true ? tier.unitName! : product.baseUnit;
+              final qtyText = tier.minQuantity.toStringAsFixed(tier.minQuantity.truncateToDouble() == tier.minQuantity ? 0 : 1);
+              final discount = product.baseSellingPrice > tier.price ? product.baseSellingPrice - tier.price : 0.0;
+              final percent = product.baseSellingPrice > 0 ? ((discount / product.baseSellingPrice) * 100).round() : 0;
+
+              return Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: AppColors.surfaceElevated,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: AppColors.border),
+                ),
+                child: Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                      decoration: BoxDecoration(
+                        color: AppColors.secondary.withOpacity(0.12),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Text(
+                        'Beli ≥ $qtyText $unitLabel',
+                        style: const TextStyle(
+                          color: AppColors.secondary,
+                          fontWeight: FontWeight.w800,
+                          fontSize: 12,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          if (discount > 0)
+                            Text(
+                              'Hemat ${CurrencyFormatter.format(discount)} ($percent%)',
+                              style: const TextStyle(
+                                color: AppColors.success,
+                                fontWeight: FontWeight.w700,
+                                fontSize: 11,
+                              ),
+                            )
+                          else
+                            Text('Harga Khusus', style: AppTypography.bodySmall.copyWith(fontSize: 11)),
+                          Text(
+                            'per $unitLabel',
+                            style: AppTypography.bodySmall.copyWith(fontSize: 10.5, color: AppColors.textMuted),
+                          ),
+                        ],
+                      ),
+                    ),
+                    Text(
+                      CurrencyFormatter.format(tier.price),
+                      style: AppTypography.headingSmall.copyWith(
+                        fontSize: 14.5,
+                        color: AppColors.textPrimary,
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            },
+          ),
         ],
       ),
     );

@@ -186,36 +186,18 @@ class ProductCardItem extends StatelessWidget {
                     ],
                   ),
                 ),
-                if (product.units.isNotEmpty || product.priceTiers.isNotEmpty) ...[
+                if (product.units.isNotEmpty) ...[
                   const SizedBox(height: 10),
-                  Row(
-                    children: [
-                      if (product.units.isNotEmpty)
-                        Container(
-                          margin: const EdgeInsets.only(right: 6),
-                          padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
-                          decoration: BoxDecoration(
-                            color: AppColors.primaryContainer.withValues(alpha: 0.6),
-                            borderRadius: BorderRadius.circular(6),
-                          ),
-                          child: Text(
-                            '${product.units.length} Kemasan',
-                            style: const TextStyle(fontSize: 10.5, fontWeight: FontWeight.w700, color: AppColors.primaryDark),
-                          ),
-                        ),
-                      if (product.priceTiers.isNotEmpty)
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
-                          decoration: BoxDecoration(
-                            color: AppColors.secondary.withOpacity(0.12),
-                            borderRadius: BorderRadius.circular(6),
-                          ),
-                          child: Text(
-                            '${product.priceTiers.length} Level Grosir',
-                            style: const TextStyle(fontSize: 10.5, fontWeight: FontWeight.w700, color: AppColors.secondary),
-                          ),
-                        ),
-                    ],
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
+                    decoration: BoxDecoration(
+                      color: AppColors.primaryContainer.withValues(alpha: 0.6),
+                      borderRadius: BorderRadius.circular(6),
+                    ),
+                    child: Text(
+                      '${product.units.length} Kemasan',
+                      style: const TextStyle(fontSize: 10.5, fontWeight: FontWeight.w700, color: AppColors.primaryDark),
+                    ),
                   ),
                 ],
               ],
