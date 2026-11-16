@@ -101,38 +101,45 @@ class _KasbonDueMonitorSheetState extends ConsumerState<KasbonDueMonitorSheet> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text('Jatuh Tempo Kasbon', style: AppTypography.headingSmall.copyWith(fontSize: 16, fontWeight: FontWeight.w800)),
-                        Text('${kasbonSales.length} tagihan hutang langganan', style: AppTypography.bodySmall.copyWith(fontSize: 11, color: AppColors.textSecondary)),
+                        Text('Jatuh Tempo Kasbon', style: AppTypography.headingSmall.copyWith(fontSize: 16, fontWeight: FontWeight.w700), maxLines: 1, overflow: TextOverflow.ellipsis),
+                        const SizedBox(height: 1),
+                        Text('${kasbonSales.length} tagihan hutang aktif', style: AppTypography.bodySmall.copyWith(fontSize: 11), maxLines: 1, overflow: TextOverflow.ellipsis),
                       ],
                     ),
                   ),
-              InkWell(
-                onTap: () {
-                  HapticFeedback.lightImpact();
-                  ScheduledReminderSheet.show(context, initialTab: 1);
-                },
-                borderRadius: BorderRadius.circular(8),
-                child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4.5),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFECFDF5),
-                    borderRadius: BorderRadius.circular(8),
-                    border: Border.all(color: const Color(0xFFA7F3D0)),
+                  const SizedBox(width: 8),
+                  InkWell(
+                    onTap: () {
+                      HapticFeedback.lightImpact();
+                      ScheduledReminderSheet.show(context, initialTab: 1);
+                    },
+                    borderRadius: BorderRadius.circular(9),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 6),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFECFDF5),
+                        borderRadius: BorderRadius.circular(9),
+                        border: Border.all(color: const Color(0xFFA7F3D0)),
+                      ),
+                      child: const Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(Icons.send_rounded, size: 12.5, color: Color(0xFF059669)),
+                          SizedBox(width: 4),
+                          Text('Kirim WA', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w800, color: Color(0xFF059669))),
+                        ],
+                      ),
+                    ),
                   ),
-                  child: const Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(Icons.send_rounded, size: 12, color: Color(0xFF059669)),
-                      SizedBox(width: 4),
-                      Text('Kirim WA', style: TextStyle(fontSize: 10.5, fontWeight: FontWeight.w800, color: Color(0xFF059669))),
-                    ],
+                  const SizedBox(width: 4),
+                  IconButton(
+                    onPressed: () => Navigator.of(context).pop(),
+                    icon: const Icon(Icons.close_rounded, color: AppColors.textPrimary, size: 20),
+                    padding: EdgeInsets.zero,
+                    constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
                   ),
-                ),
+                ],
               ),
-              const SizedBox(width: 6),
-              IconButton(onPressed: () => Navigator.of(context).pop(), icon: const Icon(Icons.close_rounded, size: 20)),
-            ],
-          ),
           const SizedBox(height: 12),
           _buildKpiCard(totalKasbonAmount, totalOverdueAmount, overdueSales.length),
           const SizedBox(height: 12),

@@ -106,26 +106,27 @@ class _CustomerListBottomSheetState extends ConsumerState<CustomerListBottomShee
           children: [
             Center(
               child: Container(
-                width: 44,
+                width: 40,
                 height: 4,
-                decoration: BoxDecoration(
-                  color: const Color(0xFFCBD5E1),
-                  borderRadius: BorderRadius.circular(2),
-                ),
+                decoration: BoxDecoration(color: AppColors.border, borderRadius: BorderRadius.circular(2)),
               ),
             ),
-            const SizedBox(height: 14),
+            const SizedBox(height: 12),
             Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text('Data Pelanggan', style: AppTypography.headingSmall.copyWith(fontSize: 16), maxLines: 1, overflow: TextOverflow.ellipsis),
-                      const SizedBox(height: 2),
                       Text(
-                        'Kelola langganan toko, member, dan piutang kasbon',
+                        'Data Pelanggan',
+                        style: AppTypography.headingSmall.copyWith(fontSize: 16, fontWeight: FontWeight.w700),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      const SizedBox(height: 1),
+                      Text(
+                        '${state.customers.length} kontak terdaftar',
                         style: AppTypography.bodySmall.copyWith(fontSize: 11),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
@@ -143,20 +144,20 @@ class _CustomerListBottomSheetState extends ConsumerState<CustomerListBottomShee
                                 .read(customerListProvider.notifier)
                                 .createCustomer(store.id, dto),
                           ),
-                  icon: const Icon(Icons.person_add_rounded, size: 16),
-                  label: const Text('Tambah', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700)),
+                  icon: const Icon(Icons.person_add_rounded, size: 15),
+                  label: const Text('Tambah', style: TextStyle(fontSize: 11.5, fontWeight: FontWeight.w700)),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppColors.primary,
                     foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                     minimumSize: Size.zero,
                     tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(9)),
                   ),
                 ),
                 const SizedBox(width: 4),
                 IconButton(
-                  icon: const Icon(Icons.close_rounded, color: AppColors.textMuted, size: 20),
+                  icon: const Icon(Icons.close_rounded, color: AppColors.textPrimary, size: 20),
                   padding: EdgeInsets.zero,
                   constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
                   onPressed: () => Navigator.of(context).pop(),

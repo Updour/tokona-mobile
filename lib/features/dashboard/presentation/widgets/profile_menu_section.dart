@@ -25,7 +25,6 @@ class ProfileMenuSection extends ConsumerWidget {
     return [
       ProfileMenuGroup(
         title: 'Penjualan & Pelanggan',
-        count: '3 Menu',
         icon: Icons.point_of_sale_rounded,
         iconColor: const Color(0xFF0D9488),
         iconBg: const Color(0xFFCCFBF1),
@@ -35,7 +34,7 @@ class ProfileMenuSection extends ConsumerWidget {
             icon: Icons.receipt_long_rounded,
             color: const Color(0xFF0D9488),
             bg: const Color(0xFFCCFBF1),
-            title: 'Riwayat Transaksi Penjualan',
+            title: 'Riwayat Penjualan',
             subtitle: 'Pantau nota kasir, cetak struk, dan void',
             onTap: () => SalesHistorySheet.show(context),
           ),
@@ -51,8 +50,8 @@ class ProfileMenuSection extends ConsumerWidget {
             icon: Icons.event_busy_rounded,
             color: alerts.hasOverdueKasbon ? const Color(0xFFDC2626) : const Color(0xFFD97706),
             bg: alerts.hasOverdueKasbon ? const Color(0xFFFEE2E2) : const Color(0xFFFEF3C7),
-            title: 'Jatuh Tempo Kasbon Pelanggan',
-            subtitle: 'Deteksi batas waktu pelunasan & kasbon telat',
+            title: 'Jatuh Tempo Kasbon',
+            subtitle: 'Batas pelunasan & kasbon telat bayar',
             badgeText: alerts.hasUrgentKasbon ? '${alerts.totalUrgentKasbon}' : null,
             badgeColor: alerts.hasOverdueKasbon ? const Color(0xFFDC2626) : const Color(0xFFD97706),
             onTap: () => KasbonDueMonitorSheet.show(context),
@@ -60,8 +59,7 @@ class ProfileMenuSection extends ConsumerWidget {
         ],
       ),
       ProfileMenuGroup(
-        title: 'Pengadaan & Stok Barang',
-        count: '6 Menu',
+        title: 'Pengadaan & Stok',
         icon: Icons.inventory_2_outlined,
         iconColor: const Color(0xFF4F46E5),
         iconBg: const Color(0xFFEEF2FF),
@@ -70,7 +68,7 @@ class ProfileMenuSection extends ConsumerWidget {
             icon: Icons.add_shopping_cart_rounded,
             color: const Color(0xFF0284C7),
             bg: const Color(0xFFE0F2FE),
-            title: 'Faktur Belanja Stok & Restok',
+            title: 'Faktur Belanja Stok',
             subtitle: 'Input kulakan dan modal HPP barang',
             badgeText: alerts.hasUrgentStock ? '${alerts.totalUrgentStock}' : null,
             badgeColor: alerts.outOfStockCount > 0 ? const Color(0xFFDC2626) : const Color(0xFFD97706),
@@ -80,7 +78,7 @@ class ProfileMenuSection extends ConsumerWidget {
             icon: Icons.receipt_long_rounded,
             color: const Color(0xFF4F46E5),
             bg: const Color(0xFFEEF2FF),
-            title: 'Riwayat Pembelian & Faktur',
+            title: 'Riwayat Pembelian',
             subtitle: 'Daftar transaksi belanja dan nota kulakan',
             onTap: () => PurchaseHistorySheet.show(context),
           ),
@@ -88,15 +86,15 @@ class ProfileMenuSection extends ConsumerWidget {
             icon: Icons.hourglass_top_rounded,
             color: const Color(0xFFD97706),
             bg: const Color(0xFFFEF3C7),
-            title: 'Pesanan Berjalan & PO Supplier',
-            subtitle: 'Pantau pesanan stok yang masih dikirim',
+            title: 'Pesanan Masuk (PO)',
+            subtitle: 'Pantau paket PO & pesanan yang sedang OTW',
             onTap: () => IncomingOrdersSheet.show(context),
           ),
           ProfileMenuItem(
             icon: Icons.business_outlined,
             color: const Color(0xFFF59E0B),
             bg: const Color(0xFFFEF3C7),
-            title: 'Master Supplier & Distributor',
+            title: 'Master Supplier',
             subtitle: 'Kelola distributor dan sales keliling',
             onTap: () => SupplierListBottomSheet.show(context),
           ),
@@ -112,15 +110,14 @@ class ProfileMenuSection extends ConsumerWidget {
             icon: Icons.phone_android_rounded,
             color: const Color(0xFF0D9488),
             bg: const Color(0xFFCCFBF1),
-            title: 'Master HP Belanja Online',
+            title: 'HP Belanja Online',
             subtitle: 'Kelola perangkat akun Shopee & TikTok',
             onTap: () => DeviceManagementSheet.show(context),
           ),
         ],
       ),
       ProfileMenuGroup(
-        title: 'Keuangan & Modal Usaha',
-        count: '2 Menu',
+        title: 'Keuangan & Kas',
         icon: Icons.account_balance_wallet_outlined,
         iconColor: const Color(0xFF2563EB),
         iconBg: const Color(0xFFEFF6FF),
@@ -129,7 +126,7 @@ class ProfileMenuSection extends ConsumerWidget {
             icon: Icons.account_balance_wallet_outlined,
             color: const Color(0xFF2563EB),
             bg: const Color(0xFFEFF6FF),
-            title: 'Master Rekening & Saldo Kas',
+            title: 'Rekening & Saldo Kas',
             subtitle: 'Kelola BCA, BRI, ShopeePay & pantau saldo',
             onTap: () => PaymentAccountManagementSheet.show(context),
           ),
@@ -144,8 +141,7 @@ class ProfileMenuSection extends ConsumerWidget {
         ],
       ),
       ProfileMenuGroup(
-        title: 'Katalog Produk & Kemasan',
-        count: '2 Menu',
+        title: 'Katalog Produk',
         icon: Icons.category_outlined,
         iconColor: AppColors.primary,
         iconBg: AppColors.primaryContainer,
@@ -154,7 +150,7 @@ class ProfileMenuSection extends ConsumerWidget {
             icon: Icons.category_outlined,
             color: AppColors.primary,
             bg: AppColors.primaryContainer,
-            title: 'Kategori & Tipe Produk',
+            title: 'Kategori Produk',
             subtitle: 'Kelola kategori barang untuk filter kasir',
             onTap: () => CategoryTypeSheet.show(context),
           ),
@@ -162,15 +158,14 @@ class ProfileMenuSection extends ConsumerWidget {
             icon: Icons.layers_outlined,
             color: const Color(0xFFD97706),
             bg: const Color(0xFFFEF3C7),
-            title: 'Satuan Kemasan Bertingkat',
-            subtitle: 'Panduan konversi Dus, Lusin, dan Pcs',
+            title: 'Panduan Kemasan',
+            subtitle: 'Pelajari sistem konversi multi-kemasan',
             onTap: () => PackagingInfoDialog.show(context),
           ),
         ],
       ),
       ProfileMenuGroup(
-        title: 'Keamanan & Cadangan Data',
-        count: '1 Menu',
+        title: 'Data & Cadangan',
         icon: Icons.shield_outlined,
         iconColor: const Color(0xFF0D9488),
         iconBg: const Color(0xFFCCFBF1),
@@ -179,8 +174,8 @@ class ProfileMenuSection extends ConsumerWidget {
             icon: Icons.cloud_sync_rounded,
             color: const Color(0xFF0D9488),
             bg: const Color(0xFFCCFBF1),
-            title: 'Cadangkan & Pulihkan Data',
-            subtitle: 'Backup database toko offline & restore kapan saja',
+            title: 'Backup & Restore',
+            subtitle: 'Cadangkan data ke cloud atau pulihkan database',
             onTap: () => BackupRestoreBottomSheet.show(context),
           ),
         ],
@@ -219,23 +214,11 @@ class ProfileMenuSection extends ConsumerWidget {
             decoration: BoxDecoration(color: group.iconBg, borderRadius: BorderRadius.circular(11)),
             child: Icon(group.icon, color: group.iconColor, size: 19),
           ),
-          title: Row(
-            children: [
-              Expanded(
-                child: Text(
-                  group.title,
-                  style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 13.5, color: AppColors.textPrimary),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ),
-              const SizedBox(width: 6),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
-                decoration: BoxDecoration(color: group.iconBg.withValues(alpha: 0.6), borderRadius: BorderRadius.circular(8)),
-                child: Text(group.count, style: TextStyle(fontSize: 10.5, fontWeight: FontWeight.w700, color: group.iconColor)),
-              ),
-            ],
+          title: Text(
+            group.title,
+            style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 13.5, color: AppColors.textPrimary),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
           ),
           children: [
             const Divider(height: 1, indent: 16, endIndent: 16, color: AppColors.border),
@@ -251,48 +234,51 @@ class ProfileMenuSection extends ConsumerWidget {
   Widget _buildTile(BuildContext context, ProfileMenuItem item, bool isLast) {
     return Column(
       children: [
-        Material(
-          color: Colors.transparent,
-          child: InkWell(
-            onTap: item.onTap,
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-              child: Row(
-                children: [
-                  Container(
-                    width: 32, height: 32,
-                    decoration: BoxDecoration(color: item.bg, borderRadius: BorderRadius.circular(9)),
-                    child: Icon(item.icon, color: item.color, size: 17),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(item.title, style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 12.5)),
-                        Text(item.subtitle, style: const TextStyle(fontSize: 10.5, color: AppColors.textSecondary), maxLines: 1, overflow: TextOverflow.ellipsis),
-                      ],
-                    ),
-                  ),
-                  if (item.badgeText != null) ...[
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                      decoration: BoxDecoration(
-                        color: (item.badgeColor ?? AppColors.primary).withValues(alpha: 0.15),
-                        borderRadius: BorderRadius.circular(8),
-                        border: Border.all(color: (item.badgeColor ?? AppColors.primary).withValues(alpha: 0.4)),
-                      ),
-                      child: Text(item.badgeText!, style: TextStyle(fontSize: 10, fontWeight: FontWeight.w800, color: item.badgeColor ?? AppColors.primary)),
-                    ),
-                    const SizedBox(width: 6),
-                  ],
-                  const Icon(Icons.chevron_right_rounded, color: AppColors.textMuted, size: 17),
-                ],
-              ),
-            ),
+        ListTile(
+          onTap: item.onTap,
+          dense: true,
+          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 2),
+          leading: Container(
+            width: 34,
+            height: 34,
+            decoration: BoxDecoration(color: item.bg, borderRadius: BorderRadius.circular(10)),
+            child: Icon(item.icon, color: item.color, size: 17),
           ),
+          title: Row(
+            children: [
+              Expanded(
+                child: Text(
+                  item.title,
+                  style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13, color: AppColors.textPrimary),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+              if (item.badgeText != null) ...[
+                const SizedBox(width: 6),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                  decoration: BoxDecoration(
+                    color: item.badgeColor ?? AppColors.error,
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Text(
+                    item.badgeText!,
+                    style: const TextStyle(fontSize: 9.5, fontWeight: FontWeight.w800, color: Colors.white),
+                  ),
+                ),
+              ],
+            ],
+          ),
+          subtitle: Text(
+            item.subtitle,
+            style: const TextStyle(fontSize: 11, color: AppColors.textSecondary),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
+          trailing: const Icon(Icons.chevron_right_rounded, size: 18, color: AppColors.textMuted),
         ),
-        if (!isLast) const Divider(height: 1, indent: 60, endIndent: 16, color: Color(0xFFF1F5F9)),
+        if (!isLast) const Divider(height: 1, indent: 64, endIndent: 16, color: AppColors.border),
       ],
     );
   }

@@ -57,7 +57,7 @@ class _ReportSegmentedNavState extends State<ReportSegmentedNav> {
       ('Ringkasan', Icons.analytics_outlined, 0),
       ('Penjualan', Icons.receipt_long_outlined, 0),
       ('Pembelian', Icons.shopping_bag_outlined, 0),
-      ('PO & OTW', Icons.local_shipping_outlined, widget.activePoCount),
+      ('Pengiriman', Icons.local_shipping_outlined, widget.activePoCount),
     ];
 
     return SizedBox(
