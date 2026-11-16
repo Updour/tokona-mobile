@@ -111,8 +111,9 @@ class ProductDetailPriceTiersSection extends StatelessWidget {
                     ],
                   ),
                   Text(
-                    '${CurrencyFormatter.format(tier.price)}',
-                    style: AppTypography.labelLarge.copyWith(
+                    CurrencyFormatter.format(tier.price),
+                    style: AppTypography.headingSmall.copyWith(
+                      fontSize: 14,
                       color: AppColors.textPrimary,
                       fontWeight: FontWeight.w800,
                     ),
