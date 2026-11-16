@@ -33,7 +33,7 @@ class ReportSalesListSection extends ConsumerWidget {
         final q = searchQuery.trim().toLowerCase();
         final matchInv = s.invoiceNumber.toLowerCase().contains(q);
         final matchCust = s.customerName?.toLowerCase().contains(q) ?? false;
-        final matchItem = s.items.any((i) => i.productName.toLowerCase().contains(q));
+        final matchItem = s.items.any((i) => i.productName?.toLowerCase().contains(q) ?? false);
         if (!matchInv && !matchCust && !matchItem) return false;
       }
       return true;

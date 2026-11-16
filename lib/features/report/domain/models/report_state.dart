@@ -43,6 +43,49 @@ class ReportState {
     return selectedFilter.label;
   }
 
+  DateTime get startDate {
+    final now = DateTime.now();
+    switch (selectedFilter) {
+      case ReportFilterType.today:
+        return DateTime(now.year, now.month, now.day, 0, 0, 0);
+      case ReportFilterType.yesterday:
+        final yest = now.subtract(const Duration(days: 1));
+        return DateTime(yest.year, yest.month, yest.day, 0, 0, 0);
+      case ReportFilterType.last7Days:
+        return DateTime(now.year, now.month, now.day - 6, 0, 0, 0);
+      case ReportFilterType.thisMonth:
+        return DateTime(now.year, now.month, 1, 0, 0, 0);
+      case ReportFilterType.lastMonth:
+        final lastMonthEnd = DateTime(now.year, now.month, 0);
+        return DateTime(lastMonthEnd.year, lastMonthEnd.month, 1, 0, 0, 0);
+      case ReportFilterType.thisYear:
+        return DateTime(now.year, 1, 1, 0, 0, 0);
+      case ReportFilterType.custom:
+        final s = customStartDate ?? DateTime(now.year, now.month, now.day);
+        return DateTime(s.year, s.month, s.day, 0, 0, 0);
+    }
+  }
+
+  DateTime get endDate {
+    final now = DateTime.now();
+    switch (selectedFilter) {
+      case ReportFilterType.today:
+        return DateTime(now.year, now.month, now.day, 23, 59, 59, 999);
+      case ReportFilterType.yesterday:
+        final yest = now.subtract(const Duration(days: 1));
+        return DateTime(yest.year, yest.month, yest.day, 23, 59, 59, 999);
+      case ReportFilterType.last7Days:
+      case ReportFilterType.thisMonth:
+      case ReportFilterType.thisYear:
+        return DateTime(now.year, now.month, now.day, 23, 59, 59, 999);
+      case ReportFilterType.lastMonth:
+        return DateTime(now.year, now.month, 0, 23, 59, 59, 999);
+      case ReportFilterType.custom:
+        final e = customEndDate ?? DateTime(now.year, now.month, now.day);
+        return DateTime(e.year, e.month, e.day, 23, 59, 59, 999);
+    }
+  }
+
   ReportState copyWith({
     bool? isLoading,
     ReportFilterType? selectedFilter,
