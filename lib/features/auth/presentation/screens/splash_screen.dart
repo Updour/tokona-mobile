@@ -29,53 +29,36 @@ class _SplashScreenState extends ConsumerState<SplashScreen> with TickerProvider
   void initState() {
     super.initState();
 
-    // Text & bottom info fade-in controller
+    // Teks fade-in instan & halus
     _textFadeController = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 350),
+      duration: const Duration(milliseconds: 200),
     );
     _textFadeAnimation = CurvedAnimation(parent: _textFadeController, curve: Curves.easeOut);
     _textFadeController.forward();
 
-    // Bouncing/jumping loop: logo lompat cepat & snappy (~1.1 detik total durasi)
+    // Animasi bounce cepat mikro
     _bounceController = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 320),
+      duration: const Duration(milliseconds: 200),
     );
 
-    _jumpAnimation = Tween<double>(begin: 0.0, end: -24.0).animate(
+    _jumpAnimation = Tween<double>(begin: 0.0, end: -16.0).animate(
       CurvedAnimation(parent: _bounceController, curve: Curves.easeOutQuad),
     );
 
-    _squashAnimation = Tween<double>(begin: 0.94, end: 1.04).animate(
+    _squashAnimation = Tween<double>(begin: 0.96, end: 1.02).animate(
       CurvedAnimation(parent: _bounceController, curve: Curves.easeInOut),
     );
 
-    _shadowAnimation = Tween<double>(begin: 1.0, end: 0.55).animate(
+    _shadowAnimation = Tween<double>(begin: 1.0, end: 0.70).animate(
       CurvedAnimation(parent: _bounceController, curve: Curves.easeInOut),
     );
 
-    int jumpCount = 0;
-    _bounceController.addStatusListener((status) {
-      if (status == AnimationStatus.completed) {
-        _bounceController.reverse();
-      } else if (status == AnimationStatus.dismissed) {
-        jumpCount++;
-        if (jumpCount < 1 && mounted) {
-          _bounceController.forward();
-        }
-      }
-    });
+    _bounceController.forward();
 
-    // Mulai animasi lompat pertama setelah delay awal singkat
-    Future.delayed(const Duration(milliseconds: 100), () {
-      if (mounted) {
-        _bounceController.forward();
-      }
-    });
-
-    // Durasi splash screen dibuat jauh lebih cepat (~1.1 detik)
-    Timer(const Duration(milliseconds: 1100), () {
+    // Langsung navigasi sesegera mungkin saat auth siap (tanpa delay buatan)
+    WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) {
         _minDurationElapsed = true;
         _checkAndNavigate();
@@ -100,7 +83,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen> with TickerProvider
       PageRouteBuilder(
         pageBuilder: (_, animation, __) => targetScreen,
         transitionsBuilder: (_, animation, __, child) => FadeTransition(opacity: animation, child: child),
-        transitionDuration: const Duration(milliseconds: 350),
+        transitionDuration: const Duration(milliseconds: 150),
       ),
     );
   }
