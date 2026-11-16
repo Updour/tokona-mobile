@@ -74,29 +74,35 @@ class _PriceTierSectionState extends State<PriceTierSection> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Row(
+                        Wrap(
+                          crossAxisAlignment: WrapCrossAlignment.center,
+                          spacing: 6,
+                          runSpacing: 4,
                           children: [
-                            Text('Harga Grosir / Kuantitas', style: AppTypography.labelMedium),
-                            if (count > 0) ...[
-                              const SizedBox(width: 8),
+                            Text(
+                              'Harga Grosir / Kuantitas',
+                              style: AppTypography.labelMedium.copyWith(fontSize: 13.5),
+                            ),
+                            if (count > 0)
                               Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 1.5),
+                                padding: const EdgeInsets.symmetric(horizontal: 6.5, vertical: 1.5),
                                 decoration: BoxDecoration(
                                   color: AppColors.secondary,
-                                  borderRadius: BorderRadius.circular(10),
+                                  borderRadius: BorderRadius.circular(8),
                                 ),
                                 child: Text(
                                   '$count Tingkat',
-                                  style: const TextStyle(fontSize: 10.5, color: Colors.white, fontWeight: FontWeight.w700),
+                                  style: const TextStyle(fontSize: 10, color: Colors.white, fontWeight: FontWeight.w700),
                                 ),
                               ),
-                            ],
                           ],
                         ),
                         const SizedBox(height: 2),
                         Text(
                           count > 0 ? '$count level diskon grosir' : 'Diskon otomatis saat beli banyak',
-                          style: AppTypography.bodySmall,
+                          style: AppTypography.bodySmall.copyWith(fontSize: 11),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
                         ),
                       ],
                     ),

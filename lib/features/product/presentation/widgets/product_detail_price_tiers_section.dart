@@ -36,7 +36,7 @@ class ProductDetailPriceTiersSection extends StatelessWidget {
         children: [
           // Header
           Padding(
-            padding: const EdgeInsets.fromLTRB(16, 14, 16, 12),
+            padding: const EdgeInsets.fromLTRB(14, 12, 14, 10),
             child: Row(
               children: [
                 Container(
@@ -48,32 +48,40 @@ class ProductDetailPriceTiersSection extends StatelessWidget {
                   child: const Icon(
                     Icons.sell_outlined,
                     color: AppColors.secondary,
-                    size: 16,
+                    size: 15,
                   ),
                 ),
-                const SizedBox(width: 10),
+                const SizedBox(width: 8),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text('Harga Grosir / Kuantitas', style: AppTypography.labelMedium.copyWith(fontSize: 13.5)),
-                      const SizedBox(height: 2),
                       Text(
-                        'Otomatis terpotong di kasir saat beli kuantitas tertentu',
-                        style: AppTypography.bodySmall.copyWith(fontSize: 11),
+                        'Harga Grosir Bertingkat',
+                        style: AppTypography.labelMedium.copyWith(fontSize: 13, fontWeight: FontWeight.w700),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      const SizedBox(height: 1),
+                      Text(
+                        'Diskon kuantitas otomatis di kasir',
+                        style: AppTypography.bodySmall.copyWith(fontSize: 10.5),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                       ),
                     ],
                   ),
                 ),
+                const SizedBox(width: 6),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                  padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
                   decoration: BoxDecoration(
                     color: AppColors.secondary.withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(10),
+                    borderRadius: BorderRadius.circular(8),
                   ),
                   child: Text(
                     '${product.priceTiers.length} Tingkat',
-                    style: const TextStyle(fontSize: 10.5, fontWeight: FontWeight.w700, color: AppColors.secondary),
+                    style: const TextStyle(fontSize: 10, fontWeight: FontWeight.w700, color: AppColors.secondary),
                   ),
                 ),
               ],

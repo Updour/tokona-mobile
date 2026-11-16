@@ -70,29 +70,35 @@ class _PackagingTierSectionState extends State<PackagingTierSection> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Row(
+                        Wrap(
+                          crossAxisAlignment: WrapCrossAlignment.center,
+                          spacing: 6,
+                          runSpacing: 4,
                           children: [
-                            Text('Kemasan Bertingkat', style: AppTypography.labelMedium),
-                            if (count > 0) ...[
-                              const SizedBox(width: 8),
+                            Text(
+                              'Kemasan Bertingkat',
+                              style: AppTypography.labelMedium.copyWith(fontSize: 13.5),
+                            ),
+                            if (count > 0)
                               Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 1.5),
+                                padding: const EdgeInsets.symmetric(horizontal: 6.5, vertical: 1.5),
                                 decoration: BoxDecoration(
                                   color: AppColors.primary,
-                                  borderRadius: BorderRadius.circular(10),
+                                  borderRadius: BorderRadius.circular(8),
                                 ),
                                 child: Text(
                                   '$count Kemasan',
-                                  style: const TextStyle(fontSize: 10.5, color: Colors.white, fontWeight: FontWeight.w700),
+                                  style: const TextStyle(fontSize: 10, color: Colors.white, fontWeight: FontWeight.w700),
                                 ),
                               ),
-                            ],
                           ],
                         ),
                         const SizedBox(height: 2),
                         Text(
                           count > 0 ? '$count opsi kemasan aktif' : 'Jual eceran & dus/slop dalam 1 produk',
-                          style: AppTypography.bodySmall,
+                          style: AppTypography.bodySmall.copyWith(fontSize: 11),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
                         ),
                       ],
                     ),
