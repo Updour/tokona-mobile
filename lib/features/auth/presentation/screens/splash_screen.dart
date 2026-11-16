@@ -37,33 +37,45 @@ class _SplashScreenState extends ConsumerState<SplashScreen> with TickerProvider
     _textFadeAnimation = CurvedAnimation(parent: _textFadeController, curve: Curves.easeOut);
     _textFadeController.forward();
 
-    // Bouncing/jumping loop ("lompat-lompat")
+    // Bouncing/jumping loop: logo lompat 3x seperti loading sebelum ke beranda
     _bounceController = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 550),
+      duration: const Duration(milliseconds: 650),
     );
 
-    _jumpAnimation = Tween<double>(begin: 0.0, end: -28.0).animate(
+    _jumpAnimation = Tween<double>(begin: 0.0, end: -32.0).animate(
       CurvedAnimation(parent: _bounceController, curve: Curves.easeOutQuad),
     );
 
-    _squashAnimation = Tween<double>(begin: 0.94, end: 1.04).animate(
+    _squashAnimation = Tween<double>(begin: 0.92, end: 1.05).animate(
       CurvedAnimation(parent: _bounceController, curve: Curves.easeInOut),
     );
 
-    _shadowAnimation = Tween<double>(begin: 1.0, end: 0.55).animate(
+    _shadowAnimation = Tween<double>(begin: 1.0, end: 0.50).animate(
       CurvedAnimation(parent: _bounceController, curve: Curves.easeInOut),
     );
 
-    // Start jumping animation smoothly after cold-start display
-    Future.delayed(const Duration(milliseconds: 150), () {
-      if (mounted) {
-        _bounceController.repeat(reverse: true);
+    int jumpCount = 0;
+    _bounceController.addStatusListener((status) {
+      if (status == AnimationStatus.completed) {
+        _bounceController.reverse();
+      } else if (status == AnimationStatus.dismissed) {
+        jumpCount++;
+        if (jumpCount < 3 && mounted) {
+          _bounceController.forward();
+        }
       }
     });
 
-    // Snappy splash duration (1.7s) before seamless fade into dashboard/login
-    Timer(const Duration(milliseconds: 1700), () {
+    // Mulai animasi lompat pertama setelah delay awal
+    Future.delayed(const Duration(milliseconds: 400), () {
+      if (mounted) {
+        _bounceController.forward();
+      }
+    });
+
+    // Durasi splash screen 5 detik dari aplikasi pertama kali dibuka
+    Timer(const Duration(milliseconds: 5000), () {
       if (mounted) {
         _minDurationElapsed = true;
         _checkAndNavigate();

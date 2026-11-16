@@ -137,53 +137,34 @@ class _StockCardHistorySheetState extends ConsumerState<StockCardHistorySheet> {
       padding: const EdgeInsets.all(3),
       child: Row(
         children: [
-          Expanded(
-            child: InkWell(
-              onTap: () => setState(() => _currentTabIndex = 0),
-              borderRadius: BorderRadius.circular(8),
-              child: Container(
-                padding: const EdgeInsets.symmetric(vertical: 6),
-                decoration: BoxDecoration(
-                  color: _currentTabIndex == 0 ? AppColors.surface : Colors.transparent,
-                  borderRadius: BorderRadius.circular(8),
-                  boxShadow: _currentTabIndex == 0 ? [BoxShadow(color: Colors.black.withValues(alpha: 0.05), blurRadius: 4)] : null,
-                ),
-                alignment: Alignment.center,
-                child: Text(
-                  'Mutasi Fisik',
-                  style: TextStyle(
-                    fontSize: 11.5,
-                    fontWeight: _currentTabIndex == 0 ? FontWeight.w700 : FontWeight.w500,
-                    color: _currentTabIndex == 0 ? AppColors.primary : AppColors.textSecondary,
-                  ),
-                ),
-              ),
-            ),
-          ),
-          Expanded(
-            child: InkWell(
-              onTap: () => setState(() => _currentTabIndex = 1),
-              borderRadius: BorderRadius.circular(8),
-              child: Container(
-                padding: const EdgeInsets.symmetric(vertical: 6),
-                decoration: BoxDecoration(
-                  color: _currentTabIndex == 1 ? AppColors.surface : Colors.transparent,
-                  borderRadius: BorderRadius.circular(8),
-                  boxShadow: _currentTabIndex == 1 ? [BoxShadow(color: Colors.black.withValues(alpha: 0.05), blurRadius: 4)] : null,
-                ),
-                alignment: Alignment.center,
-                child: Text(
-                  'Riwayat PO & Belanja',
-                  style: TextStyle(
-                    fontSize: 11.5,
-                    fontWeight: _currentTabIndex == 1 ? FontWeight.w700 : FontWeight.w500,
-                    color: _currentTabIndex == 1 ? AppColors.primary : AppColors.textSecondary,
-                  ),
-                ),
-              ),
-            ),
-          ),
+          Expanded(child: _buildTabButton(0, 'Mutasi Fisik')),
+          Expanded(child: _buildTabButton(1, 'Riwayat PO & Belanja')),
         ],
+      ),
+    );
+  }
+
+  Widget _buildTabButton(int index, String label) {
+    final isSelected = _currentTabIndex == index;
+    return InkWell(
+      onTap: () => setState(() => _currentTabIndex = index),
+      borderRadius: BorderRadius.circular(8),
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 6),
+        decoration: BoxDecoration(
+          color: isSelected ? AppColors.surface : Colors.transparent,
+          borderRadius: BorderRadius.circular(8),
+          boxShadow: isSelected ? [BoxShadow(color: Colors.black.withValues(alpha: 0.05), blurRadius: 4)] : null,
+        ),
+        alignment: Alignment.center,
+        child: Text(
+          label,
+          style: TextStyle(
+            fontSize: 11.5,
+            fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
+            color: isSelected ? AppColors.primary : AppColors.textSecondary,
+          ),
+        ),
       ),
     );
   }
@@ -277,26 +258,24 @@ class _StockCardHistorySheetState extends ConsumerState<StockCardHistorySheet> {
   Widget _buildEmptyState() {
     return Center(
       child: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.all(24),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Container(
-                padding: const EdgeInsets.all(14),
-                decoration: const BoxDecoration(color: AppColors.surfaceInput, shape: BoxShape.circle),
-                child: const Icon(Icons.history_toggle_off_rounded, size: 36, color: AppColors.textMuted),
-              ),
-              const SizedBox(height: 12),
-              const Text('Belum Ada Mutasi Stok', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: AppColors.textPrimary)),
-              const SizedBox(height: 4),
-              Text(
-                'Setiap penjualan, pembelian, atau penyesuaian stok akan tercatat otomatis di kartu stok ini.',
-                style: AppTypography.bodySmall,
-                textAlign: TextAlign.center,
-              ),
-            ],
-          ),
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              padding: const EdgeInsets.all(14),
+              decoration: const BoxDecoration(color: AppColors.surfaceInput, shape: BoxShape.circle),
+              child: const Icon(Icons.history_toggle_off_rounded, size: 36, color: AppColors.textMuted),
+            ),
+            const SizedBox(height: 12),
+            const Text('Belum Ada Mutasi Stok', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: AppColors.textPrimary)),
+            const SizedBox(height: 4),
+            Text(
+              'Setiap penjualan, pembelian, atau penyesuaian stok akan tercatat otomatis di kartu stok ini.',
+              style: AppTypography.bodySmall,
+              textAlign: TextAlign.center,
+            ),
+          ],
         ),
       ),
     );
