@@ -32,26 +32,26 @@ class _SplashScreenState extends ConsumerState<SplashScreen> with TickerProvider
     // Text & bottom info fade-in controller
     _textFadeController = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 600),
+      duration: const Duration(milliseconds: 350),
     );
     _textFadeAnimation = CurvedAnimation(parent: _textFadeController, curve: Curves.easeOut);
     _textFadeController.forward();
 
-    // Bouncing/jumping loop: logo lompat lebih responsif (~3 detik total durasi)
+    // Bouncing/jumping loop: logo lompat cepat & snappy (~1.1 detik total durasi)
     _bounceController = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 500),
+      duration: const Duration(milliseconds: 320),
     );
 
-    _jumpAnimation = Tween<double>(begin: 0.0, end: -32.0).animate(
+    _jumpAnimation = Tween<double>(begin: 0.0, end: -24.0).animate(
       CurvedAnimation(parent: _bounceController, curve: Curves.easeOutQuad),
     );
 
-    _squashAnimation = Tween<double>(begin: 0.92, end: 1.05).animate(
+    _squashAnimation = Tween<double>(begin: 0.94, end: 1.04).animate(
       CurvedAnimation(parent: _bounceController, curve: Curves.easeInOut),
     );
 
-    _shadowAnimation = Tween<double>(begin: 1.0, end: 0.50).animate(
+    _shadowAnimation = Tween<double>(begin: 1.0, end: 0.55).animate(
       CurvedAnimation(parent: _bounceController, curve: Curves.easeInOut),
     );
 
@@ -61,21 +61,21 @@ class _SplashScreenState extends ConsumerState<SplashScreen> with TickerProvider
         _bounceController.reverse();
       } else if (status == AnimationStatus.dismissed) {
         jumpCount++;
-        if (jumpCount < 2 && mounted) {
+        if (jumpCount < 1 && mounted) {
           _bounceController.forward();
         }
       }
     });
 
     // Mulai animasi lompat pertama setelah delay awal singkat
-    Future.delayed(const Duration(milliseconds: 250), () {
+    Future.delayed(const Duration(milliseconds: 100), () {
       if (mounted) {
         _bounceController.forward();
       }
     });
 
-    // Durasi splash screen disesuaikan menjadi ~3 detik
-    Timer(const Duration(milliseconds: 3000), () {
+    // Durasi splash screen dibuat jauh lebih cepat (~1.1 detik)
+    Timer(const Duration(milliseconds: 1100), () {
       if (mounted) {
         _minDurationElapsed = true;
         _checkAndNavigate();
