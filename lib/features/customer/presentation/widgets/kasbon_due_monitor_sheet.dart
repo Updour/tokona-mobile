@@ -6,6 +6,7 @@ import 'package:tokona/core/theme/app_typography.dart';
 import 'package:tokona/core/utils/currency_formatter.dart';
 import 'package:tokona/features/auth/presentation/controllers/auth_controller.dart';
 import 'package:tokona/features/customer/presentation/controllers/customer_controller.dart';
+import 'package:tokona/features/customer/presentation/widgets/kasbon_kpi_summary_card.dart';
 import 'package:tokona/features/customer/presentation/widgets/kasbon_sale_tile.dart';
 import 'package:tokona/features/pos/domain/models/sale_model.dart';
 import 'package:tokona/features/pos/presentation/controllers/sale_history_controller.dart';
@@ -29,7 +30,16 @@ class KasbonDueMonitorSheet extends ConsumerStatefulWidget {
 }
 
 class _KasbonDueMonitorSheetState extends ConsumerState<KasbonDueMonitorSheet> {
+  final _searchController = TextEditingController();
+  bool _isSearchVisible = false;
+  String _searchQuery = '';
   String _activeTab = 'all';
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
 
   @override
   void initState() {
@@ -71,6 +81,16 @@ class _KasbonDueMonitorSheetState extends ConsumerState<KasbonDueMonitorSheet> {
       displayedSales = kasbonSales;
     }
 
+    if (_searchQuery.isNotEmpty) {
+      displayedSales = displayedSales.where((s) {
+        final cust = customers.where((c) => c.id == s.customerId).firstOrNull;
+        final name = cust?.name.toLowerCase() ?? '';
+        final inv = s.invoiceNumber.toLowerCase();
+        final phone = cust?.phone?.toLowerCase() ?? '';
+        return name.contains(_searchQuery) || inv.contains(_searchQuery) || phone.contains(_searchQuery);
+      }).toList();
+    }
+
     final totalKasbonAmount = kasbonSales.fold(0.0, (acc, s) => acc + s.finalAmount);
     final totalOverdueAmount = overdueSales.fold(0.0, (acc, s) => acc + s.finalAmount);
 
@@ -103,11 +123,30 @@ class _KasbonDueMonitorSheetState extends ConsumerState<KasbonDueMonitorSheet> {
                       children: [
                         Text('Jatuh Tempo Kasbon', style: AppTypography.headingSmall.copyWith(fontSize: 16, fontWeight: FontWeight.w700), maxLines: 1, overflow: TextOverflow.ellipsis),
                         const SizedBox(height: 1),
-                        Text('${kasbonSales.length} tagihan hutang aktif', style: AppTypography.bodySmall.copyWith(fontSize: 11), maxLines: 1, overflow: TextOverflow.ellipsis),
+                        Text('${displayedSales.length} tagihan hutang aktif', style: AppTypography.bodySmall.copyWith(fontSize: 11), maxLines: 1, overflow: TextOverflow.ellipsis),
                       ],
                     ),
                   ),
-                  const SizedBox(width: 8),
+                  IconButton(
+                    icon: Icon(
+                      _isSearchVisible ? Icons.search_off_rounded : Icons.search_rounded,
+                      color: _isSearchVisible ? AppColors.primary : AppColors.textPrimary,
+                      size: 21,
+                    ),
+                    tooltip: 'Cari Kasbon',
+                    padding: EdgeInsets.zero,
+                    constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
+                    onPressed: () {
+                      setState(() {
+                        _isSearchVisible = !_isSearchVisible;
+                        if (!_isSearchVisible && _searchQuery.isNotEmpty) {
+                          _searchController.clear();
+                          _searchQuery = '';
+                        }
+                      });
+                    },
+                  ),
+                  const SizedBox(width: 4),
                   InkWell(
                     onTap: () {
                       HapticFeedback.lightImpact();
@@ -140,8 +179,45 @@ class _KasbonDueMonitorSheetState extends ConsumerState<KasbonDueMonitorSheet> {
                   ),
                 ],
               ),
+              if (_isSearchVisible) ...[
+                const SizedBox(height: 10),
+                Container(
+                  decoration: BoxDecoration(
+                    color: AppColors.surfaceElevated,
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: AppColors.border),
+                  ),
+                  child: TextField(
+                    controller: _searchController,
+                    autofocus: true,
+                    onChanged: (val) => setState(() => _searchQuery = val.trim().toLowerCase()),
+                    style: AppTypography.bodyMedium,
+                    decoration: InputDecoration(
+                      hintText: 'Cari nama pelanggan, invoice, HP...',
+                      hintStyle: AppTypography.bodySmall.copyWith(color: AppColors.textMuted),
+                      prefixIcon: const Icon(Icons.search_rounded, size: 20, color: AppColors.textMuted),
+                      suffixIcon: _searchQuery.isNotEmpty
+                          ? IconButton(
+                              icon: const Icon(Icons.clear, size: 18, color: AppColors.textMuted),
+                              onPressed: () {
+                                _searchController.clear();
+                                setState(() => _searchQuery = '');
+                              },
+                            )
+                          : null,
+                      border: InputBorder.none,
+                      isDense: true,
+                      contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 11),
+                    ),
+                  ),
+                ),
+              ],
           const SizedBox(height: 12),
-          _buildKpiCard(totalKasbonAmount, totalOverdueAmount, overdueSales.length),
+          KasbonKpiSummaryCard(
+            total: totalKasbonAmount,
+            overdue: totalOverdueAmount,
+            overdueCount: overdueSales.length,
+          ),
           const SizedBox(height: 12),
           _buildFilterTabs(kasbonSales.length, overdueSales.length, dueSoonSales.length),
           const SizedBox(height: 12),
@@ -161,55 +237,6 @@ class _KasbonDueMonitorSheetState extends ConsumerState<KasbonDueMonitorSheet> {
         ],
           ),
         ),
-      ),
-    );
-  }
-
-  Widget _buildKpiCard(double total, double overdue, int overdueCount) {
-    return Container(
-      padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-        color: const Color(0xFFFFFBEB),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: const Color(0xFFFDE68A)),
-      ),
-      child: Row(
-        children: [
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Text('Total Piutang Kasbon', style: TextStyle(fontSize: 11, color: Color(0xFF92400E), fontWeight: FontWeight.w600)),
-                const SizedBox(height: 2),
-                Text(CurrencyFormatter.format(total), style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w800, color: Color(0xFFB45309))),
-              ],
-            ),
-          ),
-          Container(width: 1, height: 36, color: const Color(0xFFFDE68A)),
-          const SizedBox(width: 14),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    const Text('Lewat Tempo', style: TextStyle(fontSize: 11, color: AppColors.error, fontWeight: FontWeight.w600)),
-                    if (overdueCount > 0) ...[
-                      const SizedBox(width: 4),
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1),
-                        decoration: BoxDecoration(color: AppColors.error, borderRadius: BorderRadius.circular(6)),
-                        child: Text('$overdueCount', style: const TextStyle(color: Colors.white, fontSize: 9, fontWeight: FontWeight.w800)),
-                      ),
-                    ],
-                  ],
-                ),
-                const SizedBox(height: 2),
-                Text(CurrencyFormatter.format(overdue), style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w800, color: AppColors.error)),
-              ],
-            ),
-          ),
-        ],
       ),
     );
   }

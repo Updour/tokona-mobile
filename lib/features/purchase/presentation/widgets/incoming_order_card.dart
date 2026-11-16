@@ -29,7 +29,7 @@ class IncomingOrderCard extends StatelessWidget {
     final isPo = p.isPreOrder;
     final badgeColor = isPo ? const Color(0xFFD97706) : const Color(0xFF0F766E);
     final badgeBg = isPo ? const Color(0xFFFEF3C7) : const Color(0xFFCCFBF1);
-    final label = isPo ? 'PO ${p.poDays ?? 3}H' : 'Dalam Kirim';
+    final label = isPo ? 'PO ${p.poDays ?? 3}H' : 'Pengiriman';
 
     final df = DateFormat('dd MMM');
     final hasEstRange = p.estimatedArrival != null;

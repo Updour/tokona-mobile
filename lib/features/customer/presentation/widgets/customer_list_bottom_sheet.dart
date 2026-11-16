@@ -30,6 +30,7 @@ class CustomerListBottomSheet extends ConsumerStatefulWidget {
 
 class _CustomerListBottomSheetState extends ConsumerState<CustomerListBottomSheet> {
   final _searchController = TextEditingController();
+  bool _isSearchVisible = false;
   String _searchQuery = '';
   String _selectedFilter = 'all';
 
@@ -126,7 +127,7 @@ class _CustomerListBottomSheetState extends ConsumerState<CustomerListBottomShee
                       ),
                       const SizedBox(height: 1),
                       Text(
-                        '${state.customers.length} kontak terdaftar',
+                        '${filtered.length} kontak terdaftar',
                         style: AppTypography.bodySmall.copyWith(fontSize: 11),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
@@ -134,7 +135,26 @@ class _CustomerListBottomSheetState extends ConsumerState<CustomerListBottomShee
                     ],
                   ),
                 ),
-                const SizedBox(width: 8),
+                IconButton(
+                  icon: Icon(
+                    _isSearchVisible ? Icons.search_off_rounded : Icons.search_rounded,
+                    color: _isSearchVisible ? AppColors.primary : AppColors.textPrimary,
+                    size: 21,
+                  ),
+                  tooltip: 'Cari Kontak',
+                  padding: EdgeInsets.zero,
+                  constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
+                  onPressed: () {
+                    setState(() {
+                      _isSearchVisible = !_isSearchVisible;
+                      if (!_isSearchVisible && _searchQuery.isNotEmpty) {
+                        _searchController.clear();
+                        _searchQuery = '';
+                      }
+                    });
+                  },
+                ),
+                const SizedBox(width: 4),
                 ElevatedButton.icon(
                   onPressed: store == null
                       ? null
@@ -164,41 +184,44 @@ class _CustomerListBottomSheetState extends ConsumerState<CustomerListBottomShee
                 ),
               ],
             ),
-            const SizedBox(height: 14),
+            if (_isSearchVisible) ...[
+              const SizedBox(height: 10),
+              Container(
+                decoration: BoxDecoration(
+                  color: AppColors.surfaceElevated,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: AppColors.border),
+                ),
+                child: TextField(
+                  controller: _searchController,
+                  autofocus: true,
+                  onChanged: (val) => setState(() => _searchQuery = val),
+                  style: AppTypography.bodyMedium,
+                  decoration: InputDecoration(
+                    hintText: 'Cari nama, no. HP, atau alamat...',
+                    hintStyle: AppTypography.bodySmall.copyWith(color: AppColors.textMuted),
+                    prefixIcon: const Icon(Icons.search_rounded, size: 20, color: AppColors.textMuted),
+                    suffixIcon: _searchQuery.isNotEmpty
+                        ? IconButton(
+                            icon: const Icon(Icons.clear, size: 18, color: AppColors.textMuted),
+                            onPressed: () {
+                              _searchController.clear();
+                              setState(() => _searchQuery = '');
+                            },
+                          )
+                        : null,
+                    border: InputBorder.none,
+                    isDense: true,
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 11),
+                  ),
+                ),
+              ),
+            ],
+            const SizedBox(height: 12),
             CustomerKasbonBanner(
               totalKasbon: totalKasbon,
               onTap: () => setState(() => _selectedFilter = 'kasbon'),
             ),
-            Container(
-              decoration: BoxDecoration(
-                color: AppColors.surfaceElevated,
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: AppColors.border),
-              ),
-              child: TextField(
-                controller: _searchController,
-                onChanged: (val) => setState(() => _searchQuery = val),
-                style: AppTypography.bodyMedium,
-                decoration: InputDecoration(
-                  hintText: 'Cari nama, no. HP, atau alamat...',
-                  hintStyle: AppTypography.bodySmall.copyWith(color: AppColors.textMuted),
-                  prefixIcon: const Icon(Icons.search_rounded, size: 20, color: AppColors.textMuted),
-                  suffixIcon: _searchQuery.isNotEmpty
-                      ? IconButton(
-                          icon: const Icon(Icons.clear, size: 18, color: AppColors.textMuted),
-                          onPressed: () {
-                            _searchController.clear();
-                            setState(() => _searchQuery = '');
-                          },
-                        )
-                      : null,
-                  border: InputBorder.none,
-                  isDense: true,
-                  contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 11),
-                ),
-              ),
-            ),
-            const SizedBox(height: 10),
             CustomerFilterChipBar(
               selectedFilter: _selectedFilter,
               onFilterChanged: (key) => setState(() => _selectedFilter = key),

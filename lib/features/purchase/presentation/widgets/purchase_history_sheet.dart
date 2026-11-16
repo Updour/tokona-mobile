@@ -27,6 +27,7 @@ class PurchaseHistorySheet extends ConsumerStatefulWidget {
 
 class _PurchaseHistorySheetState extends ConsumerState<PurchaseHistorySheet> {
   final TextEditingController _searchController = TextEditingController();
+  bool _isSearchVisible = false;
   String _selectedFilter = 'Semua';
   String _searchQuery = '';
 
@@ -107,11 +108,32 @@ class _PurchaseHistorySheetState extends ConsumerState<PurchaseHistorySheet> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text('Riwayat Pembelian', style: AppTypography.headingSmall.copyWith(fontSize: 16)),
-                      Text('${filteredList.length} transaksi belanja stok tercatat', style: AppTypography.bodySmall.copyWith(fontSize: 11)),
+                      Text('Riwayat Pembelian', style: AppTypography.headingSmall.copyWith(fontSize: 16, fontWeight: FontWeight.w700), maxLines: 1, overflow: TextOverflow.ellipsis),
+                      const SizedBox(height: 1),
+                      Text('${filteredList.length} transaksi belanja stok tercatat', style: AppTypography.bodySmall.copyWith(fontSize: 11), maxLines: 1, overflow: TextOverflow.ellipsis),
                     ],
                   ),
                 ),
+                IconButton(
+                  icon: Icon(
+                    _isSearchVisible ? Icons.search_off_rounded : Icons.search_rounded,
+                    color: _isSearchVisible ? AppColors.primary : AppColors.textPrimary,
+                    size: 21,
+                  ),
+                  tooltip: 'Cari Faktur',
+                  padding: EdgeInsets.zero,
+                  constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
+                  onPressed: () {
+                    setState(() {
+                      _isSearchVisible = !_isSearchVisible;
+                      if (!_isSearchVisible && _searchQuery.isNotEmpty) {
+                        _searchController.clear();
+                        _searchQuery = '';
+                      }
+                    });
+                  },
+                ),
+                const SizedBox(width: 4),
                 IconButton(
                   icon: const Icon(Icons.add_shopping_cart_rounded, color: AppColors.primary, size: 21),
                   tooltip: 'Catat Belanja Baru',
@@ -122,16 +144,19 @@ class _PurchaseHistorySheetState extends ConsumerState<PurchaseHistorySheet> {
                     AddPurchaseBottomSheet.show(context);
                   },
                 ),
+                const SizedBox(width: 4),
                 IconButton(
-                  icon: const Icon(Icons.close_rounded, color: AppColors.textMuted, size: 20),
+                  icon: const Icon(Icons.close_rounded, color: AppColors.textPrimary, size: 20),
                   padding: EdgeInsets.zero,
                   constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
                   onPressed: () => Navigator.of(context).pop(),
                 ),
               ],
             ),
-            const SizedBox(height: 12),
-            _buildSearchBar(),
+            if (_isSearchVisible) ...[
+              const SizedBox(height: 10),
+              _buildSearchBar(),
+            ],
             const SizedBox(height: 10),
             _buildFilterChips(),
             const SizedBox(height: 12),

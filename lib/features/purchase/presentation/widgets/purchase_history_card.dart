@@ -200,7 +200,7 @@ class PurchaseHistoryCard extends StatelessWidget {
       case 'shipping':
         bg = const Color(0xFFE0F2FE);
         fg = const Color(0xFF0369A1);
-        label = 'Dalam Kirim';
+        label = 'Pengiriman';
         break;
       case 'cancelled':
         bg = const Color(0xFFFEE2E2);

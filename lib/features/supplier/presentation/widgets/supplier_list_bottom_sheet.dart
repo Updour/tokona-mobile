@@ -29,6 +29,7 @@ class SupplierListBottomSheet extends ConsumerStatefulWidget {
 
 class _SupplierListBottomSheetState extends ConsumerState<SupplierListBottomSheet> {
   final _searchController = TextEditingController();
+  bool _isSearchVisible = false;
   String _selectedType = 'all';
 
   @override
@@ -94,30 +95,49 @@ class _SupplierListBottomSheetState extends ConsumerState<SupplierListBottomShee
         children: [
           Center(
             child: Container(
-              width: 44,
+              width: 40,
               height: 4,
-              decoration: BoxDecoration(
-                color: const Color(0xFFCBD5E1),
-                borderRadius: BorderRadius.circular(2),
-              ),
+              decoration: BoxDecoration(color: AppColors.border, borderRadius: BorderRadius.circular(2)),
             ),
           ),
-          const SizedBox(height: 14),
+          const SizedBox(height: 12),
           Row(
             children: [
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('Master Supplier & Distributor', style: AppTypography.headingSmall.copyWith(fontSize: 16), maxLines: 1, overflow: TextOverflow.ellipsis),
-                    const SizedBox(height: 2),
-                    Text('Daftar distributor resmi dan toko online', style: AppTypography.bodySmall.copyWith(fontSize: 11), maxLines: 1, overflow: TextOverflow.ellipsis),
+                    Text('Master Supplier & Distributor', style: AppTypography.headingSmall.copyWith(fontSize: 16, fontWeight: FontWeight.w700), maxLines: 1, overflow: TextOverflow.ellipsis),
+                    const SizedBox(height: 1),
+                    Text('${state.suppliers.length} rekanan supplier terdaftar', style: AppTypography.bodySmall.copyWith(fontSize: 11), maxLines: 1, overflow: TextOverflow.ellipsis),
                   ],
                 ),
               ),
-              IconButton.filledTonal(
-                icon: const Icon(Icons.add_rounded, size: 20),
+              IconButton(
+                icon: Icon(
+                  _isSearchVisible ? Icons.search_off_rounded : Icons.search_rounded,
+                  color: _isSearchVisible ? AppColors.primary : AppColors.textPrimary,
+                  size: 21,
+                ),
+                tooltip: 'Cari Supplier',
+                padding: EdgeInsets.zero,
+                constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
+                onPressed: () {
+                  setState(() {
+                    _isSearchVisible = !_isSearchVisible;
+                    if (!_isSearchVisible && _searchController.text.isNotEmpty) {
+                      _searchController.clear();
+                      _onSearch('');
+                    }
+                  });
+                },
+              ),
+              const SizedBox(width: 4),
+              IconButton(
+                icon: const Icon(Icons.person_add_rounded, color: AppColors.primary, size: 21),
                 tooltip: 'Tambah Supplier',
+                padding: EdgeInsets.zero,
+                constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
                 onPressed: () => AddSupplierBottomSheet.show(
                   context,
                   onCreate: (dto) => ref.read(supplierListProvider.notifier).createSupplier(storeId, dto),
@@ -125,32 +145,35 @@ class _SupplierListBottomSheetState extends ConsumerState<SupplierListBottomShee
               ),
               const SizedBox(width: 4),
               IconButton(
-                icon: const Icon(Icons.close_rounded, color: AppColors.textMuted, size: 20),
+                icon: const Icon(Icons.close_rounded, color: AppColors.textPrimary, size: 20),
                 padding: EdgeInsets.zero,
                 constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
                 onPressed: () => Navigator.of(context).pop(),
               ),
             ],
           ),
-          const SizedBox(height: 14),
-          TextField(
-            controller: _searchController,
-            onChanged: _onSearch,
-            decoration: InputDecoration(
-              hintText: 'Cari nama supplier, toko, atau sales...',
-              prefixIcon: const Icon(Icons.search_rounded, size: 20, color: AppColors.textSecondary),
-              suffixIcon: _searchController.text.isNotEmpty
-                  ? IconButton(
-                      icon: const Icon(Icons.clear_rounded, size: 18),
-                      onPressed: () {
-                        _searchController.clear();
-                        _onSearch('');
-                      },
-                    )
-                  : null,
-              contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+          if (_isSearchVisible) ...[
+            const SizedBox(height: 10),
+            TextField(
+              controller: _searchController,
+              autofocus: true,
+              onChanged: _onSearch,
+              decoration: InputDecoration(
+                hintText: 'Cari nama supplier, toko, atau sales...',
+                prefixIcon: const Icon(Icons.search_rounded, size: 20, color: AppColors.textSecondary),
+                suffixIcon: _searchController.text.isNotEmpty
+                    ? IconButton(
+                        icon: const Icon(Icons.clear_rounded, size: 18),
+                        onPressed: () {
+                          _searchController.clear();
+                          _onSearch('');
+                        },
+                      )
+                    : null,
+                contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+              ),
             ),
-          ),
+          ],
           const SizedBox(height: 10),
           Row(
             children: [
