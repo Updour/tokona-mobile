@@ -64,9 +64,9 @@ class _BerandaSwipeableCardsState extends ConsumerState<BerandaSwipeableCards> {
         : [0.0, 0.0];
 
     final accounts = ref.watch(paymentAccountListProvider);
-    final balanceTrend = accounts.length >= 2
-        ? accounts.map((a) => a.balance).toList()
-        : [totalBalance * 0.4, totalBalance];
+    final List<double> balanceTrend = accounts.length >= 2
+        ? accounts.map((a) => a.currentBalance).toList()
+        : <double>[totalBalance * 0.4, totalBalance];
 
     final stockTrend = productState.products.length >= 2
         ? productState.products.take(8).map((p) => p.stockBase).toList()
