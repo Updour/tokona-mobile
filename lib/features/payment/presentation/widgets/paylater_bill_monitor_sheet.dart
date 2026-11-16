@@ -176,7 +176,7 @@ class PaylaterBillMonitorSheet extends ConsumerWidget {
                     itemBuilder: (context, idx) {
                       final p = paylaterPurchases[idx];
                       return InkWell(
-                        onTap: () => PurchaseDetailSheet.show(context, purchase: p),
+                        onTap: () => PurchaseDetailSheet.show(context, p),
                         borderRadius: BorderRadius.circular(12),
                         child: Container(
                           padding: const EdgeInsets.all(12),
@@ -262,3 +262,4 @@ class PaylaterBillMonitorSheet extends ConsumerWidget {
     );
   }
 }
+
