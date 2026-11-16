@@ -9,6 +9,8 @@ class DeviceProcurementHistoryItem {
   final String? trackingNumber;
   final DateTime date; // updatedAt for received, createdAt for shipping/po
   final DateTime? estimatedArrival;
+  final DateTime? estimatedArrivalEnd;
+  final bool isAutoReceived;
 
   const DeviceProcurementHistoryItem({
     required this.deviceTag,
@@ -19,6 +21,8 @@ class DeviceProcurementHistoryItem {
     this.trackingNumber,
     required this.date,
     this.estimatedArrival,
+    this.estimatedArrivalEnd,
+    this.isAutoReceived = false,
   });
 
   bool get isReceived => status == 'received';
@@ -46,6 +50,8 @@ class DeviceProcurementHistoryItem {
             trackingNumber: p.trackingNumber,
             date: p.isReceived ? p.updatedAt : p.createdAt,
             estimatedArrival: p.estimatedArrival,
+            estimatedArrivalEnd: p.estimatedArrivalEnd,
+            isAutoReceived: p.isAutoReceived,
           ));
         }
       }

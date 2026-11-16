@@ -23,6 +23,11 @@ class PurchaseController extends StateNotifier<PurchaseState> {
   Future<void> loadPurchases(String storeId) async {
     state = state.copyWith(isLoading: true, clearMessages: true);
     try {
+      final autoCount = await _repository.checkAndAutoReceiveExpiredOrders(storeId);
+      if (autoCount > 0) {
+        _ref.read(productListProvider.notifier).loadProducts(storeId);
+        _ref.read(reportControllerProvider.notifier).loadReport(storeId);
+      }
       final list = await _repository.getPurchases(storeId);
       state = state.copyWith(isLoading: false, purchases: list);
     } catch (e) {

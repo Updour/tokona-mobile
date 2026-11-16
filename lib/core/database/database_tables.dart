@@ -106,6 +106,8 @@ class DatabaseTables {
   static const String columnPurchaseStatus = 'status';
   static const String columnPurchasePoDays = 'po_days';
   static const String columnPurchaseEstimatedArrival = 'estimated_arrival';
+  static const String columnPurchaseEstimatedArrivalEnd = 'estimated_arrival_end';
+  static const String columnPurchaseIsAutoReceived = 'is_auto_received';
   static const String columnPurchaseRefundStatus = 'refund_status';
   static const String columnPurchaseTotalAmount = 'total_amount';
   static const String columnPurchaseNotes = 'notes';

@@ -7,6 +7,7 @@ class InTransitDeviceItem {
   final bool isPreOrder;
   final String invoiceNumber;
   final DateTime? estimatedArrival;
+  final DateTime? estimatedArrivalEnd;
 
   const InTransitDeviceItem({
     required this.deviceTag,
@@ -15,6 +16,7 @@ class InTransitDeviceItem {
     required this.isPreOrder,
     required this.invoiceNumber,
     this.estimatedArrival,
+    this.estimatedArrivalEnd,
   });
 
   String get statusLabel => isShipping ? 'OTW' : (isPreOrder ? 'PO' : 'Dalam Proses');
@@ -39,6 +41,7 @@ class InTransitDeviceItem {
               isPreOrder: prev.isPreOrder || order.isPreOrder,
               invoiceNumber: prev.invoiceNumber,
               estimatedArrival: prev.estimatedArrival ?? order.estimatedArrival,
+              estimatedArrivalEnd: prev.estimatedArrivalEnd ?? order.estimatedArrivalEnd,
             );
           } else {
             grouped[dev] = InTransitDeviceItem(
@@ -48,6 +51,7 @@ class InTransitDeviceItem {
               isPreOrder: order.isPreOrder,
               invoiceNumber: order.invoiceNumber,
               estimatedArrival: order.estimatedArrival,
+              estimatedArrivalEnd: order.estimatedArrivalEnd,
             );
           }
         }

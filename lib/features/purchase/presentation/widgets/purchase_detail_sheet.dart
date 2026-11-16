@@ -165,6 +165,19 @@ class PurchaseDetailSheet extends ConsumerWidget {
               child: _buildInfoRow('No. Resi Pengiriman', '📦 ${purchase.trackingNumber!} (Salin)'),
             ),
           ],
+          if (purchase.estimatedArrival != null) ...[
+            const SizedBox(height: 7),
+            _buildInfoRow(
+              'Estimasi Tiba',
+              purchase.estimatedArrivalEnd != null
+                  ? '${DateFormat('dd MMM yyyy').format(purchase.estimatedArrival!)} – ${DateFormat('dd MMM yyyy').format(purchase.estimatedArrivalEnd!)}'
+                  : DateFormat('dd MMM yyyy').format(purchase.estimatedArrival!),
+            ),
+          ],
+          if (purchase.isAutoReceived) ...[
+            const SizedBox(height: 7),
+            _buildInfoRow('Penerimaan', '🤖 Otomatis by Sistem (Batas Waktu)'),
+          ],
         ],
       ),
     );

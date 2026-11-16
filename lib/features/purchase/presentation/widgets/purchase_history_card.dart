@@ -190,7 +190,7 @@ class PurchaseHistoryCard extends StatelessWidget {
       case 'received':
         bg = const Color(0xFFDCFCE7);
         fg = const Color(0xFF15803D);
-        label = 'Diterima';
+        label = purchase.isAutoReceived ? '🤖 Diterima Sistem' : 'Diterima';
         break;
       case 'pre_order':
         bg = const Color(0xFFFEF3C7);

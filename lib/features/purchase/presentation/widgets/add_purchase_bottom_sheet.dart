@@ -13,6 +13,7 @@ import 'package:tokona/features/purchase/presentation/controllers/purchase_contr
 import 'package:tokona/features/purchase/presentation/widgets/add_purchase_header.dart';
 import 'package:tokona/features/purchase/presentation/widgets/purchase_channel_selector.dart';
 import 'package:tokona/features/purchase/presentation/widgets/purchase_device_chips.dart';
+import 'package:tokona/features/purchase/presentation/widgets/purchase_estimate_range_card.dart';
 import 'package:tokona/features/purchase/presentation/widgets/purchase_fee_inputs.dart';
 import 'package:tokona/features/purchase/presentation/widgets/purchase_item_list_section.dart';
 import 'package:tokona/features/purchase/presentation/widgets/purchase_payment_account_chips.dart';
@@ -43,11 +44,8 @@ class AddPurchaseBottomSheet extends ConsumerStatefulWidget {
 }
 
 class _AddPurchaseBottomSheetState extends ConsumerState<AddPurchaseBottomSheet> {
-  final _supplierController = TextEditingController();
-  final _invoiceController = TextEditingController();
-  final _notesController = TextEditingController();
-  final _serviceFeeController = TextEditingController();
-  final _shippingFeeController = TextEditingController();
+  final _supplierController = TextEditingController(), _invoiceController = TextEditingController();
+  final _notesController = TextEditingController(), _serviceFeeController = TextEditingController(), _shippingFeeController = TextEditingController();
 
   String? _supplierId;
   String _purchaseType = 'offline';
@@ -57,6 +55,8 @@ class _AddPurchaseBottomSheetState extends ConsumerState<AddPurchaseBottomSheet>
   String _status = 'received';
   String? _proofImagePath;
   int _poDays = 3;
+  DateTime? _estArrivalStart;
+  DateTime? _estArrivalEnd;
 
   final List<CreatePurchaseItemDto> _items = [];
   bool _isSubmitting = false;
@@ -89,7 +89,6 @@ class _AddPurchaseBottomSheetState extends ConsumerState<AddPurchaseBottomSheet>
     final authState = ref.read(authProvider);
     final store = authState.currentStore;
     final user = authState.currentUser;
-
     if (store == null || user == null) {
       AppToast.showError(context, 'Sesi toko tidak ditemukan. Silakan login kembali.');
       return;
@@ -99,30 +98,22 @@ class _AddPurchaseBottomSheetState extends ConsumerState<AddPurchaseBottomSheet>
       return;
     }
 
-    setState(() {
-      _isSubmitting = true;
-      _errorMessage = null;
-    });
+    setState(() { _isSubmitting = true; _errorMessage = null; });
 
     try {
       String? effectiveSupplierId = _supplierId;
-      final rawSupplierName = _supplierController.text.trim();
-      if (rawSupplierName.isNotEmpty) {
+      final rawSup = _supplierController.text.trim();
+      if (rawSup.isNotEmpty) {
         final suppliers = ref.read(supplierListProvider).suppliers;
-        final match = suppliers.where((s) => s.name.trim().toLowerCase() == rawSupplierName.toLowerCase()).firstOrNull;
+        final match = suppliers.where((s) => s.name.trim().toLowerCase() == rawSup.toLowerCase()).firstOrNull;
         if (match != null) {
           effectiveSupplierId = match.id;
         } else {
           try {
-            final created = await ref.read(supplierRepositoryProvider).createSupplier(
-              store.id,
-              CreateSupplierDto(
-                name: rawSupplierName,
-                type: _purchaseType,
-                platform: _purchaseType == 'online' ? _platform : null,
-              ),
+            final c = await ref.read(supplierRepositoryProvider).createSupplier(
+              store.id, CreateSupplierDto(name: rawSup, type: _purchaseType, platform: _purchaseType == 'online' ? _platform : null),
             );
-            effectiveSupplierId = created.id;
+            effectiveSupplierId = c.id;
             ref.read(supplierListProvider.notifier).loadSuppliers(store.id);
           } catch (_) {}
         }
@@ -131,15 +122,17 @@ class _AddPurchaseBottomSheetState extends ConsumerState<AddPurchaseBottomSheet>
       final dto = CreatePurchaseDto(
         storeId: store.id, userId: user.id,
         invoiceNumber: _invoiceController.text.trim().isEmpty ? null : _invoiceController.text.trim(),
-        supplierId: effectiveSupplierId, supplierName: rawSupplierName.isEmpty ? null : rawSupplierName,
+        supplierId: effectiveSupplierId, supplierName: rawSup.isEmpty ? null : rawSup,
         purchaseType: _purchaseType, platform: _purchaseType == 'online' ? _platform : null,
         deviceTag: _purchaseType == 'online' ? _deviceTag : null, paymentAccount: _paymentAccount,
         serviceFee: _serviceFee, shippingFee: _shippingFee, status: _status,
         poDays: _status == 'pre_order' ? _poDays : null,
-        estimatedArrival: _status == 'pre_order' ? DateTime.now().add(Duration(days: _poDays)) : null,
+        estimatedArrival: _status != 'received' ? (_estArrivalStart ?? DateTime.now().add(Duration(days: _status == 'pre_order' ? _poDays : 2))) : null,
+        estimatedArrivalEnd: _status != 'received'
+            ? (_estArrivalEnd != null ? DateTime(_estArrivalEnd!.year, _estArrivalEnd!.month, _estArrivalEnd!.day, 23, 59, 59) : DateTime.now().add(Duration(days: _status == 'pre_order' ? _poDays + 3 : 4)))
+            : null,
         notes: _notesController.text.trim().isEmpty ? null : _notesController.text.trim(),
-        imagePath: _proofImagePath,
-        items: _items,
+        imagePath: _proofImagePath, items: _items,
       );
 
       final result = await ref.read(purchaseControllerProvider.notifier).recordPurchase(dto);
@@ -224,9 +217,31 @@ class _AddPurchaseBottomSheetState extends ConsumerState<AddPurchaseBottomSheet>
                     PurchaseStatusSelector(
                       status: _status,
                       poDays: _poDays,
-                      onStatusChanged: (s) => setState(() => _status = s),
+                      onStatusChanged: (s) {
+                        setState(() {
+                          _status = s;
+                          final now = DateTime.now();
+                          if (s == 'shipping' && _estArrivalStart == null) {
+                            _estArrivalStart = now.add(const Duration(days: 2));
+                            _estArrivalEnd = now.add(const Duration(days: 4));
+                          } else if (s == 'pre_order' && _estArrivalStart == null) {
+                            _estArrivalStart = now.add(Duration(days: _poDays));
+                            _estArrivalEnd = now.add(Duration(days: _poDays + 3));
+                          }
+                        });
+                      },
                       onPoDaysChanged: (d) => setState(() => _poDays = d),
                     ),
+                    if (_status != 'received') ...[
+                      const SizedBox(height: 10),
+                      PurchaseEstimateRangeCard(
+                        startDate: _estArrivalStart ?? DateTime.now().add(Duration(days: _status == 'pre_order' ? _poDays : 2)),
+                        endDate: _estArrivalEnd ?? DateTime.now().add(Duration(days: _status == 'pre_order' ? _poDays + 3 : 4)),
+                        onRangeChanged: (r) {
+                          if (r != null) setState(() { _estArrivalStart = r.start; _estArrivalEnd = r.end; });
+                        },
+                      ),
+                    ],
                     const SizedBox(height: 14),
                     PurchaseProductSelector(products: products, onAddItem: (item) => setState(() => _items.add(item))),
                     PurchaseItemListSection(

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:intl/intl.dart';
 import 'package:tokona/core/theme/app_colors.dart';
 import 'package:tokona/core/theme/app_typography.dart';
 import 'package:tokona/core/utils/currency_formatter.dart';
@@ -29,6 +30,14 @@ class IncomingOrderCard extends StatelessWidget {
     final badgeColor = isPo ? const Color(0xFFD97706) : const Color(0xFF0F766E);
     final badgeBg = isPo ? const Color(0xFFFEF3C7) : const Color(0xFFCCFBF1);
     final label = isPo ? 'PO ${p.poDays ?? 3} Hari' : '🚚 Dalam Pengiriman';
+
+    final df = DateFormat('dd MMM');
+    final hasEstRange = p.estimatedArrival != null;
+    final estLabel = hasEstRange
+        ? (p.estimatedArrivalEnd != null
+            ? '${df.format(p.estimatedArrival!)} – ${df.format(p.estimatedArrivalEnd!)}'
+            : df.format(p.estimatedArrival!))
+        : null;
 
     return Container(
       padding: const EdgeInsets.all(13),
@@ -86,6 +95,14 @@ class IncomingOrderCard extends StatelessWidget {
                             decoration: BoxDecoration(color: badgeBg, borderRadius: BorderRadius.circular(6)),
                             child: Text(label, style: TextStyle(fontSize: 10, fontWeight: FontWeight.w800, color: badgeColor)),
                           ),
+                          if (estLabel != null) ...[
+                            const SizedBox(width: 4),
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2.5),
+                              decoration: BoxDecoration(color: const Color(0xFFF0FDF4), borderRadius: BorderRadius.circular(6), border: Border.all(color: const Color(0xFFBBF7D0))),
+                              child: Text('Est: $estLabel', style: const TextStyle(fontSize: 10, fontWeight: FontWeight.w700, color: Color(0xFF15803D))),
+                            ),
+                          ],
                           if (p.deviceTag != null && p.deviceTag!.isNotEmpty) ...[
                             const SizedBox(width: 4),
                             Container(

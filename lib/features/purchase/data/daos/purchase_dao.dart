@@ -30,6 +30,8 @@ class PurchaseDao {
     required String status,
     String? refundStatus,
     String? trackingNumber,
+    bool? isAutoReceived,
+    String? notes,
     DateTime? updatedAt,
   }) async {
     final values = <String, dynamic>{
@@ -38,6 +40,8 @@ class PurchaseDao {
     };
     if (refundStatus != null) values[DatabaseTables.columnPurchaseRefundStatus] = refundStatus;
     if (trackingNumber != null) values[DatabaseTables.columnPurchaseTrackingNumber] = trackingNumber;
+    if (isAutoReceived != null) values[DatabaseTables.columnPurchaseIsAutoReceived] = isAutoReceived ? 1 : 0;
+    if (notes != null) values[DatabaseTables.columnPurchaseNotes] = notes;
     await db.update(DatabaseTables.purchases, values, where: '${DatabaseTables.columnId} = ?', whereArgs: [id]);
   }
 

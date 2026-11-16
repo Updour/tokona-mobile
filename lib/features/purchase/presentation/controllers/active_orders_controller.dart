@@ -18,6 +18,12 @@ class ActiveOrdersController extends StateNotifier<List<PurchaseModel>> {
 
   Future<void> loadOrders(String storeId) async {
     try {
+      // Periksa dan otomatis terima pesanan yang melewati batas estimasi maksimal
+      final autoReceivedCount = await _repository.checkAndAutoReceiveExpiredOrders(storeId);
+      if (autoReceivedCount > 0) {
+        _ref.read(productListProvider.notifier).loadProducts(storeId);
+        _ref.read(reportControllerProvider.notifier).loadReport(storeId);
+      }
       final list = await _repository.getActiveOrders(storeId);
       state = list;
     } catch (_) {}

@@ -21,6 +21,8 @@ class PurchaseSchema {
       ${DatabaseTables.columnPurchaseStatus} TEXT NOT NULL DEFAULT 'received',
       ${DatabaseTables.columnPurchasePoDays} INTEGER,
       ${DatabaseTables.columnPurchaseEstimatedArrival} TEXT,
+      ${DatabaseTables.columnPurchaseEstimatedArrivalEnd} TEXT,
+      ${DatabaseTables.columnPurchaseIsAutoReceived} INTEGER NOT NULL DEFAULT 0,
       ${DatabaseTables.columnPurchaseRefundStatus} TEXT NOT NULL DEFAULT 'none',
       ${DatabaseTables.columnPurchaseTotalAmount} REAL NOT NULL DEFAULT 0.0,
       ${DatabaseTables.columnPurchaseNotes} TEXT,

@@ -37,18 +37,16 @@ class PurchaseRepository {
 
   Future<PurchaseModel> recordPurchase(CreatePurchaseDto dto) async {
     final validationError = dto.validate();
-    if (validationError != null) {
-      throw ArgumentError(validationError);
-    }
+    if (validationError != null) throw ArgumentError(validationError);
 
     final db = await appDatabase.database;
     final now = DateTime.now();
     final purchaseId = IdGenerator.generateId(prefix: 'PUR');
     final customInv = dto.invoiceNumber?.trim();
-    final firstItemName = dto.items.isNotEmpty ? dto.items.first.productName : null;
+    final firstItem = dto.items.isNotEmpty ? dto.items.first.productName : null;
     final invoiceNumber = (customInv != null && customInv.isNotEmpty)
         ? customInv
-        : _generateInvoiceNumber(now, supplierName: dto.supplierName ?? dto.platform, productName: firstItemName);
+        : _generateInvoiceNumber(now, supplierName: dto.supplierName ?? dto.platform, productName: firstItem);
 
     return await db.transaction<PurchaseModel>((txn) async {
       final purchaseModel = PurchaseModel(
@@ -56,11 +54,12 @@ class PurchaseRepository {
         supplierId: dto.supplierId, supplierName: dto.supplierName?.trim().isEmpty == true ? null : dto.supplierName?.trim(),
         purchaseType: dto.purchaseType, platform: dto.platform, deviceTag: dto.deviceTag,
         paymentAccount: dto.paymentAccount, serviceFee: dto.serviceFee, shippingFee: dto.shippingFee,
-        status: dto.status, poDays: dto.poDays, estimatedArrival: dto.estimatedArrival,
+        status: dto.status, poDays: dto.poDays,
+        estimatedArrival: dto.estimatedArrival,
+        estimatedArrivalEnd: dto.estimatedArrivalEnd,
         refundStatus: 'none', totalAmount: dto.itemsSubtotal,
         notes: dto.notes?.trim().isEmpty == true ? null : dto.notes?.trim(),
-        imagePath: dto.imagePath,
-        trackingNumber: dto.trackingNumber,
+        imagePath: dto.imagePath, trackingNumber: dto.trackingNumber,
         items: const [], createdAt: now, updatedAt: now,
       );
 
@@ -90,9 +89,7 @@ class PurchaseRepository {
 
       if (dto.paymentAccount != null && dto.paymentAccount!.trim().isNotEmpty) {
         await const PaymentAccountDao().adjustBalance(
-          txn,
-          storeId: dto.storeId,
-          accountNameOrId: dto.paymentAccount!,
+          txn, storeId: dto.storeId, accountNameOrId: dto.paymentAccount!,
           deltaAmount: -(dto.itemsSubtotal + dto.serviceFee + dto.shippingFee),
         );
       }
@@ -100,7 +97,7 @@ class PurchaseRepository {
     });
   }
 
-  Future<void> confirmReceived(String purchaseId) async {
+  Future<void> confirmReceived(String purchaseId, {bool isAutoReceived = false, String? autoNote}) async {
     final db = await appDatabase.database;
     final now = DateTime.now();
     await db.transaction((txn) async {
@@ -119,8 +116,32 @@ class PurchaseRepository {
           deviceTag: purchase.deviceTag,
         );
       }
-      await purchaseDao.updateStatus(txn, purchaseId, status: 'received', updatedAt: now);
+      final updatedNotes = autoNote != null
+          ? (purchase.notes != null && purchase.notes!.isNotEmpty ? '${purchase.notes}\n$autoNote' : autoNote)
+          : purchase.notes;
+      await purchaseDao.updateStatus(
+        txn, purchaseId,
+        status: 'received', isAutoReceived: isAutoReceived,
+        notes: updatedNotes, updatedAt: now,
+      );
     });
+  }
+
+  /// Memeriksa dan menyelesaikan pesanan PO / Dikirim secara otomatis jika melewati batas estimasi maksimal
+  Future<int> checkAndAutoReceiveExpiredOrders(String storeId) async {
+    final activeOrders = await getActiveOrders(storeId);
+    final now = DateTime.now();
+    int count = 0;
+    for (final order in activeOrders) {
+      final deadline = order.estimatedArrivalEnd ?? order.estimatedArrival;
+      if (deadline != null && now.isAfter(deadline)) {
+        final dateStr = '${deadline.day}/${deadline.month}/${deadline.year}';
+        final autoNote = 'pesanan di terima otomatis by sistem (melewati batas estimasi $dateStr)';
+        await confirmReceived(order.id, isAutoReceived: true, autoNote: autoNote);
+        count++;
+      }
+    }
+    return count;
   }
 
   Future<void> markAsShipped(String purchaseId, {String? trackingNumber}) async {
@@ -142,43 +163,31 @@ class PurchaseRepository {
     final db = await appDatabase.database;
     final now = DateTime.now();
     await db.transaction((txn) async {
-      final purchase = await purchaseDao.getById(txn, purchaseId);
+      final p = await purchaseDao.getById(txn, purchaseId);
       await purchaseDao.updateStatus(txn, purchaseId, status: 'cancelled', refundStatus: 'refunded', updatedAt: now);
-      if (purchase != null && purchase.paymentAccount != null && purchase.paymentAccount!.trim().isNotEmpty) {
+      if (p != null && p.paymentAccount != null && p.paymentAccount!.trim().isNotEmpty) {
         await const PaymentAccountDao().adjustBalance(
-          txn,
-          storeId: purchase.storeId,
-          accountNameOrId: purchase.paymentAccount!,
-          deltaAmount: purchase.grandTotal,
+          txn, storeId: p.storeId, accountNameOrId: p.paymentAccount!, deltaAmount: p.grandTotal,
         );
       }
     });
   }
 
-  Future<List<PurchaseModel>> getPendingRefunds(String storeId) async {
-    final db = await appDatabase.database;
-    return _hydrateItems(db, await purchaseDao.getPendingRefunds(db, storeId));
-  }
+  Future<List<PurchaseModel>> getPendingRefunds(String storeId) async =>
+      _hydrateItems(await appDatabase.database, await purchaseDao.getPendingRefunds(await appDatabase.database, storeId));
 
-  Future<List<PurchaseModel>> getCompletedRefunds(String storeId) async {
-    final db = await appDatabase.database;
-    return _hydrateItems(db, await purchaseDao.getCompletedRefunds(db, storeId));
-  }
+  Future<List<PurchaseModel>> getCompletedRefunds(String storeId) async =>
+      _hydrateItems(await appDatabase.database, await purchaseDao.getCompletedRefunds(await appDatabase.database, storeId));
 
-  Future<List<PurchaseModel>> getActiveOrders(String storeId) async {
-    final db = await appDatabase.database;
-    return _hydrateItems(db, await purchaseDao.getActiveOrders(db, storeId));
-  }
+  Future<List<PurchaseModel>> getActiveOrders(String storeId) async =>
+      _hydrateItems(await appDatabase.database, await purchaseDao.getActiveOrders(await appDatabase.database, storeId));
 
-  Future<List<PurchaseModel>> getPurchases(String storeId, {int limit = 50, int offset = 0}) async {
-    final db = await appDatabase.database;
-    return _hydrateItems(db, await purchaseDao.getByStoreId(db, storeId, limit: limit, offset: offset));
-  }
+  Future<List<PurchaseModel>> getPurchases(String storeId, {int limit = 50, int offset = 0}) async =>
+      _hydrateItems(await appDatabase.database, await purchaseDao.getByStoreId(await appDatabase.database, storeId, limit: limit, offset: offset));
 
   Future<List<PurchaseModel>> getPurchasesByProduct(String productId, {int limit = 50}) async {
     final db = await appDatabase.database;
-    final list = await purchaseDao.getByProductId(db, productId, limit: limit);
-    return _hydrateItems(db, list);
+    return _hydrateItems(db, await purchaseDao.getByProductId(db, productId, limit: limit));
   }
 
   Future<Map<String, double>> getProductDeviceBreakdown(String productId) async {
@@ -271,20 +280,20 @@ class PurchaseRepository {
   }
 
   String _generateInvoiceNumber(DateTime now, {String? supplierName, String? productName}) {
-    final dateStr = '${now.year.toString().substring(2)}${now.month.toString().padLeft(2, '0')}${now.day.toString().padLeft(2, '0')}';
-    String shopTag = 'TKO';
+    final dStr = '${now.year.toString().substring(2)}${now.month.toString().padLeft(2, '0')}${now.day.toString().padLeft(2, '0')}';
+    String sTag = 'TKO';
     if (supplierName != null && supplierName.trim().isNotEmpty) {
-      final clean = supplierName.trim().replaceAll(RegExp(r'[^a-zA-Z0-9]'), '').toUpperCase();
-      if (clean.isNotEmpty) shopTag = clean.length > 4 ? clean.substring(0, 4) : clean;
+      final c = supplierName.trim().replaceAll(RegExp(r'[^a-zA-Z0-9]'), '').toUpperCase();
+      if (c.isNotEmpty) sTag = c.length > 4 ? c.substring(0, 4) : c;
     }
-    String prodTag = 'STK';
+    String pTag = 'STK';
     if (productName != null && productName.trim().isNotEmpty) {
-      final clean = productName.trim().replaceAll(RegExp(r'[^a-zA-Z0-9]'), '').toUpperCase();
-      if (clean.isNotEmpty) prodTag = clean.length > 3 ? clean.substring(0, 3) : clean;
+      final c = productName.trim().replaceAll(RegExp(r'[^a-zA-Z0-9]'), '').toUpperCase();
+      if (c.isNotEmpty) pTag = c.length > 3 ? c.substring(0, 3) : c;
     }
     const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
     final rng = Random();
-    final randomSuffix = List.generate(4, (_) => chars[rng.nextInt(chars.length)]).join();
-    return 'PUR-$shopTag-$prodTag-$dateStr-$randomSuffix';
+    final suffix = List.generate(4, (_) => chars[rng.nextInt(chars.length)]).join();
+    return 'PUR-$sTag-$pTag-$dStr-$suffix';
   }
 }

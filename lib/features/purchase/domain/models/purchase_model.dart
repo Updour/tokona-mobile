@@ -17,6 +17,8 @@ class PurchaseModel {
   final String status;
   final int? poDays;
   final DateTime? estimatedArrival;
+  final DateTime? estimatedArrivalEnd;
+  final bool isAutoReceived;
   final String refundStatus;
   final double totalAmount;
   final String? notes;
@@ -43,6 +45,8 @@ class PurchaseModel {
     this.status = 'received',
     this.poDays,
     this.estimatedArrival,
+    this.estimatedArrivalEnd,
+    this.isAutoReceived = false,
     this.refundStatus = 'none',
     required this.totalAmount,
     this.notes,
@@ -81,6 +85,10 @@ class PurchaseModel {
       estimatedArrival: map[DatabaseTables.columnPurchaseEstimatedArrival] != null
           ? DateTime.tryParse(map[DatabaseTables.columnPurchaseEstimatedArrival].toString())
           : null,
+      estimatedArrivalEnd: map[DatabaseTables.columnPurchaseEstimatedArrivalEnd] != null
+          ? DateTime.tryParse(map[DatabaseTables.columnPurchaseEstimatedArrivalEnd].toString())
+          : null,
+      isAutoReceived: (map[DatabaseTables.columnPurchaseIsAutoReceived] as int? ?? 0) == 1,
       refundStatus: map[DatabaseTables.columnPurchaseRefundStatus] as String? ?? 'none',
       totalAmount: (map[DatabaseTables.columnPurchaseTotalAmount] as num).toDouble(),
       notes: map[DatabaseTables.columnPurchaseNotes] as String?,
@@ -112,6 +120,8 @@ class PurchaseModel {
       DatabaseTables.columnPurchaseStatus: status,
       DatabaseTables.columnPurchasePoDays: poDays,
       DatabaseTables.columnPurchaseEstimatedArrival: estimatedArrival?.toIso8601String(),
+      DatabaseTables.columnPurchaseEstimatedArrivalEnd: estimatedArrivalEnd?.toIso8601String(),
+      DatabaseTables.columnPurchaseIsAutoReceived: isAutoReceived ? 1 : 0,
       DatabaseTables.columnPurchaseRefundStatus: refundStatus,
       DatabaseTables.columnPurchaseTotalAmount: totalAmount,
       DatabaseTables.columnPurchaseNotes: notes,
@@ -139,6 +149,8 @@ class PurchaseModel {
     String? status,
     int? poDays,
     DateTime? estimatedArrival,
+    DateTime? estimatedArrivalEnd,
+    bool? isAutoReceived,
     String? refundStatus,
     double? totalAmount,
     String? notes,
@@ -165,6 +177,8 @@ class PurchaseModel {
       status: status ?? this.status,
       poDays: poDays ?? this.poDays,
       estimatedArrival: estimatedArrival ?? this.estimatedArrival,
+      estimatedArrivalEnd: estimatedArrivalEnd ?? this.estimatedArrivalEnd,
+      isAutoReceived: isAutoReceived ?? this.isAutoReceived,
       refundStatus: refundStatus ?? this.refundStatus,
       totalAmount: totalAmount ?? this.totalAmount,
       notes: notes ?? this.notes,

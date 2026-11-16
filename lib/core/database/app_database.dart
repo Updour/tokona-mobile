@@ -155,6 +155,8 @@ class AppDatabase {
     await _addColumnIfNotExists(db, DatabaseTables.purchases, DatabaseTables.columnPurchaseStatus, "TEXT DEFAULT 'received'");
     await _addColumnIfNotExists(db, DatabaseTables.purchases, DatabaseTables.columnPurchasePoDays, 'INTEGER');
     await _addColumnIfNotExists(db, DatabaseTables.purchases, DatabaseTables.columnPurchaseEstimatedArrival, 'TEXT');
+    await _addColumnIfNotExists(db, DatabaseTables.purchases, DatabaseTables.columnPurchaseEstimatedArrivalEnd, 'TEXT');
+    await _addColumnIfNotExists(db, DatabaseTables.purchases, DatabaseTables.columnPurchaseIsAutoReceived, 'INTEGER DEFAULT 0');
     await _addColumnIfNotExists(db, DatabaseTables.purchases, DatabaseTables.columnPurchaseRefundStatus, "TEXT DEFAULT 'none'");
     await _addColumnIfNotExists(db, DatabaseTables.purchases, DatabaseTables.columnPurchaseImagePath, 'TEXT');
     await _addColumnIfNotExists(db, DatabaseTables.purchases, DatabaseTables.columnPurchaseTrackingNumber, 'TEXT');

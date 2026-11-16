@@ -15,6 +15,7 @@ class CreatePurchaseDto {
   final String status;
   final int? poDays;
   final DateTime? estimatedArrival;
+  final DateTime? estimatedArrivalEnd;
   final String? notes;
   final String? imagePath;
   final String? trackingNumber;
@@ -35,6 +36,7 @@ class CreatePurchaseDto {
     this.status = 'received',
     this.poDays,
     this.estimatedArrival,
+    this.estimatedArrivalEnd,
     this.notes,
     this.imagePath,
     this.trackingNumber,

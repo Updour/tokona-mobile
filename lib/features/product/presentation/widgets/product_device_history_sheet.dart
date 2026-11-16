@@ -196,9 +196,15 @@ class ProductDeviceHistorySheet extends StatelessWidget {
               if (!isReceived && item.estimatedArrival != null) ...[
                 const SizedBox(width: 8),
                 Text(
-                  '• Est. Tiba: ${dateOnlyFormat.format(item.estimatedArrival!)}',
+                  item.estimatedArrivalEnd != null
+                      ? '• Est. Tiba: ${dateOnlyFormat.format(item.estimatedArrival!)} – ${dateOnlyFormat.format(item.estimatedArrivalEnd!)}'
+                      : '• Est. Tiba: ${dateOnlyFormat.format(item.estimatedArrival!)}',
                   style: const TextStyle(fontSize: 10, color: Color(0xFFEA580C), fontWeight: FontWeight.w600),
                 ),
+              ],
+              if (item.isAutoReceived) ...[
+                const SizedBox(width: 6),
+                const Text('• 🤖 Sistem', style: TextStyle(fontSize: 10, color: Color(0xFF15803D), fontWeight: FontWeight.w700)),
               ],
             ],
           ),
