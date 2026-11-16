@@ -6,6 +6,7 @@ import 'package:tokona/core/theme/app_typography.dart';
 import 'package:tokona/core/utils/currency_formatter.dart';
 import 'package:tokona/core/widgets/app_toast.dart';
 import 'package:tokona/features/purchase/domain/models/purchase_model.dart';
+import 'package:tokona/features/purchase/presentation/widgets/shipment_tracking_sheet.dart';
 
 class IncomingOrderCard extends StatelessWidget {
   final PurchaseModel purchase;
@@ -30,25 +31,21 @@ class IncomingOrderCard extends StatelessWidget {
     final badgeColor = isPo ? const Color(0xFFD97706) : const Color(0xFF0F766E);
     final badgeBg = isPo ? const Color(0xFFFEF3C7) : const Color(0xFFCCFBF1);
     final label = isPo ? 'PO ${p.poDays ?? 3}H' : 'Pengiriman';
-
     final df = DateFormat('dd MMM');
-    final hasEstRange = p.estimatedArrival != null;
-    final estLabel = hasEstRange
-        ? (p.estimatedArrivalEnd != null
-            ? '${df.format(p.estimatedArrival!)}–${df.format(p.estimatedArrivalEnd!)}'
-            : df.format(p.estimatedArrival!))
+    final estLabel = p.estimatedArrival != null
+        ? (p.estimatedArrivalEnd != null ? '${df.format(p.estimatedArrival!)}–${df.format(p.estimatedArrivalEnd!)}' : df.format(p.estimatedArrival!))
         : null;
 
-    final senderName = (p.supplierName != null && p.supplierName!.trim().isNotEmpty)
-        ? p.supplierName!.trim()
-        : (p.platform ?? 'Supplier Toko');
+    final senderName = (p.supplierName != null && p.supplierName!.trim().isNotEmpty) ? p.supplierName!.trim() : (p.platform ?? 'Supplier Toko');
+    final cardBg = isPo ? const Color(0xFFFFFBEB) : const Color(0xFFF0F9FF);
+    final borderColor = isPo ? const Color(0xFFFDE68A) : const Color(0xFFBAE6FD);
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 11),
       decoration: BoxDecoration(
-        color: AppColors.surface,
+        color: cardBg,
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: AppColors.border),
+        border: Border.all(color: borderColor),
         boxShadow: [
           BoxShadow(
             color: const Color(0xFF0F172A).withValues(alpha: 0.02),
@@ -182,19 +179,31 @@ class IncomingOrderCard extends StatelessWidget {
                   InkWell(
                     borderRadius: BorderRadius.circular(4),
                     onTap: () {
+                      final raw = p.trackingNumber!.trim();
+                      String c = 'J&T Cargo';
+                      String w = raw;
+                      final b = RegExp(r'^\[([^\]]+)\]\s*(.*)$').firstMatch(raw);
+                      if (b != null) {
+                        c = b.group(1)?.trim() ?? 'J&T Cargo';
+                        w = b.group(2)?.trim() ?? raw;
+                      }
+                      ShipmentTrackingSheet.show(context, waybillNo: w, courier: c, onConfirmArrival: onConfirmArrival);
+                    },
+                    child: const Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 5, vertical: 2),
+                      child: Text('Lacak', style: TextStyle(fontSize: 10, fontWeight: FontWeight.w700, color: Color(0xFF0284C7))),
+                    ),
+                  ),
+                  const SizedBox(width: 4),
+                  InkWell(
+                    borderRadius: BorderRadius.circular(4),
+                    onTap: () {
                       Clipboard.setData(ClipboardData(text: p.trackingNumber!));
                       AppToast.showSuccess(context, 'No. resi disalin');
                     },
                     child: const Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 5, vertical: 2),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(Icons.copy_rounded, size: 12, color: Color(0xFF15803D)),
-                          SizedBox(width: 3),
-                          Text('Salin', style: TextStyle(fontSize: 10, fontWeight: FontWeight.w700, color: Color(0xFF15803D))),
-                        ],
-                      ),
+                      padding: EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+                      child: Text('Salin', style: TextStyle(fontSize: 10, fontWeight: FontWeight.w700, color: Color(0xFF15803D))),
                     ),
                   ),
                   if (onEditTracking != null) ...[
@@ -234,7 +243,6 @@ class IncomingOrderCard extends StatelessWidget {
           ],
           const SizedBox(height: 8),
 
-          // Action Buttons
           Row(
             children: [
               IconButton(

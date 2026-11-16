@@ -20,15 +20,29 @@ class PurchaseHistoryCard extends StatelessWidget {
     final dateFormat = DateFormat('dd MMM yyyy, HH:mm');
     final formattedDate = dateFormat.format(purchase.createdAt);
 
+    Color cardBg = AppColors.surface;
+    Color borderColor = AppColors.border;
+
+    if (purchase.status == 'shipping') {
+      cardBg = const Color(0xFFF0F9FF);
+      borderColor = const Color(0xFFBAE6FD);
+    } else if (purchase.status == 'pre_order') {
+      cardBg = const Color(0xFFFFFBEB);
+      borderColor = const Color(0xFFFDE68A);
+    } else if (purchase.status == 'cancelled') {
+      cardBg = const Color(0xFFFEF2F2);
+      borderColor = const Color(0xFFFECACA);
+    }
+
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(14),
       child: Container(
         padding: const EdgeInsets.all(14),
         decoration: BoxDecoration(
-          color: AppColors.surface,
+          color: cardBg,
           borderRadius: BorderRadius.circular(14),
-          border: Border.all(color: AppColors.border),
+          border: Border.all(color: borderColor),
           boxShadow: [
             BoxShadow(
               color: Colors.black.withValues(alpha: 0.02),

@@ -15,6 +15,7 @@ import 'package:tokona/features/purchase/domain/models/purchase_model.dart';
 import 'package:tokona/features/purchase/presentation/controllers/purchase_controller.dart';
 import 'package:tokona/features/purchase/presentation/widgets/edit_purchase_items_sheet.dart';
 import 'package:tokona/features/purchase/presentation/widgets/purchase_detail_item_tile.dart';
+import 'package:tokona/features/purchase/presentation/widgets/purchase_tracking_section.dart';
 
 class PurchaseDetailSheet extends ConsumerWidget {
   final PurchaseModel purchase;
@@ -143,13 +144,9 @@ class PurchaseDetailSheet extends ConsumerWidget {
           ],
           if (purchase.trackingNumber != null && purchase.trackingNumber!.isNotEmpty) ...[
             const SizedBox(height: 7),
-            InkWell(
-              borderRadius: BorderRadius.circular(6),
-              onTap: () {
-                Clipboard.setData(ClipboardData(text: purchase.trackingNumber!));
-                AppToast.showSuccess(context, 'No. resi disalin: ${purchase.trackingNumber}');
-              },
-              child: _buildInfoRow('No. Resi Pengiriman', '📦 ${purchase.trackingNumber!} (Salin)'),
+            PurchaseTrackingSection(
+              rawTracking: purchase.trackingNumber!,
+              onConfirmArrival: () => _handleConfirmArrival(context, ref),
             ),
           ],
           if (purchase.estimatedArrival != null) ...[
