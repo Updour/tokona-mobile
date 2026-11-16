@@ -19,17 +19,27 @@ class CapturedNotificationEvent {
     final lower = '$title $text $subText'.toLowerCase();
     return lower.contains('dikirim') ||
         lower.contains('dalam perjalanan') ||
+        lower.contains('diserahkan ke kurir') ||
+        lower.contains('diserahkan kepada kurir') ||
+        lower.contains('telah diserahkan') ||
+        lower.contains('diambil oleh kurir') ||
+        lower.contains('pesanan telah dikirim') ||
         lower.contains('menuju') ||
         lower.contains('transit') ||
+        lower.contains('sedang dibawa kurir') ||
+        lower.contains('sedang diantar') ||
         lower.contains('antar');
   }
 
   bool get isDelivered {
     final lower = '$title $text $subText'.toLowerCase();
     return lower.contains('telah diterima') ||
+        lower.contains('sudah diterima') ||
         lower.contains('berhasil terkirim') ||
         lower.contains('sampai di tujuan') ||
         lower.contains('diterima oleh') ||
+        lower.contains('selesai') ||
+        lower.contains('telah sampai') ||
         lower.contains('paket telah diantar');
   }
 
@@ -65,3 +75,4 @@ class CapturedNotificationEvent {
     );
   }
 }
+
