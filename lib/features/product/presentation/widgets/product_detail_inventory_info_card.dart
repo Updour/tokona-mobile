@@ -5,8 +5,10 @@ import 'package:intl/intl.dart';
 import 'package:tokona/core/theme/app_colors.dart';
 import 'package:tokona/core/theme/app_typography.dart';
 import 'package:tokona/core/widgets/app_toast.dart';
+import 'package:tokona/features/product/domain/models/device_procurement_history_item.dart';
 import 'package:tokona/features/product/domain/models/in_transit_device_item.dart';
 import 'package:tokona/features/product/domain/models/product_model.dart';
+import 'package:tokona/features/product/presentation/widgets/product_device_history_sheet.dart';
 import 'package:tokona/features/purchase/data/repositories/purchase_repository.dart';
 import 'package:tokona/features/purchase/presentation/controllers/active_orders_controller.dart';
 
@@ -179,9 +181,35 @@ class _ProductDetailInventoryInfoCardState extends ConsumerState<ProductDetailIn
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               const Text('Rincian Stok per Device:', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: Color(0xFF475569))),
-              Text('Fisik: ${physicalQty.toInt()} • OTW: ${inTransitQty.toInt()}', style: const TextStyle(fontSize: 10.5, fontWeight: FontWeight.w700, color: AppColors.primary)),
+              InkWell(
+                onTap: () async {
+                  final purchases = await ref.read(purchaseRepositoryProvider).getPurchasesByProduct(widget.product.id);
+                  final historyItems = DeviceProcurementHistoryItem.fromPurchases(purchases, widget.product.id);
+                  if (context.mounted) {
+                    ProductDeviceHistorySheet.show(
+                      context,
+                      productName: widget.product.name,
+                      baseUnit: widget.product.baseUnit,
+                      items: historyItems,
+                    );
+                  }
+                },
+                borderRadius: BorderRadius.circular(6),
+                child: const Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+                  child: Row(
+                    children: [
+                      Text('Lihat Riwayat & Waktu', style: TextStyle(fontSize: 10.5, fontWeight: FontWeight.w700, color: Color(0xFF4F46E5))),
+                      SizedBox(width: 2),
+                      Icon(Icons.chevron_right_rounded, size: 13, color: Color(0xFF4F46E5)),
+                    ],
+                  ),
+                ),
+              ),
             ],
           ),
+          const SizedBox(height: 4),
+          Text('Fisik: ${physicalQty.toInt()} • OTW: ${inTransitQty.toInt()}', style: const TextStyle(fontSize: 10, fontWeight: FontWeight.w700, color: AppColors.primary)),
           const SizedBox(height: 6),
           Wrap(
             spacing: 5,
@@ -212,11 +240,8 @@ class _ProductDetailInventoryInfoCardState extends ConsumerState<ProductDetailIn
   }
 
   Widget _buildRow({
-    required IconData icon,
-    required String label,
-    required String value,
-    Widget? badge,
-    Widget? trailing,
+    required IconData icon, required String label, required String value,
+    Widget? badge, Widget? trailing,
   }) {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -229,17 +254,12 @@ class _ProductDetailInventoryInfoCardState extends ConsumerState<ProductDetailIn
           child: Row(
             mainAxisAlignment: MainAxisAlignment.end,
             children: [
-              if (badge != null) ...[
-                badge,
-                const SizedBox(width: 6),
-              ],
+              if (badge != null) ...[badge, const SizedBox(width: 6)],
               Flexible(
                 child: Text(
                   value,
                   style: const TextStyle(fontSize: 12.5, fontWeight: FontWeight.w700, color: AppColors.textPrimary),
-                  textAlign: TextAlign.end,
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
+                  textAlign: TextAlign.end, maxLines: 2, overflow: TextOverflow.ellipsis,
                 ),
               ),
               if (trailing != null) trailing,
