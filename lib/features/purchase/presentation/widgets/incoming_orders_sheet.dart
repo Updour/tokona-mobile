@@ -12,6 +12,7 @@ import 'package:tokona/features/purchase/presentation/widgets/incoming_order_car
 import 'package:tokona/features/purchase/presentation/widgets/incoming_orders_filter_sheet.dart';
 import 'package:tokona/features/purchase/presentation/widgets/input_tracking_number_dialog.dart';
 import 'package:tokona/features/purchase/presentation/widgets/refund_monitor_sheet.dart';
+import 'package:tokona/features/purchase/presentation/widgets/shopee_notification_sync_bar.dart';
 
 class IncomingOrdersSheet extends ConsumerStatefulWidget {
   const IncomingOrdersSheet({super.key});
@@ -242,7 +243,8 @@ class _IncomingOrdersSheetState extends ConsumerState<IncomingOrdersSheet> {
                 ),
               ),
             ],
-            const SizedBox(height: 12),
+            const SizedBox(height: 8),
+            const ShopeeNotificationSyncBar(),
             Expanded(
               child: _isLoading && filtered.isEmpty
                   ? const Center(child: CircularProgressIndicator())
