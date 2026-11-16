@@ -60,14 +60,15 @@ class ProductDetailPriceTiersSection extends StatelessWidget {
             final unitLabel = tier.unitName?.isNotEmpty == true ? tier.unitName! : product.baseUnit;
             final qtyText = tier.minQuantity.toStringAsFixed(tier.minQuantity.truncateToDouble() == tier.minQuantity ? 0 : 1);
             final discount = product.baseSellingPrice > tier.price ? product.baseSellingPrice - tier.price : 0.0;
+            final percent = product.baseSellingPrice > 0 ? ((discount / product.baseSellingPrice) * 100).round() : 0;
 
             return Container(
               margin: const EdgeInsets.only(bottom: 8),
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 11),
               decoration: BoxDecoration(
                 color: AppColors.surfaceElevated,
-                borderRadius: BorderRadius.circular(10),
-                border: Border.all(color: AppColors.border),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: AppColors.secondary.withOpacity(0.18)),
               ),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -75,35 +76,46 @@ class ProductDetailPriceTiersSection extends StatelessWidget {
                   Row(
                     children: [
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                        padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 4.5),
                         decoration: BoxDecoration(
                           color: AppColors.secondary.withOpacity(0.15),
-                          borderRadius: BorderRadius.circular(6),
+                          borderRadius: BorderRadius.circular(8),
                         ),
                         child: Text(
                           '≥ $qtyText $unitLabel',
                           style: AppTypography.bodySmall.copyWith(
                             color: AppColors.secondary,
                             fontWeight: FontWeight.w700,
+                            fontSize: 12,
                           ),
                         ),
                       ),
                       if (discount > 0) ...[
                         const SizedBox(width: 8),
-                        Text(
-                          'Hemat ${CurrencyFormatter.format(discount)}',
-                          style: AppTypography.bodySmall.copyWith(
-                            color: AppColors.success,
-                            fontWeight: FontWeight.w600,
-                            fontSize: 11,
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2.5),
+                          decoration: BoxDecoration(
+                            color: AppColors.success.withValues(alpha: 0.12),
+                            borderRadius: BorderRadius.circular(6),
+                          ),
+                          child: Text(
+                            'Hemat ${CurrencyFormatter.format(discount)} ($percent%)',
+                            style: const TextStyle(
+                              color: AppColors.success,
+                              fontWeight: FontWeight.w700,
+                              fontSize: 10.5,
+                            ),
                           ),
                         ),
                       ],
                     ],
                   ),
                   Text(
-                    '${CurrencyFormatter.format(tier.price)} / $unitLabel',
-                    style: AppTypography.bodySmall.copyWith(fontWeight: FontWeight.w700),
+                    '${CurrencyFormatter.format(tier.price)}',
+                    style: AppTypography.labelLarge.copyWith(
+                      color: AppColors.textPrimary,
+                      fontWeight: FontWeight.w800,
+                    ),
                   ),
                 ],
               ),

@@ -39,7 +39,10 @@ class _PriceTierFormCardState extends State<PriceTierFormCard> {
     final price = CurrencyFormatter.parse(_priceController.text);
 
     if (qty <= 1) {
-      AppToast.showWarning(context, 'Minimal beli harus lebih dari 1');
+      AppToast.showWarning(
+        context,
+        'Minimal beli grosir harus ≥ 2. Untuk pembelian 1 ${widget.baseUnit}, harganya memakai Harga Jual Dasar di form atas.',
+      );
       return;
     }
 

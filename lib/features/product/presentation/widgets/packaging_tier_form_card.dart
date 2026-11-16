@@ -42,8 +42,21 @@ class _PackagingTierFormCardState extends State<PackagingTierFormCard> {
     final sellPrice = CurrencyFormatter.parse(_priceController.text);
     final barcode = _barcodeController.text.trim();
 
-    if (name.isEmpty || factor <= 1 || sellPrice <= 0) {
-      AppToast.showWarning(context, 'Lengkapi data kemasan');
+    if (name.isEmpty) {
+      AppToast.showWarning(context, 'Nama kemasan (misal: Dus / Slop / Pack) wajib diisi');
+      return;
+    }
+
+    if (factor <= 1) {
+      AppToast.showWarning(
+        context,
+        'Isi isi kemasan (konversi) harus lebih dari 1. Contoh: 1 Dus berisi 40 Pcs, masukkan 40.',
+      );
+      return;
+    }
+
+    if (sellPrice <= 0) {
+      AppToast.showWarning(context, 'Harga jual kemasan harus lebih dari Rp 0');
       return;
     }
 

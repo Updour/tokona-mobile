@@ -35,6 +35,27 @@ class PriceTierSection extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+            margin: const EdgeInsets.only(bottom: 12),
+            decoration: BoxDecoration(
+              color: AppColors.secondary.withOpacity(0.08),
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(color: AppColors.secondary.withOpacity(0.2)),
+            ),
+            child: Row(
+              children: [
+                const Icon(Icons.info_outline_rounded, size: 16, color: AppColors.secondary),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    'Untuk harga 1 $baseUnit sudah diatur di form utama atas (Harga Jual Dasar). Di sini khusus potongan harga saat beli ≥ 2 $baseUnit dst.',
+                    style: AppTypography.bodySmall.copyWith(fontSize: 11, color: AppColors.secondary),
+                  ),
+                ),
+              ],
+            ),
+          ),
           Row(
             children: [
               Container(
@@ -54,9 +75,9 @@ class PriceTierSection extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('Harga Grosir Bertingkat', style: AppTypography.labelMedium),
+                    Text('Harga Grosir / Kuantitas Bertingkat', style: AppTypography.labelMedium),
                     const SizedBox(height: 2),
-                    Text('Diskon otomatis saat beli kuantitas banyak', style: AppTypography.bodySmall),
+                    Text('Diskon otomatis saat pelanggan beli banyak (≥ 2, ≥ 5 $baseUnit, dst)', style: AppTypography.bodySmall),
                   ],
                 ),
               ),

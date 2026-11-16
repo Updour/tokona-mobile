@@ -32,6 +32,27 @@ class PackagingTierSection extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+            margin: const EdgeInsets.only(bottom: 12),
+            decoration: BoxDecoration(
+              color: AppColors.primaryContainer.withValues(alpha: 0.5),
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(color: AppColors.primary.withValues(alpha: 0.2)),
+            ),
+            child: Row(
+              children: [
+                const Icon(Icons.lightbulb_outline_rounded, size: 16, color: AppColors.primaryDark),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    'Kemasan ini untuk satuan lebih besar dari satuan dasar (cth: 1 Dus = 40 Pcs, isi faktor 40).',
+                    style: AppTypography.bodySmall.copyWith(fontSize: 11, color: AppColors.primaryDark),
+                  ),
+                ),
+              ],
+            ),
+          ),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
@@ -41,7 +62,7 @@ class PackagingTierSection extends StatelessWidget {
                   children: [
                     Text('Satuan Kemasan Bertingkat', style: AppTypography.labelMedium),
                     const SizedBox(height: 2),
-                    Text('Eceran & grosir dalam 1 master barang', style: AppTypography.bodySmall),
+                    Text('Jual kemasan besar (Dus/Slop/Pack) isi beberapa pcs', style: AppTypography.bodySmall),
                   ],
                 ),
               ),
