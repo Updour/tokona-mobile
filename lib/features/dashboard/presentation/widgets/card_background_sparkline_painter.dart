@@ -76,3 +76,4 @@ class CardBackgroundSparklinePainter extends CustomPainter {
     return oldDelegate.data != data || oldDelegate.color != color;
   }
 }
+
