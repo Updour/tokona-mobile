@@ -194,6 +194,15 @@ class AppShortcutRegistry {
       description: 'Daftar nomor rekening bank & QRIS toko',
     ),
     ShortcutMenuItem(
+      id: 'tagihan_paylater',
+      label: 'Tagihan Paylater',
+      category: 'Keuangan & Laporan',
+      icon: Icons.credit_card_rounded,
+      iconColor: Color(0xFFD97706),
+      bgColor: Color(0xFFFEF3C7),
+      description: 'Pantau belanja modal Paylater & jatuh tempo tgl 1',
+    ),
+    ShortcutMenuItem(
       id: 'cadangan',
       label: 'Cadangan Data',
       category: 'Keuangan & Laporan',

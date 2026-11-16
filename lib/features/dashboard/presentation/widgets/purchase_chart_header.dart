@@ -173,3 +173,4 @@ class PurchaseChartHeader extends StatelessWidget {
     );
   }
 }
+

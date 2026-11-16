@@ -6,6 +6,7 @@ import 'package:tokona/features/backup/presentation/widgets/backup_restore_botto
 import 'package:tokona/features/customer/presentation/widgets/customer_list_bottom_sheet.dart';
 import 'package:tokona/features/customer/presentation/widgets/kasbon_due_monitor_sheet.dart';
 import 'package:tokona/features/dashboard/presentation/widgets/store_closing_sheet.dart';
+import 'package:tokona/features/payment/presentation/widgets/paylater_bill_monitor_sheet.dart';
 import 'package:tokona/features/payment/presentation/widgets/payment_account_management_sheet.dart';
 import 'package:tokona/features/payment/presentation/widgets/store_capital_management_sheet.dart';
 import 'package:tokona/features/pos/presentation/widgets/sales_history_sheet.dart';
@@ -103,6 +104,9 @@ class ShortcutActionDispatcher {
         break;
       case 'rekening_bayar':
         PaymentAccountManagementSheet.show(context);
+        break;
+      case 'tagihan_paylater':
+        PaylaterBillMonitorSheet.show(context);
         break;
       case 'cadangan':
         BackupRestoreBottomSheet.show(context);

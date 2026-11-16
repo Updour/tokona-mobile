@@ -64,6 +64,7 @@ class PurchaseModel {
   bool get isReceived => status == 'received';
   bool get isCancelled => status == 'cancelled';
   bool get hasPendingRefund => refundStatus == 'pending_refund';
+  bool get isPaylater => (paymentAccount != null && paymentAccount!.toLowerCase().contains('paylater'));
   double get grandTotal => totalAmount + serviceFee + shippingFee;
 
   factory PurchaseModel.fromMap(Map<String, dynamic> map, {List<PurchaseItemModel> items = const []}) {

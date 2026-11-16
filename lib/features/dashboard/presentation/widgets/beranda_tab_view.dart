@@ -20,6 +20,7 @@ import 'package:tokona/features/dashboard/presentation/widgets/beranda_swipeable
 import 'package:tokona/features/dashboard/presentation/widgets/beranda_top_products_card.dart';
 import 'package:tokona/features/dashboard/presentation/widgets/daily_sales_chart_card.dart';
 import 'package:tokona/features/payment/presentation/controllers/payment_account_controller.dart';
+import 'package:tokona/features/payment/presentation/widgets/paylater_bill_monitor_sheet.dart';
 import 'package:tokona/features/payment/presentation/widgets/payment_account_management_sheet.dart';
 import 'package:tokona/features/pos/presentation/controllers/sale_history_controller.dart';
 import 'package:tokona/features/pos/presentation/widgets/scheduled_reminder_sheet.dart';
@@ -69,7 +70,7 @@ class BerandaTabView extends ConsumerWidget {
                     IncomingOrdersSheet.show(context);
                     break;
                   case 'paylater':
-                    PaymentAccountManagementSheet.show(context);
+                    PaylaterBillMonitorSheet.show(context);
                     break;
                 }
               },

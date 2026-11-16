@@ -17,6 +17,7 @@ class PurchasePaymentAccountChips extends ConsumerWidget {
   });
 
   static const List<String> fallbackAccounts = [
+    'SPayLater',
     'SeaBank',
     'Bank BCA',
     'ShopeePay',
