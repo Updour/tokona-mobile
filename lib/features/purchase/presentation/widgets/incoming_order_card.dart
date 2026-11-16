@@ -24,6 +24,22 @@ class IncomingOrderCard extends StatelessWidget {
     this.onEditTracking,
   });
 
+  String get _courierName {
+    final raw = purchase.trackingNumber?.trim() ?? '';
+    final b = RegExp(r'^\[([^\]]+)\]').firstMatch(raw);
+    return b?.group(1)?.trim() ?? 'J&T Cargo';
+  }
+
+  String get _waybillCode {
+    final raw = purchase.trackingNumber?.trim() ?? '';
+    final b = RegExp(r'^\[[^\]]+\]\s*(.*)$').firstMatch(raw);
+    return b?.group(1)?.trim() ?? raw;
+  }
+
+  void _track(BuildContext context) {
+    ShipmentTrackingSheet.show(context, waybillNo: _waybillCode, courier: _courierName, onConfirmArrival: onConfirmArrival);
+  }
+
   @override
   Widget build(BuildContext context) {
     final p = purchase;
@@ -57,7 +73,6 @@ class IncomingOrderCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Baris 1: Pengirim & Total
           Row(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
@@ -105,8 +120,6 @@ class IncomingOrderCard extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 8),
-
-          // Baris 2: Chips status, device, akun, est
           SingleChildScrollView(
             scrollDirection: Axis.horizontal,
             child: Row(
@@ -133,20 +146,11 @@ class IncomingOrderCard extends StatelessWidget {
                     child: Text('📱 ${p.deviceTag!}', style: const TextStyle(fontSize: 9.5, fontWeight: FontWeight.w700, color: Color(0xFF475569))),
                   ),
                 ],
-                if (p.paymentAccount != null && p.paymentAccount!.isNotEmpty) ...[
-                  const SizedBox(width: 4),
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 5.5, vertical: 2),
-                    decoration: BoxDecoration(color: const Color(0xFFEFF6FF), borderRadius: BorderRadius.circular(6)),
-                    child: Text(p.paymentAccount!, style: const TextStyle(fontSize: 9.5, fontWeight: FontWeight.w700, color: Color(0xFF1D4ED8))),
-                  ),
-                ],
               ],
             ),
           ),
           const SizedBox(height: 7),
 
-          // Ringkasan item barang
           Text(
             p.items.isNotEmpty ? p.items.map((i) => '${i.quantity.toStringAsFixed(0)} ${i.unitName} ${i.productName ?? ""}').join(', ') : 'Pesanan ${p.invoiceNumber}',
             style: AppTypography.bodySmall.copyWith(fontSize: 11, fontWeight: FontWeight.w500, color: AppColors.textSecondary),
@@ -154,11 +158,9 @@ class IncomingOrderCard extends StatelessWidget {
             overflow: TextOverflow.ellipsis,
           ),
           const SizedBox(height: 7),
-
-          // Strip Resi yang selalu tampil & bisa disalin
           if (p.trackingNumber != null && p.trackingNumber!.trim().isNotEmpty) ...[
             Container(
-              padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 3.5),
+              padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 4),
               decoration: BoxDecoration(
                 color: const Color(0xFFF0FDF4),
                 borderRadius: BorderRadius.circular(8),
@@ -166,11 +168,15 @@ class IncomingOrderCard extends StatelessWidget {
               ),
               child: Row(
                 children: [
-                  const Icon(Icons.confirmation_number_outlined, size: 13, color: Color(0xFF15803D)),
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1.5),
+                    decoration: BoxDecoration(color: const Color(0xFF0284C7), borderRadius: BorderRadius.circular(4)),
+                    child: Text(_courierName, style: const TextStyle(fontSize: 9, fontWeight: FontWeight.w800, color: Colors.white)),
+                  ),
                   const SizedBox(width: 6),
                   Expanded(
                     child: Text(
-                      'Resi: ${p.trackingNumber}',
+                      _waybillCode,
                       style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: Color(0xFF166534), fontFamily: 'monospace'),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
@@ -178,17 +184,7 @@ class IncomingOrderCard extends StatelessWidget {
                   ),
                   InkWell(
                     borderRadius: BorderRadius.circular(4),
-                    onTap: () {
-                      final raw = p.trackingNumber!.trim();
-                      String c = 'J&T Cargo';
-                      String w = raw;
-                      final b = RegExp(r'^\[([^\]]+)\]\s*(.*)$').firstMatch(raw);
-                      if (b != null) {
-                        c = b.group(1)?.trim() ?? 'J&T Cargo';
-                        w = b.group(2)?.trim() ?? raw;
-                      }
-                      ShipmentTrackingSheet.show(context, waybillNo: w, courier: c, onConfirmArrival: onConfirmArrival);
-                    },
+                    onTap: () => _track(context),
                     child: const Padding(
                       padding: EdgeInsets.symmetric(horizontal: 5, vertical: 2),
                       child: Text('Lacak', style: TextStyle(fontSize: 10, fontWeight: FontWeight.w700, color: Color(0xFF0284C7))),
@@ -198,11 +194,11 @@ class IncomingOrderCard extends StatelessWidget {
                   InkWell(
                     borderRadius: BorderRadius.circular(4),
                     onTap: () {
-                      Clipboard.setData(ClipboardData(text: p.trackingNumber!));
+                      Clipboard.setData(ClipboardData(text: _waybillCode));
                       AppToast.showSuccess(context, 'No. resi disalin');
                     },
                     child: const Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+                      padding: EdgeInsets.symmetric(horizontal: 5, vertical: 2),
                       child: Text('Salin', style: TextStyle(fontSize: 10, fontWeight: FontWeight.w700, color: Color(0xFF15803D))),
                     ),
                   ),

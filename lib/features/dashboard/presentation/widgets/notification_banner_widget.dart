@@ -84,120 +84,74 @@ class _NotificationBannerWidgetState extends State<NotificationBannerWidget>
                   _dismissWithAnim();
                   widget.onTap();
                 },
-                borderRadius: BorderRadius.circular(18),
+                borderRadius: BorderRadius.circular(14),
                 child: Container(
-                  padding: const EdgeInsets.fromLTRB(14, 12, 14, 14),
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 9),
                   decoration: BoxDecoration(
                     color: Colors.white,
-                    borderRadius: BorderRadius.circular(18),
+                    borderRadius: BorderRadius.circular(14),
                     border: Border.all(color: const Color(0xFFE2E8F0)),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.14),
-                        blurRadius: 22,
-                        offset: const Offset(0, 8),
+                        color: Colors.black.withValues(alpha: 0.10),
+                        blurRadius: 14,
+                        offset: const Offset(0, 4),
                       ),
                     ],
                   ),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.start,
+                  child: Row(
                     children: [
-                      Row(
-                        children: [
-                          Container(
-                            width: 18,
-                            height: 18,
-                            decoration: BoxDecoration(
-                              gradient: const LinearGradient(
-                                colors: [Color(0xFF0F766E), Color(0xFF0D9488)],
-                              ),
-                              borderRadius: BorderRadius.circular(5),
-                            ),
-                            child: const Icon(Icons.storefront_rounded, size: 11, color: Colors.white),
-                          ),
-                          const SizedBox(width: 6),
-                          const Text(
-                            'Tokona POS',
-                            style: TextStyle(fontWeight: FontWeight.w700, fontSize: 11.5, color: AppColors.textPrimary),
-                          ),
-                          const SizedBox(width: 5),
-                          Container(
-                            width: 3,
-                            height: 3,
-                            decoration: const BoxDecoration(color: AppColors.textMuted, shape: BoxShape.circle),
-                          ),
-                          const SizedBox(width: 5),
-                          Text(
-                            notif.categoryLabel,
-                            style: TextStyle(fontWeight: FontWeight.w700, fontSize: 10.5, color: notif.accentColor),
-                          ),
-                          const Spacer(),
-                          const Text('Baru saja', style: TextStyle(fontSize: 10, color: AppColors.textMuted)),
-                          const SizedBox(width: 6),
-                          InkWell(
-                            onTap: _dismissWithAnim,
-                            borderRadius: BorderRadius.circular(12),
-                            child: const Padding(
-                              padding: EdgeInsets.all(2),
-                              child: Icon(Icons.close_rounded, size: 16, color: AppColors.textMuted),
-                            ),
-                          ),
-                        ],
+                      Container(
+                        padding: const EdgeInsets.all(7),
+                        decoration: BoxDecoration(
+                          color: notif.containerColor,
+                          borderRadius: BorderRadius.circular(9),
+                        ),
+                        child: Icon(notif.icon, color: notif.accentColor, size: 16),
                       ),
-                      const SizedBox(height: 10),
-                      Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Container(
-                            padding: const EdgeInsets.all(9),
-                            decoration: BoxDecoration(
-                              color: notif.containerColor,
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            child: Icon(notif.icon, color: notif.accentColor, size: 20),
-                          ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
                               children: [
-                                Text(
-                                  notif.title,
-                                  style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 13.5, color: AppColors.textPrimary),
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
+                                Flexible(
+                                  child: Text(
+                                    notif.title,
+                                    style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 12, color: AppColors.textPrimary),
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
                                 ),
-                                const SizedBox(height: 3),
+                                const SizedBox(width: 4),
+                                Container(width: 2.5, height: 2.5, decoration: const BoxDecoration(color: AppColors.textMuted, shape: BoxShape.circle)),
+                                const SizedBox(width: 4),
                                 Text(
-                                  notif.body,
-                                  style: const TextStyle(fontSize: 11.5, color: AppColors.textSecondary, height: 1.3),
-                                  maxLines: 2,
-                                  overflow: TextOverflow.ellipsis,
+                                  notif.categoryLabel,
+                                  style: TextStyle(fontWeight: FontWeight.w700, fontSize: 9.5, color: notif.accentColor),
                                 ),
                               ],
                             ),
-                          ),
-                          const SizedBox(width: 8),
-                          Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 5),
-                            decoration: BoxDecoration(
-                              color: notif.accentColor.withValues(alpha: 0.1),
-                              borderRadius: BorderRadius.circular(8),
+                            const SizedBox(height: 1.5),
+                            Text(
+                              notif.body,
+                              style: const TextStyle(fontSize: 10.5, color: AppColors.textSecondary, height: 1.2),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
                             ),
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Text(
-                                  'Buka',
-                                  style: TextStyle(fontSize: 11, fontWeight: FontWeight.w800, color: notif.accentColor),
-                                ),
-                                const SizedBox(width: 2),
-                                Icon(Icons.arrow_forward_ios_rounded, size: 9, color: notif.accentColor),
-                              ],
-                            ),
-                          ),
-                        ],
+                          ],
+                        ),
+                      ),
+                      const SizedBox(width: 6),
+                      InkWell(
+                        onTap: _dismissWithAnim,
+                        borderRadius: BorderRadius.circular(10),
+                        child: const Padding(
+                          padding: EdgeInsets.all(3),
+                          child: Icon(Icons.close_rounded, size: 15, color: AppColors.textMuted),
+                        ),
                       ),
                     ],
                   ),

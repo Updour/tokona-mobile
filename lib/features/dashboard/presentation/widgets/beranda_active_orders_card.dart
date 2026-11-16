@@ -18,18 +18,14 @@ class BerandaActiveOrdersCard extends ConsumerWidget {
     final confirmed = await AppDialog.showConfirmation(
       context,
       title: 'Konfirmasi Barang Tiba',
-      message: 'Apakah paket fisik untuk nota ${p.invoiceNumber} sudah tiba di toko dan dicek? Stok barang akan otomatis bertambah.',
+      message: 'Paket ${p.invoiceNumber} sudah tiba di toko? Stok barang otomatis bertambah.',
       confirmText: 'Ya, Terima Barang',
       icon: Icons.inventory_2_outlined,
     );
     if (confirmed == true && context.mounted) {
       final storeId = ref.read(authProvider).currentStore?.id;
-      if (storeId != null) {
-        await ref.read(activeOrdersProvider.notifier).confirmReceived(p.id, storeId);
-      }
-      if (context.mounted) {
-        AppToast.showSuccess(context, 'Stok barang berhasil ditambahkan ke inventaris');
-      }
+      if (storeId != null) await ref.read(activeOrdersProvider.notifier).confirmReceived(p.id, storeId);
+      if (context.mounted) AppToast.showSuccess(context, 'Stok barang berhasil ditambahkan ke inventaris');
     }
   }
 
@@ -229,31 +225,40 @@ class BerandaActiveOrdersCard extends ConsumerWidget {
                 ],
                 if (p.trackingNumber != null && p.trackingNumber!.isNotEmpty) ...[
                   const SizedBox(width: 4),
-                  InkWell(
-                    onTap: () {
-                      Clipboard.setData(ClipboardData(text: p.trackingNumber!));
-                      AppToast.showSuccess(context, 'No. resi disalin');
-                    },
-                    borderRadius: BorderRadius.circular(5),
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 2),
-                      decoration: BoxDecoration(
-                        color: const Color(0xFFF0FDF4),
+                  Builder(
+                    builder: (context) {
+                      final raw = p.trackingNumber!.trim();
+                      final b = RegExp(r'^\[([^\]]+)\]\s*(.*)$').firstMatch(raw);
+                      final courier = b?.group(1)?.trim() ?? 'J&T';
+                      final waybill = b?.group(2)?.trim() ?? raw;
+
+                      return InkWell(
+                        onTap: () {
+                          Clipboard.setData(ClipboardData(text: waybill));
+                          AppToast.showSuccess(context, 'No. resi disalin');
+                        },
                         borderRadius: BorderRadius.circular(5),
-                        border: Border.all(color: const Color(0xFFBBF7D0)),
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          const Icon(Icons.confirmation_number_outlined, size: 10, color: Color(0xFF15803D)),
-                          const SizedBox(width: 3),
-                          Text(
-                            p.trackingNumber!,
-                            style: const TextStyle(fontSize: 9.5, fontWeight: FontWeight.w700, color: Color(0xFF15803D), fontFamily: 'monospace'),
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 2),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFF0FDF4),
+                            borderRadius: BorderRadius.circular(5),
+                            border: Border.all(color: const Color(0xFFBBF7D0)),
                           ),
-                        ],
-                      ),
-                    ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text(courier, style: const TextStyle(fontSize: 8.5, fontWeight: FontWeight.w800, color: Color(0xFF0284C7))),
+                              const SizedBox(width: 4),
+                              Text(
+                                waybill,
+                                style: const TextStyle(fontSize: 9.5, fontWeight: FontWeight.w700, color: Color(0xFF15803D), fontFamily: 'monospace'),
+                              ),
+                            ],
+                          ),
+                        ),
+                      );
+                    },
                   ),
                 ],
               ],

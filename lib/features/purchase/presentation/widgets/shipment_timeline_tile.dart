@@ -83,11 +83,14 @@ class ShipmentTimelineTile extends StatelessWidget {
                   ),
                   if (point.officerName != null || (point.contactPhone != null && point.contactPhone!.trim().isNotEmpty)) ...[
                     const SizedBox(height: 5),
-                    Row(
+                    Wrap(
+                      spacing: 8,
+                      runSpacing: 4,
+                      alignment: WrapAlignment.spaceBetween,
+                      crossAxisAlignment: WrapCrossAlignment.center,
                       children: [
                         if (point.officerName != null)
                           Text('Petugas: ${point.officerName}', style: const TextStyle(fontSize: 10.5, color: AppColors.textMuted)),
-                        const Spacer(),
                         if (point.contactPhone != null && point.contactPhone!.trim().isNotEmpty)
                           InkWell(
                             onTap: () => onCall?.call(point.contactPhone!),
@@ -95,6 +98,7 @@ class ShipmentTimelineTile extends StatelessWidget {
                             child: Padding(
                               padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
                               child: Row(
+                                mainAxisSize: MainAxisSize.min,
                                 children: [
                                   const Icon(Icons.phone_in_talk_rounded, size: 12, color: Color(0xFF16A34A)),
                                   const SizedBox(width: 3),

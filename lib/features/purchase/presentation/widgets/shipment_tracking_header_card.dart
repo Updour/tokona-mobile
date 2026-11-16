@@ -20,24 +20,35 @@ class ShipmentTrackingHeaderCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                decoration: BoxDecoration(
-                  color: result.isDelivered ? const Color(0xFF16A34A) : const Color(0xFF0284C7),
-                  borderRadius: BorderRadius.circular(6),
-                ),
-                child: Text(
-                  result.latestStatus.toUpperCase(),
-                  style: const TextStyle(color: Colors.white, fontSize: 10.5, fontWeight: FontWeight.w800),
+              Expanded(
+                child: Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                      decoration: BoxDecoration(
+                        color: result.isDelivered ? const Color(0xFF16A34A) : const Color(0xFF0284C7),
+                        borderRadius: BorderRadius.circular(6),
+                      ),
+                      child: Text(
+                        result.latestStatus.toUpperCase(),
+                        style: const TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.w800),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                  ],
                 ),
               ),
-              if (result.serviceType != null)
+              if (result.serviceType != null) ...[
+                const SizedBox(width: 8),
                 Text(
                   result.serviceType!,
-                  style: const TextStyle(fontSize: 11.5, fontWeight: FontWeight.w700, color: Color(0xFF15803D)),
+                  style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: Color(0xFF15803D)),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                 ),
+              ],
             ],
           ),
           const SizedBox(height: 10),
