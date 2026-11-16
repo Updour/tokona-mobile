@@ -123,27 +123,52 @@ class _LaporanTabViewState extends ConsumerState<LaporanTabView> {
             activePoCount: activeOrders.length,
           ),
           const SizedBox(height: 14),
-          if (_currentTabIndex == 0)
-            _buildSummaryTab(reportState, filteredProducts)
-          else if (_currentTabIndex == 1)
-            ReportSalesListSection(
-              startDate: reportState.startDate,
-              endDate: reportState.endDate,
-              searchQuery: _searchQuery,
-            )
-          else if (_currentTabIndex == 2)
-            ReportPurchasesListSection(
-              startDate: reportState.startDate,
-              endDate: reportState.endDate,
-              searchQuery: _searchQuery,
-            )
-          else
-            ReportActivePoListSection(
-              searchQuery: _searchQuery,
+          AnimatedSwitcher(
+            duration: const Duration(milliseconds: 280),
+            switchInCurve: Curves.easeOutCubic,
+            switchOutCurve: Curves.easeInCubic,
+            transitionBuilder: (child, animation) {
+              return FadeTransition(
+                opacity: animation,
+                child: SlideTransition(
+                  position: Tween<Offset>(
+                    begin: const Offset(0.04, 0.0),
+                    end: Offset.zero,
+                  ).animate(animation),
+                  child: child,
+                ),
+              );
+            },
+            child: KeyedSubtree(
+              key: ValueKey<int>(_currentTabIndex),
+              child: _buildCurrentTabContent(reportState, filteredProducts),
             ),
+          ),
         ],
       ),
     );
+  }
+
+  Widget _buildCurrentTabContent(ReportState reportState, List<dynamic> filteredProducts) {
+    if (_currentTabIndex == 0) {
+      return _buildSummaryTab(reportState, filteredProducts);
+    } else if (_currentTabIndex == 1) {
+      return ReportSalesListSection(
+        startDate: reportState.startDate,
+        endDate: reportState.endDate,
+        searchQuery: _searchQuery,
+      );
+    } else if (_currentTabIndex == 2) {
+      return ReportPurchasesListSection(
+        startDate: reportState.startDate,
+        endDate: reportState.endDate,
+        searchQuery: _searchQuery,
+      );
+    } else {
+      return ReportActivePoListSection(
+        searchQuery: _searchQuery,
+      );
+    }
   }
 
   Widget _buildSummaryTab(ReportState reportState, List<dynamic> filteredProducts) {
