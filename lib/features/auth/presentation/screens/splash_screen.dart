@@ -37,10 +37,10 @@ class _SplashScreenState extends ConsumerState<SplashScreen> with TickerProvider
     _textFadeAnimation = CurvedAnimation(parent: _textFadeController, curve: Curves.easeOut);
     _textFadeController.forward();
 
-    // Bouncing/jumping loop: logo lompat 3x seperti loading sebelum ke beranda
+    // Bouncing/jumping loop: logo lompat lebih responsif (~3 detik total durasi)
     _bounceController = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 650),
+      duration: const Duration(milliseconds: 500),
     );
 
     _jumpAnimation = Tween<double>(begin: 0.0, end: -32.0).animate(
@@ -61,21 +61,21 @@ class _SplashScreenState extends ConsumerState<SplashScreen> with TickerProvider
         _bounceController.reverse();
       } else if (status == AnimationStatus.dismissed) {
         jumpCount++;
-        if (jumpCount < 3 && mounted) {
+        if (jumpCount < 2 && mounted) {
           _bounceController.forward();
         }
       }
     });
 
-    // Mulai animasi lompat pertama setelah delay awal
-    Future.delayed(const Duration(milliseconds: 400), () {
+    // Mulai animasi lompat pertama setelah delay awal singkat
+    Future.delayed(const Duration(milliseconds: 250), () {
       if (mounted) {
         _bounceController.forward();
       }
     });
 
-    // Durasi splash screen 5 detik dari aplikasi pertama kali dibuka
-    Timer(const Duration(milliseconds: 5000), () {
+    // Durasi splash screen disesuaikan menjadi ~3 detik
+    Timer(const Duration(milliseconds: 3000), () {
       if (mounted) {
         _minDurationElapsed = true;
         _checkAndNavigate();
