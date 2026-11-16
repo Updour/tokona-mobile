@@ -6,7 +6,7 @@ import 'package:tokona/features/product/presentation/widgets/packaging_info_dial
 import 'package:tokona/features/product/presentation/widgets/packaging_tier_form_card.dart';
 import 'package:tokona/features/product/presentation/widgets/packaging_unit_field_tile.dart';
 
-class PackagingTierSection extends StatelessWidget {
+class PackagingTierSection extends StatefulWidget {
   final List<CreateProductUnitDto> packagingUnits;
   final double baseCostPrice;
   final ValueChanged<CreateProductUnitDto> onAddUnit;
@@ -21,73 +21,123 @@ class PackagingTierSection extends StatelessWidget {
   });
 
   @override
+  State<PackagingTierSection> createState() => _PackagingTierSectionState();
+}
+
+class _PackagingTierSectionState extends State<PackagingTierSection> {
+  bool _isExpanded = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _isExpanded = widget.packagingUnits.isNotEmpty;
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final count = widget.packagingUnits.length;
+
     return Container(
-      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: AppColors.surfaceElevated,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(color: AppColors.border),
       ),
+      clipBehavior: Clip.antiAlias,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-            margin: const EdgeInsets.only(bottom: 12),
-            decoration: BoxDecoration(
-              color: AppColors.primaryContainer.withValues(alpha: 0.5),
-              borderRadius: BorderRadius.circular(8),
-              border: Border.all(color: AppColors.primary.withValues(alpha: 0.2)),
-            ),
-            child: Row(
-              children: [
-                const Icon(Icons.lightbulb_outline_rounded, size: 16, color: AppColors.primaryDark),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: Text(
-                    'Kemasan ini untuk satuan lebih besar dari satuan dasar (cth: 1 Dus = 40 Pcs, isi faktor 40).',
-                    style: AppTypography.bodySmall.copyWith(fontSize: 11, color: AppColors.primaryDark),
+          InkWell(
+            onTap: () => setState(() => _isExpanded = !_isExpanded),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+              child: Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(6),
+                    decoration: BoxDecoration(
+                      color: AppColors.primaryContainer,
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: const Icon(
+                      Icons.inventory_2_outlined,
+                      color: AppColors.primaryDark,
+                      size: 18,
+                    ),
                   ),
-                ),
-              ],
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            Text('Kemasan Bertingkat', style: AppTypography.labelMedium),
+                            if (count > 0) ...[
+                              const SizedBox(width: 8),
+                              Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 1.5),
+                                decoration: BoxDecoration(
+                                  color: AppColors.primary,
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                                child: Text(
+                                  '$count Kemasan',
+                                  style: const TextStyle(fontSize: 10.5, color: Colors.white, fontWeight: FontWeight.w700),
+                                ),
+                              ),
+                            ],
+                          ],
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          count > 0 ? '$count opsi kemasan aktif' : 'Jual eceran & dus/slop dalam 1 produk',
+                          style: AppTypography.bodySmall,
+                        ),
+                      ],
+                    ),
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.help_outline_rounded, color: AppColors.primary, size: 20),
+                    tooltip: 'Panduan Kemasan',
+                    padding: EdgeInsets.zero,
+                    constraints: const BoxConstraints(),
+                    onPressed: () => PackagingInfoDialog.show(context),
+                  ),
+                  const SizedBox(width: 8),
+                  Icon(
+                    _isExpanded ? Icons.keyboard_arrow_up_rounded : Icons.keyboard_arrow_down_rounded,
+                    color: AppColors.textSecondary,
+                  ),
+                ],
+              ),
             ),
           ),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text('Satuan Kemasan Bertingkat', style: AppTypography.labelMedium),
-                    const SizedBox(height: 2),
-                    Text('Jual kemasan besar (Dus/Slop/Pack) isi beberapa pcs', style: AppTypography.bodySmall),
+          if (_isExpanded) ...[
+            const Divider(height: 1, color: AppColors.border),
+            Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  if (widget.packagingUnits.isNotEmpty) ...[
+                    ...widget.packagingUnits.asMap().entries.map(
+                          (entry) => PackagingUnitFieldTile(
+                            index: entry.key,
+                            unit: entry.value,
+                            onRemove: () => widget.onRemoveUnit(entry.key),
+                          ),
+                        ),
+                    const SizedBox(height: 12),
                   ],
-                ),
-              ),
-              IconButton(
-                icon: const Icon(Icons.info_outline_rounded, color: AppColors.primary, size: 22),
-                tooltip: 'Panduan Satuan Bertingkat',
-                onPressed: () => PackagingInfoDialog.show(context),
-              ),
-            ],
-          ),
-          if (packagingUnits.isNotEmpty) ...[
-            const SizedBox(height: 12),
-            ...packagingUnits.asMap().entries.map(
-                  (entry) => PackagingUnitFieldTile(
-                    index: entry.key,
-                    unit: entry.value,
-                    onRemove: () => onRemoveUnit(entry.key),
+                  PackagingTierFormCard(
+                    baseCostPrice: widget.baseCostPrice,
+                    onAddUnit: widget.onAddUnit,
                   ),
-                ),
+                ],
+              ),
+            ),
           ],
-          const SizedBox(height: 12),
-          PackagingTierFormCard(
-            baseCostPrice: baseCostPrice,
-            onAddUnit: onAddUnit,
-          ),
         ],
       ),
     );

@@ -186,54 +186,36 @@ class ProductCardItem extends StatelessWidget {
                     ],
                   ),
                 ),
-                if (product.units.isNotEmpty) ...[
-                  const SizedBox(height: 12),
-                  Wrap(
-                    spacing: 6,
-                    runSpacing: 6,
-                    children: product.units.map((unit) {
-                      return Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                        decoration: BoxDecoration(
-                          color: AppColors.surface,
-                          borderRadius: BorderRadius.circular(8),
-                          border: Border.all(color: AppColors.border),
-                        ),
-                        child: Text(
-                          '${unit.unitName} (${unit.conversionFactor.toStringAsFixed(0)} ${product.baseUnit}) • ${CurrencyFormatter.format(unit.sellingPrice)}',
-                          style: AppTypography.bodySmall.copyWith(
-                            fontSize: 11,
-                            fontWeight: FontWeight.w500,
+                if (product.units.isNotEmpty || product.priceTiers.isNotEmpty) ...[
+                  const SizedBox(height: 10),
+                  Row(
+                    children: [
+                      if (product.units.isNotEmpty)
+                        Container(
+                          margin: const EdgeInsets.only(right: 6),
+                          padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
+                          decoration: BoxDecoration(
+                            color: AppColors.primaryContainer.withValues(alpha: 0.6),
+                            borderRadius: BorderRadius.circular(6),
+                          ),
+                          child: Text(
+                            '${product.units.length} Kemasan',
+                            style: const TextStyle(fontSize: 10.5, fontWeight: FontWeight.w700, color: AppColors.primaryDark),
                           ),
                         ),
-                      );
-                    }).toList(),
-                  ),
-                ],
-                if (product.priceTiers.isNotEmpty) ...[
-                  const SizedBox(height: 8),
-                  Wrap(
-                    spacing: 6,
-                    runSpacing: 6,
-                    children: product.priceTiers.map((tier) {
-                      final qtyText = tier.minQuantity.toStringAsFixed(tier.minQuantity.truncateToDouble() == tier.minQuantity ? 0 : 1);
-                      return Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                        decoration: BoxDecoration(
-                          color: AppColors.secondary.withOpacity(0.08),
-                          borderRadius: BorderRadius.circular(6),
-                          border: Border.all(color: AppColors.secondary.withOpacity(0.25)),
-                        ),
-                        child: Text(
-                          'Grosir ≥ $qtyText: ${CurrencyFormatter.format(tier.price)}',
-                          style: AppTypography.bodySmall.copyWith(
-                            fontSize: 10,
-                            color: AppColors.secondary,
-                            fontWeight: FontWeight.w600,
+                      if (product.priceTiers.isNotEmpty)
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
+                          decoration: BoxDecoration(
+                            color: AppColors.secondary.withOpacity(0.12),
+                            borderRadius: BorderRadius.circular(6),
+                          ),
+                          child: Text(
+                            '${product.priceTiers.length} Level Grosir',
+                            style: const TextStyle(fontSize: 10.5, fontWeight: FontWeight.w700, color: AppColors.secondary),
                           ),
                         ),
-                      );
-                    }).toList(),
+                    ],
                   ),
                 ],
               ],

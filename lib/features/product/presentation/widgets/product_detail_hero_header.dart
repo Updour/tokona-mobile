@@ -13,44 +13,37 @@ class ProductDetailHeroHeader extends StatelessWidget {
   Widget build(BuildContext context) {
     final isLow = product.isLowStock;
 
-    return Container(
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: AppColors.surfaceElevated,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AppColors.border),
-      ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          ProductThumbnailAvatar(
-            imagePath: product.imagePath,
-            productName: product.name,
-            size: 56,
-            borderRadius: 14,
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  product.name,
-                  style: AppTypography.headingSmall.copyWith(fontSize: 16, fontWeight: FontWeight.w700),
-                ),
-                const SizedBox(height: 4),
-                Row(
-                  children: [
-                    const Icon(Icons.qr_code_2_rounded, size: 14, color: AppColors.textSecondary),
-                    const SizedBox(width: 4),
-                    Text(
-                      (product.sku != null && product.sku!.isNotEmpty)
-                          ? product.sku!
-                          : 'Tanpa Barcode/SKU',
-                      style: AppTypography.bodySmall.copyWith(fontSize: 12),
-                    ),
-                  ],
-                ),
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        ProductThumbnailAvatar(
+          imagePath: product.imagePath,
+          productName: product.name,
+          size: 52,
+          borderRadius: 14,
+        ),
+        const SizedBox(width: 12),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                product.name,
+                style: AppTypography.headingSmall.copyWith(fontSize: 16),
+              ),
+              const SizedBox(height: 4),
+              Row(
+                children: [
+                  const Icon(Icons.qr_code_2_rounded, size: 14, color: AppColors.textSecondary),
+                  const SizedBox(width: 4),
+                  Text(
+                    (product.sku != null && product.sku!.isNotEmpty)
+                        ? product.sku!
+                        : 'Tanpa Barcode/SKU',
+                    style: AppTypography.bodySmall.copyWith(fontSize: 12),
+                  ),
+                ],
+              ),
               const SizedBox(height: 6),
               Wrap(
                 spacing: 6,
@@ -158,9 +151,8 @@ class ProductDetailHeroHeader extends StatelessWidget {
           ),
         ),
       ],
-    ),
-  );
-}
+    );
+  }
 
   String _formatDate(DateTime dt) {
     final months = [
