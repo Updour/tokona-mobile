@@ -99,10 +99,21 @@ class SwipeableCardItem extends StatelessWidget {
                         FittedBox(
                           fit: BoxFit.scaleDown,
                           alignment: Alignment.centerLeft,
-                          child: Text(
-                            mainValue,
-                            style: const TextStyle(color: Colors.white, fontSize: 20.5, fontWeight: FontWeight.w900, letterSpacing: -0.4),
-                            maxLines: 1,
+                          child: AnimatedSwitcher(
+                            duration: const Duration(milliseconds: 300),
+                            transitionBuilder: (child, animation) => FadeTransition(
+                              opacity: animation,
+                              child: SlideTransition(
+                                position: Tween<Offset>(begin: const Offset(0.0, 0.2), end: Offset.zero).animate(animation),
+                                child: child,
+                              ),
+                            ),
+                            child: Text(
+                              mainValue,
+                              key: ValueKey<String>(mainValue),
+                              style: const TextStyle(color: Colors.white, fontSize: 20.5, fontWeight: FontWeight.w900, letterSpacing: -0.4),
+                              maxLines: 1,
+                            ),
                           ),
                         ),
                       ],

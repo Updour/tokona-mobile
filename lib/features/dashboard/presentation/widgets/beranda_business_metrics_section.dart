@@ -24,17 +24,20 @@ class BerandaBusinessMetricsSection extends ConsumerWidget {
     final activeOrders = ref.watch(activeOrdersProvider);
 
     final totalOmzet = reportState.summary.totalRevenue;
-    final totalSalesCount = saleState.sales.where((s) => !s.isVoided).length;
+    final totalSalesCount = reportState.summary.transactionCount;
 
-    final completedPurchases = purchaseState.purchases.where((p) => p.isReceived);
-    final totalPurchaseSpend = completedPurchases.fold<double>(0.0, (acc, p) => acc + p.grandTotal);
-    final totalPurchaseCount = completedPurchases.length;
+    final totalPurchaseSpend = reportState.summary.totalPurchaseSpend > 0
+        ? reportState.summary.totalPurchaseSpend
+        : purchaseState.purchases.where((p) => p.isReceived).fold<double>(0.0, (acc, p) => acc + p.grandTotal);
+    final totalPurchaseCount = purchaseState.purchases.where((p) => p.isReceived).length;
 
     final poOrders = activeOrders.where((p) => p.isPreOrder).toList();
     final totalPoAmount = poOrders.fold<double>(0.0, (acc, p) => acc + p.grandTotal);
 
     final otwOrders = activeOrders.where((p) => p.isShipping).toList();
     final totalOtwAmount = otwOrders.fold<double>(0.0, (acc, p) => acc + p.grandTotal);
+
+    final periodLabel = reportState.selectedFilter.label;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -69,10 +72,13 @@ class BerandaBusinessMetricsSection extends ConsumerWidget {
               child: _buildMetricCard(
                 title: 'Penjualan',
                 value: CurrencyFormatter.format(totalOmzet),
-                subtitle: '$totalSalesCount Nota Kasir',
+                subtitle: '$totalSalesCount Transaksi ($periodLabel)',
                 icon: Icons.receipt_long_rounded,
                 gradient: const [Color(0xFF2563EB), Color(0xFF1D4ED8)],
-                sparklineData: [12.0, 24.0, 18.0, 36.0, 48.0, 40.0, 60.0],
+                sparklineData: reportState.dailyTrends.length >= 2
+                    ? reportState.dailyTrends.map((d) => d.revenue).toList()
+                    : [12.0, 24.0, 18.0, 36.0, 48.0, 40.0, 60.0],
+                badgeText: periodLabel.toUpperCase(),
                 onTap: () => onNavigateTab?.call(3),
               ),
             ),
@@ -84,7 +90,10 @@ class BerandaBusinessMetricsSection extends ConsumerWidget {
                 subtitle: '$totalPurchaseCount Faktur Selesai',
                 icon: Icons.shopping_bag_outlined,
                 gradient: const [Color(0xFF0F766E), Color(0xFF115E59)],
-                sparklineData: [20.0, 15.0, 30.0, 25.0, 42.0, 50.0, 45.0],
+                sparklineData: purchaseState.purchases.length >= 2
+                    ? purchaseState.purchases.take(7).map((p) => p.grandTotal).toList().reversed.toList()
+                    : [20.0, 15.0, 30.0, 25.0, 42.0, 50.0, 45.0],
+                badgeText: periodLabel.toUpperCase(),
                 onTap: () => PurchaseHistorySheet.show(context),
               ),
             ),
@@ -211,13 +220,24 @@ class BerandaBusinessMetricsSection extends ConsumerWidget {
                     FittedBox(
                       fit: BoxFit.scaleDown,
                       alignment: Alignment.centerLeft,
-                      child: Text(
-                        value,
-                        style: const TextStyle(
-                          fontSize: 14.5,
-                          fontWeight: FontWeight.w900,
-                          color: Colors.white,
-                          letterSpacing: -0.2,
+                      child: AnimatedSwitcher(
+                        duration: const Duration(milliseconds: 300),
+                        transitionBuilder: (child, animation) => FadeTransition(
+                          opacity: animation,
+                          child: SlideTransition(
+                            position: Tween<Offset>(begin: const Offset(0.0, 0.2), end: Offset.zero).animate(animation),
+                            child: child,
+                          ),
+                        ),
+                        child: Text(
+                          value,
+                          key: ValueKey<String>(value),
+                          style: const TextStyle(
+                            fontSize: 14.5,
+                            fontWeight: FontWeight.w900,
+                            color: Colors.white,
+                            letterSpacing: -0.2,
+                          ),
                         ),
                       ),
                     ),
