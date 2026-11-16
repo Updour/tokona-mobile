@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:tokona/core/theme/app_colors.dart';
 import 'package:tokona/core/theme/app_typography.dart';
 import 'package:tokona/core/utils/currency_formatter.dart';
+import 'package:tokona/features/dashboard/presentation/widgets/card_background_sparkline_painter.dart';
 import 'package:tokona/features/pos/presentation/controllers/sale_history_controller.dart';
 import 'package:tokona/features/purchase/presentation/controllers/active_orders_controller.dart';
 import 'package:tokona/features/purchase/presentation/controllers/purchase_controller.dart';
@@ -70,8 +71,8 @@ class BerandaBusinessMetricsSection extends ConsumerWidget {
                 value: CurrencyFormatter.format(totalOmzet),
                 subtitle: '$totalSalesCount Nota Kasir',
                 icon: Icons.receipt_long_rounded,
-                accentColor: const Color(0xFF2563EB),
-                bgColor: const Color(0xFFEFF6FF),
+                gradient: const [Color(0xFF2563EB), Color(0xFF1D4ED8)],
+                sparklineData: [12.0, 24.0, 18.0, 36.0, 48.0, 40.0, 60.0],
                 onTap: () => onNavigateTab?.call(3),
               ),
             ),
@@ -82,8 +83,8 @@ class BerandaBusinessMetricsSection extends ConsumerWidget {
                 value: CurrencyFormatter.format(totalPurchaseSpend),
                 subtitle: '$totalPurchaseCount Faktur Selesai',
                 icon: Icons.shopping_bag_outlined,
-                accentColor: const Color(0xFF0F766E),
-                bgColor: const Color(0xFFF0FDFA),
+                gradient: const [Color(0xFF0F766E), Color(0xFF115E59)],
+                sparklineData: [20.0, 15.0, 30.0, 25.0, 42.0, 50.0, 45.0],
                 onTap: () => PurchaseHistorySheet.show(context),
               ),
             ),
@@ -98,8 +99,8 @@ class BerandaBusinessMetricsSection extends ConsumerWidget {
                 value: CurrencyFormatter.format(totalPoAmount),
                 subtitle: '${poOrders.length} Pesanan Indent',
                 icon: Icons.hourglass_top_rounded,
-                accentColor: const Color(0xFF7C3AED),
-                bgColor: const Color(0xFFF5F3FF),
+                gradient: const [Color(0xFF7C3AED), Color(0xFF6D28D9)],
+                sparklineData: [10.0, 30.0, 22.0, 45.0, 38.0, 55.0, 65.0],
                 badgeText: poOrders.isNotEmpty ? '${poOrders.length} PO' : null,
                 onTap: () => IncomingOrdersSheet.show(context),
               ),
@@ -107,12 +108,12 @@ class BerandaBusinessMetricsSection extends ConsumerWidget {
             const SizedBox(width: 10),
             Expanded(
               child: _buildMetricCard(
-                title: 'Dalam Kirim (OTW)',
+                title: 'Pengiriman',
                 value: CurrencyFormatter.format(totalOtwAmount),
                 subtitle: '${otwOrders.length} Paket di Jalan',
                 icon: Icons.local_shipping_outlined,
-                accentColor: const Color(0xFFEA580C),
-                bgColor: const Color(0xFFFFF7ED),
+                gradient: const [Color(0xFFEA580C), Color(0xFFC2410C)],
+                sparklineData: [35.0, 28.0, 42.0, 38.0, 50.0, 46.0, 62.0],
                 badgeText: otwOrders.isNotEmpty ? '${otwOrders.length} OTW' : null,
                 onTap: () => IncomingOrdersSheet.show(context),
               ),
@@ -128,8 +129,8 @@ class BerandaBusinessMetricsSection extends ConsumerWidget {
     required String value,
     required String subtitle,
     required IconData icon,
-    required Color accentColor,
-    required Color bgColor,
+    required List<Color> gradient,
+    required List<double> sparklineData,
     String? badgeText,
     required VoidCallback onTap,
   }) {
@@ -139,67 +140,100 @@ class BerandaBusinessMetricsSection extends ConsumerWidget {
         onTap: onTap,
         borderRadius: BorderRadius.circular(16),
         child: Container(
-          padding: const EdgeInsets.all(12),
           decoration: BoxDecoration(
-            color: AppColors.surface,
+            gradient: LinearGradient(
+              colors: gradient,
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
             borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: AppColors.border),
             boxShadow: [
               BoxShadow(
-                color: const Color(0xFF0F172A).withValues(alpha: 0.03),
+                color: gradient.first.withValues(alpha: 0.28),
                 blurRadius: 10,
-                offset: const Offset(0, 3),
+                offset: const Offset(0, 4),
               ),
             ],
           ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+          clipBehavior: Clip.antiAlias,
+          child: Stack(
             children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Container(
-                    padding: const EdgeInsets.all(6),
-                    decoration: BoxDecoration(
-                      color: bgColor,
-                      borderRadius: BorderRadius.circular(9),
-                    ),
-                    child: Icon(icon, size: 16, color: accentColor),
+              Positioned.fill(
+                child: CustomPaint(
+                  painter: CardBackgroundSparklinePainter(
+                    data: sparklineData,
+                    color: Colors.white,
                   ),
-                  if (badgeText != null)
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1.5),
-                      decoration: BoxDecoration(
-                        color: accentColor.withValues(alpha: 0.12),
-                        borderRadius: BorderRadius.circular(6),
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(12),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(6),
+                          decoration: BoxDecoration(
+                            color: Colors.white.withValues(alpha: 0.2),
+                            borderRadius: BorderRadius.circular(9),
+                          ),
+                          child: Icon(icon, size: 16, color: Colors.white),
+                        ),
+                        if (badgeText != null)
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1.5),
+                            decoration: BoxDecoration(
+                              color: Colors.white.withValues(alpha: 0.25),
+                              borderRadius: BorderRadius.circular(6),
+                            ),
+                            child: Text(
+                              badgeText,
+                              style: const TextStyle(fontSize: 9, fontWeight: FontWeight.w800, color: Colors.white),
+                            ),
+                          ),
+                      ],
+                    ),
+                    const SizedBox(height: 10),
+                    Text(
+                      title,
+                      style: TextStyle(
+                        fontSize: 11,
+                        color: Colors.white.withValues(alpha: 0.85),
+                        fontWeight: FontWeight.w600,
                       ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    const SizedBox(height: 2),
+                    FittedBox(
+                      fit: BoxFit.scaleDown,
+                      alignment: Alignment.centerLeft,
                       child: Text(
-                        badgeText,
-                        style: TextStyle(fontSize: 9, fontWeight: FontWeight.w800, color: accentColor),
+                        value,
+                        style: const TextStyle(
+                          fontSize: 14.5,
+                          fontWeight: FontWeight.w900,
+                          color: Colors.white,
+                          letterSpacing: -0.2,
+                        ),
                       ),
                     ),
-                ],
-              ),
-              const SizedBox(height: 8),
-              Text(
-                title,
-                style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: AppColors.textSecondary),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-              ),
-              const SizedBox(height: 2),
-              Text(
-                value,
-                style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w900, color: AppColors.textPrimary, letterSpacing: -0.2),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-              ),
-              const SizedBox(height: 2),
-              Text(
-                subtitle,
-                style: const TextStyle(fontSize: 10, fontWeight: FontWeight.w500, color: AppColors.textMuted),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
+                    const SizedBox(height: 3),
+                    Text(
+                      subtitle,
+                      style: TextStyle(
+                        fontSize: 10,
+                        color: Colors.white.withValues(alpha: 0.75),
+                        fontWeight: FontWeight.w500,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ],
+                ),
               ),
             ],
           ),

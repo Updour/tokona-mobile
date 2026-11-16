@@ -170,7 +170,7 @@ class BerandaActiveOrdersCard extends ConsumerWidget {
     final isPo = p.isPreOrder;
     final badgeColor = isPo ? const Color(0xFFD97706) : AppColors.primary;
     final badgeBg = isPo ? const Color(0xFFFEF3C7) : AppColors.primaryContainer;
-    final statusLabel = isPo ? 'PO ${p.poDays ?? 3} Hari' : 'Dalam Kirim';
+    final statusLabel = isPo ? 'PO ${p.poDays ?? 3} Hari' : 'Pengiriman';
 
     return Container(
       margin: const EdgeInsets.only(bottom: 8),

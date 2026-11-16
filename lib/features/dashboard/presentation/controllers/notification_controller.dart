@@ -127,7 +127,7 @@ final notificationListProvider = Provider<List<AppNotificationItem>>((ref) {
     items.add(AppNotificationItem(
       id: 'active_order_${ord.id}',
       title: 'Pesanan Masuk: ${ord.supplierName ?? ord.invoiceNumber}',
-      body: 'Stok kulakan ${ord.isPreOrder ? "PO" : "dalam kirim"} (${CurrencyFormatter.format(ord.grandTotal)}). Cek jika tiba.',
+      body: 'Stok kulakan ${ord.isPreOrder ? "PO" : "pengiriman"} (${CurrencyFormatter.format(ord.grandTotal)}). Cek jika tiba.',
       type: AppNotificationType.bookingReady,
       createdAt: ord.createdAt,
       targetPayload: 'incoming',
