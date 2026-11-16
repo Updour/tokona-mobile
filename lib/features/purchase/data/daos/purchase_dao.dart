@@ -63,6 +63,9 @@ class PurchaseDao {
     required String invoiceNumber,
     String? supplierName,
     String? notes,
+    double? totalAmount,
+    double? serviceFee,
+    double? shippingFee,
   }) async {
     final values = <String, dynamic>{
       DatabaseTables.columnPurchaseInvoiceNumber: invoiceNumber,
@@ -70,6 +73,9 @@ class PurchaseDao {
     };
     if (supplierName != null) values[DatabaseTables.columnPurchaseSupplierName] = supplierName;
     if (notes != null) values[DatabaseTables.columnPurchaseNotes] = notes;
+    if (totalAmount != null) values[DatabaseTables.columnPurchaseTotalAmount] = totalAmount;
+    if (serviceFee != null) values[DatabaseTables.columnPurchaseServiceFee] = serviceFee;
+    if (shippingFee != null) values[DatabaseTables.columnPurchaseShippingFee] = shippingFee;
     await db.update(
       DatabaseTables.purchases,
       values,

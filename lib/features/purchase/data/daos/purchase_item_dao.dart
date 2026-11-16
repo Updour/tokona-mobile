@@ -19,8 +19,15 @@ class PurchaseItemDao {
     }
   }
 
+  Future<void> deleteByPurchaseId(DatabaseExecutor db, String purchaseId) async {
+    await db.delete(
+      DatabaseTables.purchaseItems,
+      where: '${DatabaseTables.columnPurchaseItemPurchaseId} = ?',
+      whereArgs: [purchaseId],
+    );
+  }
+
   Future<List<PurchaseItemModel>> getByPurchaseId(DatabaseExecutor db, String purchaseId) async {
-    final rows = await db.rawQuery('''
       SELECT pi.*, p.${DatabaseTables.columnProductName} AS product_name
       FROM ${DatabaseTables.purchaseItems} pi
       LEFT JOIN ${DatabaseTables.products} p ON pi.${DatabaseTables.columnPurchaseItemProductId} = p.${DatabaseTables.columnId}

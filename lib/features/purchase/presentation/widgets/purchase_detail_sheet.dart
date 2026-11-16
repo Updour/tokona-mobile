@@ -13,7 +13,7 @@ import 'package:tokona/features/product/presentation/controllers/product_control
 import 'package:tokona/features/purchase/data/repositories/purchase_repository.dart';
 import 'package:tokona/features/purchase/domain/models/purchase_model.dart';
 import 'package:tokona/features/purchase/presentation/controllers/purchase_controller.dart';
-import 'package:tokona/features/purchase/presentation/widgets/edit_purchase_invoice_dialog.dart';
+import 'package:tokona/features/purchase/presentation/widgets/edit_purchase_items_sheet.dart';
 import 'package:tokona/features/purchase/presentation/widgets/purchase_detail_item_tile.dart';
 
 class PurchaseDetailSheet extends ConsumerWidget {
@@ -42,12 +42,12 @@ class PurchaseDetailSheet extends ConsumerWidget {
       icon: Icons.inventory_2_outlined,
     );
     if (confirmed == true && context.mounted) {
-      final storeId = ref.read(authProvider).currentStore?.id;
+      final sId = ref.read(authProvider).currentStore?.id;
       await ref.read(purchaseRepositoryProvider).confirmReceived(purchase.id);
       if (!context.mounted) return;
-      if (storeId != null) {
-        ref.read(productListProvider.notifier).loadProducts(storeId);
-        ref.read(purchaseControllerProvider.notifier).loadPurchases(storeId);
+      if (sId != null) {
+        ref.read(productListProvider.notifier).loadProducts(sId);
+        ref.read(purchaseControllerProvider.notifier).loadPurchases(sId);
       }
       AppToast.showSuccess(context, 'Stok barang berhasil ditambahkan ke inventaris');
       Navigator.of(context).pop();
@@ -61,18 +61,13 @@ class PurchaseDetailSheet extends ConsumerWidget {
     return SafeArea(
       top: false,
       child: Container(
-        decoration: const BoxDecoration(
-          color: AppColors.surface,
-          borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-        ),
+        decoration: const BoxDecoration(color: AppColors.surface, borderRadius: BorderRadius.vertical(top: Radius.circular(24))),
         padding: const EdgeInsets.fromLTRB(20, 16, 20, 24),
         constraints: BoxConstraints(maxHeight: MediaQuery.of(context).size.height * 0.88),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Center(
-              child: Container(width: 40, height: 4, decoration: BoxDecoration(color: AppColors.border, borderRadius: BorderRadius.circular(2))),
-            ),
+            Center(child: Container(width: 40, height: 4, decoration: BoxDecoration(color: AppColors.border, borderRadius: BorderRadius.circular(2)))),
             const SizedBox(height: 12),
             Row(
               children: [
@@ -86,14 +81,11 @@ class PurchaseDetailSheet extends ConsumerWidget {
                   ),
                 ),
                 IconButton(
-                  icon: const Icon(Icons.edit_outlined, color: AppColors.primary, size: 20),
-                  tooltip: 'Edit No. Faktur & Toko',
-                  onPressed: () => EditPurchaseInvoiceDialog.show(context, ref, purchase),
+                  icon: const Icon(Icons.edit_note_rounded, color: AppColors.primary, size: 24),
+                  tooltip: 'Edit & Tambah Barang Faktur',
+                  onPressed: () => EditPurchaseItemsSheet.show(context, purchase),
                 ),
-                IconButton(
-                  icon: const Icon(Icons.close_rounded, color: AppColors.textMuted),
-                  onPressed: () => Navigator.of(context).pop(),
-                ),
+                IconButton(icon: const Icon(Icons.close_rounded, color: AppColors.textMuted), onPressed: () => Navigator.of(context).pop()),
               ],
             ),
             const SizedBox(height: 12),
@@ -102,7 +94,7 @@ class PurchaseDetailSheet extends ConsumerWidget {
                 children: [
                   _buildHeaderInfoCard(context, dateFormat),
                   const SizedBox(height: 16),
-                  _buildItemsSection(),
+                  _buildItemsSection(context),
                   const SizedBox(height: 16),
                   _buildFinancialSummaryCard(),
                   if (purchase.notes != null && purchase.notes!.trim().isNotEmpty) ...[
@@ -119,12 +111,7 @@ class PurchaseDetailSheet extends ConsumerWidget {
                 onPressed: () => _handleConfirmArrival(context, ref),
                 icon: const Icon(Icons.check_circle_outline_rounded, size: 18),
                 label: const Text('Konfirmasi Barang Sudah Tiba', style: TextStyle(fontWeight: FontWeight.w700)),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.primary,
-                  foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(vertical: 14),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                ),
+                style: ElevatedButton.styleFrom(backgroundColor: AppColors.primary, foregroundColor: Colors.white, padding: const EdgeInsets.symmetric(vertical: 14), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))),
               ),
             ],
           ],
@@ -170,13 +157,13 @@ class PurchaseDetailSheet extends ConsumerWidget {
             _buildInfoRow(
               'Estimasi Tiba',
               purchase.estimatedArrivalEnd != null
-                  ? '${DateFormat('dd MMM yyyy').format(purchase.estimatedArrival!)} – ${DateFormat('dd MMM yyyy').format(purchase.estimatedArrivalEnd!)}'
+                  ? '${DateFormat('dd MMM').format(purchase.estimatedArrival!)} – ${DateFormat('dd MMM yyyy').format(purchase.estimatedArrivalEnd!)}'
                   : DateFormat('dd MMM yyyy').format(purchase.estimatedArrival!),
             ),
           ],
           if (purchase.isAutoReceived) ...[
             const SizedBox(height: 7),
-            _buildInfoRow('Penerimaan', '🤖 Otomatis by Sistem (Batas Waktu)'),
+            _buildInfoRow('Penerimaan', '🤖 Otomatis by Sistem'),
           ],
         ],
       ),
@@ -196,11 +183,30 @@ class PurchaseDetailSheet extends ConsumerWidget {
     );
   }
 
-  Widget _buildItemsSection() {
+  Widget _buildItemsSection(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('Rincian Barang (${purchase.items.length})', style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w700)),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text('Rincian Barang (${purchase.items.length})', style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w700)),
+            InkWell(
+              onTap: () => EditPurchaseItemsSheet.show(context, purchase),
+              borderRadius: BorderRadius.circular(6),
+              child: const Padding(
+                padding: EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                child: Row(
+                  children: [
+                    Icon(Icons.add_circle_outline_rounded, size: 13, color: AppColors.primary),
+                    SizedBox(width: 4),
+                    Text('Edit / Tambah', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: AppColors.primary)),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
         const SizedBox(height: 8),
         ...purchase.items.map((item) => PurchaseDetailItemTile(item: item)),
       ],
@@ -238,10 +244,7 @@ class PurchaseDetailSheet extends ConsumerWidget {
   Widget _buildNotesCard() {
     return Container(
       padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: AppColors.surfaceInput,
-        borderRadius: BorderRadius.circular(12),
-      ),
+      decoration: BoxDecoration(color: AppColors.surfaceInput, borderRadius: BorderRadius.circular(12)),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
