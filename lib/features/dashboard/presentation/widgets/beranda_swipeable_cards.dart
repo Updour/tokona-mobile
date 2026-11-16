@@ -63,7 +63,7 @@ class _BerandaSwipeableCardsState extends ConsumerState<BerandaSwipeableCards> {
         ? kasbonSales.take(7).map((s) => s.finalAmount).toList().reversed.toList()
         : [0.0, 0.0];
 
-    final accounts = ref.watch(paymentAccountListProvider).accounts;
+    final accounts = ref.watch(paymentAccountListProvider);
     final balanceTrend = accounts.length >= 2
         ? accounts.map((a) => a.balance).toList()
         : [totalBalance * 0.4, totalBalance];
