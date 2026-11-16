@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:tokona/core/providers/alert_notification_provider.dart';
 import 'package:tokona/core/theme/app_colors.dart';
+import 'package:tokona/features/auth/presentation/controllers/auth_controller.dart';
 import 'package:tokona/features/customer/presentation/widgets/kasbon_due_monitor_sheet.dart';
 import 'package:tokona/features/dashboard/presentation/widgets/swipeable_card_item.dart';
 import 'package:tokona/features/payment/presentation/controllers/payment_account_controller.dart';
@@ -13,6 +14,7 @@ import 'package:tokona/features/product/presentation/controllers/product_control
 import 'package:tokona/features/purchase/presentation/controllers/active_orders_controller.dart';
 import 'package:tokona/features/purchase/presentation/controllers/purchase_controller.dart';
 import 'package:tokona/features/purchase/presentation/widgets/purchase_history_sheet.dart';
+import 'package:tokona/features/report/domain/models/report_filter_type.dart';
 import 'package:tokona/features/report/presentation/controllers/report_controller.dart';
 
 class BerandaSwipeableCards extends ConsumerStatefulWidget {
@@ -32,6 +34,74 @@ class _BerandaSwipeableCardsState extends ConsumerState<BerandaSwipeableCards> {
   void dispose() {
     _pageController.dispose();
     super.dispose();
+  }
+
+  void _showFilterMenu(BuildContext context, ReportFilterType currentFilter) {
+    HapticFeedback.lightImpact();
+    final store = ref.read(authProvider).currentStore;
+    if (store == null) return;
+
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (ctx) {
+        const filters = [
+          ReportFilterType.today,
+          ReportFilterType.yesterday,
+          ReportFilterType.last7Days,
+          ReportFilterType.thisMonth,
+          ReportFilterType.thisYear,
+        ];
+        return Container(
+          padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 16),
+          decoration: const BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Text('Pilih Rentang Waktu Omzet', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                  IconButton(
+                    icon: const Icon(Icons.close_rounded, size: 20),
+                    onPressed: () => Navigator.pop(ctx),
+                    padding: EdgeInsets.zero,
+                    constraints: const BoxConstraints(),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 12),
+              ...filters.map((f) {
+                final isSelected = f == currentFilter;
+                return ListTile(
+                  dense: true,
+                  contentPadding: const EdgeInsets.symmetric(horizontal: 8),
+                  leading: Icon(
+                    isSelected ? Icons.check_circle_rounded : Icons.radio_button_unchecked_rounded,
+                    color: isSelected ? const Color(0xFF0D9488) : AppColors.textMuted,
+                  ),
+                  title: Text(
+                    f.label,
+                    style: TextStyle(
+                      fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                      color: isSelected ? const Color(0xFF0D9488) : AppColors.textPrimary,
+                    ),
+                  ),
+                  onTap: () {
+                    Navigator.pop(ctx);
+                    ref.read(reportControllerProvider.notifier).changeFilter(store.id, f);
+                  },
+                );
+              }),
+            ],
+          ),
+        );
+      },
+    );
   }
 
   @override
@@ -92,9 +162,9 @@ class _BerandaSwipeableCardsState extends ConsumerState<BerandaSwipeableCards> {
                 gradient: const [Color(0xFF0D9488), Color(0xFF047857), Color(0xFF064E3B)],
                 sparklineData: salesTrend,
                 icon: Icons.trending_up_rounded,
-                badgeText: 'HARI INI',
+                badgeText: reportState.selectedFilter.label.toUpperCase(),
                 badgeBg: Colors.white.withValues(alpha: 0.22),
-                hasLiveDot: true,
+                hasLiveDot: reportState.selectedFilter == ReportFilterType.today,
                 title: 'Penjualan Bersih (Omzet)',
                 mainValue: currency.format(reportState.summary.totalRevenue),
                 footerLeftLabel: 'Laba',
@@ -102,6 +172,7 @@ class _BerandaSwipeableCardsState extends ConsumerState<BerandaSwipeableCards> {
                 footerRightLabel: 'Rerata',
                 footerRightValue: currency.format(avgBasket),
                 onTap: () => widget.onNavigateTab?.call(3),
+                onBadgeTap: () => _showFilterMenu(context, reportState.selectedFilter),
               ),
               SwipeableCardItem(
                 gradient: alerts.hasOverdueKasbon

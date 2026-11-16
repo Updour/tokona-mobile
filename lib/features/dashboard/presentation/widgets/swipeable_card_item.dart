@@ -14,6 +14,7 @@ class SwipeableCardItem extends StatelessWidget {
   final String footerRightLabel;
   final String footerRightValue;
   final VoidCallback onTap;
+  final VoidCallback? onBadgeTap;
 
   const SwipeableCardItem({
     super.key,
@@ -30,6 +31,7 @@ class SwipeableCardItem extends StatelessWidget {
     required this.footerRightLabel,
     required this.footerRightValue,
     required this.onTap,
+    this.onBadgeTap,
   });
 
   @override
@@ -65,18 +67,25 @@ class SwipeableCardItem extends StatelessWidget {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3.5),
-                          decoration: BoxDecoration(color: badgeBg, borderRadius: BorderRadius.circular(8)),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              if (hasLiveDot) ...[
-                                Container(width: 6, height: 6, decoration: const BoxDecoration(shape: BoxShape.circle, color: Color(0xFF10B981))),
-                                const SizedBox(width: 4),
+                        GestureDetector(
+                          onTap: onBadgeTap,
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3.5),
+                            decoration: BoxDecoration(color: badgeBg, borderRadius: BorderRadius.circular(8)),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                if (hasLiveDot) ...[
+                                  Container(width: 6, height: 6, decoration: const BoxDecoration(shape: BoxShape.circle, color: Color(0xFF10B981))),
+                                  const SizedBox(width: 4),
+                                ],
+                                Text(badgeText, style: const TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.w800, letterSpacing: 0.4)),
+                                if (onBadgeTap != null) ...[
+                                  const SizedBox(width: 2),
+                                  const Icon(Icons.arrow_drop_down_rounded, size: 14, color: Colors.white),
+                                ],
                               ],
-                              Text(badgeText, style: const TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.w800, letterSpacing: 0.4)),
-                            ],
+                            ),
                           ),
                         ),
                         Icon(icon, color: Colors.white.withValues(alpha: 0.88), size: 22),
@@ -196,3 +205,4 @@ class _CardBgPainter extends CustomPainter {
   @override
   bool shouldRepaint(covariant _CardBgPainter oldDelegate) => oldDelegate.data != data;
 }
+

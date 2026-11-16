@@ -79,7 +79,7 @@ class BerandaBusinessMetricsSection extends ConsumerWidget {
             const SizedBox(width: 10),
             Expanded(
               child: _buildMetricCard(
-                title: 'Pembelian (Kulak)',
+                title: 'Pembelian',
                 value: CurrencyFormatter.format(totalPurchaseSpend),
                 subtitle: '$totalPurchaseCount Faktur Selesai',
                 icon: Icons.shopping_bag_outlined,
