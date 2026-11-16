@@ -129,45 +129,6 @@ class _NotificationCenterSheetState extends ConsumerState<NotificationCenterShee
                 _buildFilterChip('Stok', notifications.where((n) => n.targetPayload == 'stock').length),
                 const SizedBox(width: 6),
                 _buildFilterChip('Booking', notifications.where((n) => n.targetPayload == 'booking').length),
-                const SizedBox(width: 10),
-                InkWell(
-                  onTap: () {
-                    if (notifications.isNotEmpty) {
-                      InAppNotificationService.show(
-                        context,
-                        notifications.first,
-                        onTap: () => _handleNotificationTap(notifications.first),
-                      );
-                    } else {
-                      InAppNotificationService.show(
-                        context,
-                        AppNotificationItem(
-                          id: 'test_${DateTime.now().millisecondsSinceEpoch}',
-                          title: 'Uji Coba Notifikasi Tokona',
-                          body: 'Popup notifikasi muncul otomatis saat ada kasbon jatuh tempo atau stok menipis.',
-                          type: AppNotificationType.generalInfo,
-                          createdAt: DateTime.now(),
-                          targetPayload: 'test',
-                        ),
-                      );
-                    }
-                  },
-                  borderRadius: BorderRadius.circular(8),
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 5),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFF6366F1).withValues(alpha: 0.1),
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: const Row(
-                      children: [
-                        Icon(Icons.bolt_rounded, size: 14, color: Color(0xFF6366F1)),
-                        SizedBox(width: 4),
-                        Text('Tes Popup', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: Color(0xFF6366F1))),
-                      ],
-                    ),
-                  ),
-                ),
               ],
             ),
           ),
@@ -229,65 +190,85 @@ class _NotificationCenterSheetState extends ConsumerState<NotificationCenterShee
       color: Colors.transparent,
       child: InkWell(
         onTap: () => _handleNotificationTap(item),
-        borderRadius: BorderRadius.circular(14),
+        borderRadius: BorderRadius.circular(12),
         child: Container(
-          padding: const EdgeInsets.all(12),
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
           decoration: BoxDecoration(
-            color: isRead ? const Color(0xFFF8FAFC) : item.containerColor,
-            borderRadius: BorderRadius.circular(14),
-            border: Border.all(color: isRead ? const Color(0xFFE2E8F0) : item.accentColor.withValues(alpha: 0.35)),
+            color: isRead ? Colors.white : const Color(0xFFF8FAFC),
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(
+              color: isRead ? const Color(0xFFF1F5F9) : item.accentColor.withValues(alpha: 0.28),
+              width: isRead ? 1 : 1.2,
+            ),
           ),
           child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               Container(
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(10)),
-                child: Icon(item.icon, color: isRead ? AppColors.textMuted : item.accentColor, size: 20),
+                padding: const EdgeInsets.all(7),
+                decoration: BoxDecoration(
+                  color: isRead ? const Color(0xFFF1F5F9) : item.containerColor,
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Icon(item.icon, color: isRead ? AppColors.textMuted : item.accentColor, size: 17),
               ),
-              const SizedBox(width: 12),
+              const SizedBox(width: 10),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
                   children: [
                     Row(
                       children: [
+                        Flexible(
+                          child: Text(
+                            item.title,
+                            style: TextStyle(
+                              fontWeight: isRead ? FontWeight.w600 : FontWeight.w800,
+                              fontSize: 12.5,
+                              color: isRead ? const Color(0xFF475569) : AppColors.textPrimary,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                        const SizedBox(width: 6),
                         Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                          padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1),
                           decoration: BoxDecoration(
                             color: item.accentColor.withValues(alpha: isRead ? 0.08 : 0.14),
                             borderRadius: BorderRadius.circular(4),
                           ),
                           child: Text(
                             item.categoryLabel,
-                            style: TextStyle(fontSize: 10, fontWeight: FontWeight.w800, color: isRead ? AppColors.textSecondary : item.accentColor),
+                            style: TextStyle(
+                              fontSize: 8.5,
+                              fontWeight: FontWeight.w800,
+                              color: isRead ? AppColors.textSecondary : item.accentColor,
+                            ),
                           ),
                         ),
-                        if (!isRead) ...[
-                          const SizedBox(width: 6),
-                          Container(
-                            width: 6,
-                            height: 6,
-                            decoration: const BoxDecoration(color: Color(0xFFDC2626), shape: BoxShape.circle),
-                          ),
-                        ],
                       ],
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      item.title,
-                      style: TextStyle(fontWeight: FontWeight.w700, fontSize: 13, color: isRead ? const Color(0xFF64748B) : AppColors.textPrimary),
                     ),
                     const SizedBox(height: 2),
                     Text(
                       item.body,
-                      style: TextStyle(fontSize: 11.5, color: isRead ? const Color(0xFF94A3B8) : AppColors.textSecondary),
+                      style: TextStyle(fontSize: 11, color: isRead ? AppColors.textMuted : AppColors.textSecondary),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                     ),
                   ],
                 ),
               ),
-              const SizedBox(width: 8),
-              Icon(Icons.arrow_forward_ios_rounded, size: 13, color: isRead ? const Color(0xFFCBD5E1) : item.accentColor),
+              const SizedBox(width: 6),
+              if (!isRead)
+                Container(
+                  width: 6,
+                  height: 6,
+                  decoration: const BoxDecoration(color: Color(0xFF10B981), shape: BoxShape.circle),
+                )
+              else
+                const Icon(Icons.chevron_right_rounded, size: 16, color: Color(0xFFCBD5E1)),
             ],
           ),
         ),
