@@ -1,0 +1,189 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:tokona/core/utils/currency_formatter.dart';
+import 'package:tokona/core/widgets/app_dialog.dart';
+import 'package:tokona/core/widgets/app_toast.dart';
+import 'package:tokona/features/payment/presentation/controllers/paylater_settlement_controller.dart';
+
+class PaylaterBillSummaryCard extends ConsumerWidget {
+  final double totalTargetBill;
+  final double allTimePaylaterTotal;
+  final int transactionCount;
+  final bool isWindowActive;
+  final int targetYear;
+  final int targetMonth;
+
+  const PaylaterBillSummaryCard({
+    super.key,
+    required this.totalTargetBill,
+    required this.allTimePaylaterTotal,
+    required this.transactionCount,
+    required this.isWindowActive,
+    required this.targetYear,
+    required this.targetMonth,
+  });
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final settlementState = ref.watch(paylaterSettlementProvider);
+    final isSettled = settlementState.isSettled(targetYear, targetMonth);
+
+    return Container(
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: isSettled
+              ? const [Color(0xFFF0FDF4), Color(0xFFDCFCE7)]
+              : (isWindowActive
+                  ? const [Color(0xFFFFFBEB), Color(0xFFFEF3C7)]
+                  : const [Color(0xFFF8FAFC), Color(0xFFF1F5F9)]),
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: isSettled
+              ? const Color(0xFF86EFAC)
+              : (isWindowActive ? const Color(0xFFFDE68A) : const Color(0xFFE2E8F0)),
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                'Total Tagihan Jatuh Tempo',
+                style: TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w700,
+                  color: isSettled ? const Color(0xFF166534) : const Color(0xFF92400E),
+                ),
+              ),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2.5),
+                decoration: BoxDecoration(
+                  color: isSettled
+                      ? const Color(0xFF16A34A)
+                      : (isWindowActive ? const Color(0xFFDC2626) : const Color(0xFF64748B)),
+                  borderRadius: BorderRadius.circular(6),
+                ),
+                child: Text(
+                  isSettled ? 'LUNAS' : (isWindowActive ? 'TGL 01 JATUH TEMPO' : 'BELUM JATUH TEMPO'),
+                  style: const TextStyle(fontSize: 9.5, fontWeight: FontWeight.w800, color: Colors.white),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 6),
+          Text(
+            CurrencyFormatter.format(totalTargetBill > 0 ? totalTargetBill : allTimePaylaterTotal),
+            style: TextStyle(
+              fontSize: 22,
+              fontWeight: FontWeight.w900,
+              color: isSettled ? const Color(0xFF15803D) : const Color(0xFFB45309),
+            ),
+          ),
+          const SizedBox(height: 8),
+          Row(
+            children: [
+              Icon(
+                isSettled ? Icons.check_circle_rounded : Icons.info_outline_rounded,
+                size: 13,
+                color: isSettled ? const Color(0xFF16A34A) : const Color(0xFFB45309),
+              ),
+              const SizedBox(width: 5),
+              Expanded(
+                child: Text(
+                  isSettled
+                      ? 'Tagihan bulan ini sudah dikonfirmasi lunas.'
+                      : (isWindowActive
+                          ? '$transactionCount transaksi kulakan siap dilunasi.'
+                          : 'Tagihan aktif dibuka mulai tgl 29 s/d 01.'),
+                  style: TextStyle(
+                    fontSize: 11,
+                    color: isSettled ? const Color(0xFF166534) : const Color(0xFF92400E),
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          _buildActionButton(context, ref, isSettled),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildActionButton(BuildContext context, WidgetRef ref, bool isSettled) {
+    if (isSettled) {
+      return OutlinedButton.icon(
+        onPressed: () async {
+          final confirm = await AppDialog.showConfirmation(
+            context,
+            title: 'Batal Status Lunas',
+            message: 'Ubah kembali status tagihan bulan ini menjadi belum lunas?',
+            confirmText: 'Ya, Batalkan',
+          );
+          if (confirm == true) {
+            await ref.read(paylaterSettlementProvider.notifier).unmarkSettled(targetYear, targetMonth);
+            if (context.mounted) AppToast.showSuccess(context, 'Status tagihan diperbarui');
+          }
+        },
+        icon: const Icon(Icons.undo_rounded, size: 14, color: Color(0xFF15803D)),
+        label: const Text('Sudah Lunas (Batalkan)', style: TextStyle(fontSize: 11.5, fontWeight: FontWeight.w700, color: Color(0xFF15803D))),
+        style: OutlinedButton.styleFrom(
+          side: const BorderSide(color: Color(0xFF86EFAC)),
+          padding: const EdgeInsets.symmetric(vertical: 8),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+        ),
+      );
+    }
+
+    if (!isWindowActive) {
+      return Container(
+        padding: const EdgeInsets.symmetric(vertical: 8),
+        alignment: Alignment.center,
+        decoration: BoxDecoration(
+          color: const Color(0xFFE2E8F0),
+          borderRadius: BorderRadius.circular(10),
+        ),
+        child: const Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.lock_clock_rounded, size: 14, color: Color(0xFF64748B)),
+            SizedBox(width: 6),
+            Text(
+              'Tombol Bayar Aktif Tgl 29 - 01',
+              style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: Color(0xFF64748B)),
+            ),
+          ],
+        ),
+      );
+    }
+
+    return ElevatedButton.icon(
+      onPressed: () async {
+        final confirm = await AppDialog.showConfirmation(
+          context,
+          title: 'Konfirmasi Bayar Paylater',
+          message: 'Apakah tagihan Paylater bulan ini (${CurrencyFormatter.format(totalTargetBill > 0 ? totalTargetBill : allTimePaylaterTotal)}) sudah berhasil Anda bayar / transfer?',
+          confirmText: 'Sudah Dibayar',
+        );
+        if (confirm == true) {
+          await ref.read(paylaterSettlementProvider.notifier).markSettled(targetYear, targetMonth);
+          if (context.mounted) AppToast.showSuccess(context, 'Tagihan Paylater berhasil ditandai LUNAS!');
+        }
+      },
+      icon: const Icon(Icons.check_circle_outline_rounded, size: 16, color: Colors.white),
+      label: const Text('Konfirmasi Sudah Dibayar', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w800, color: Colors.white)),
+      style: ElevatedButton.styleFrom(
+        backgroundColor: const Color(0xFF16A34A),
+        padding: const EdgeInsets.symmetric(vertical: 10),
+        elevation: 0,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+      ),
+    );
+  }
+}

@@ -4,8 +4,8 @@ import 'package:intl/intl.dart';
 import 'package:tokona/core/theme/app_colors.dart';
 import 'package:tokona/core/theme/app_typography.dart';
 import 'package:tokona/core/utils/currency_formatter.dart';
+import 'package:tokona/features/payment/presentation/widgets/paylater_bill_summary_card.dart';
 import 'package:tokona/features/payment/presentation/widgets/payment_account_management_sheet.dart';
-import 'package:tokona/features/purchase/domain/models/purchase_model.dart';
 import 'package:tokona/features/purchase/presentation/controllers/purchase_controller.dart';
 import 'package:tokona/features/purchase/presentation/widgets/purchase_detail_sheet.dart';
 
@@ -45,6 +45,12 @@ class PaylaterBillMonitorSheet extends ConsumerWidget {
     final totalTargetBill = targetMonthPurchases.fold<double>(0.0, (acc, p) => acc + p.grandTotal);
     final allTimePaylaterTotal = paylaterPurchases.fold<double>(0.0, (acc, p) => acc + p.grandTotal);
     final dateFormat = DateFormat('dd MMM yyyy, HH:mm', 'id_ID');
+
+    final currentDay = now.day;
+    final lastDayOfMonth = DateTime(now.year, now.month + 1, 0).day;
+    final isWindowActive = (currentDay >= (lastDayOfMonth - 2)) || (currentDay == 1);
+    final targetYear = (now.day == 1 && now.month == 1) ? now.year - 1 : now.year;
+    final targetMonth = (now.day == 1) ? (now.month == 1 ? 12 : now.month - 1) : now.month;
 
     return Container(
       decoration: const BoxDecoration(
@@ -93,54 +99,14 @@ class PaylaterBillMonitorSheet extends ConsumerWidget {
             ],
           ),
           const SizedBox(height: 14),
-          // KPI Summary Card
-          Container(
-            padding: const EdgeInsets.all(14),
-            decoration: BoxDecoration(
-              gradient: const LinearGradient(
-                colors: [Color(0xFFFFFBEB), Color(0xFFFEF3C7)],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-              ),
-              borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: const Color(0xFFFDE68A)),
-            ),
-            child: Column(
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    const Text('Total Tagihan Jatuh Tempo', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: Color(0xFF92400E))),
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2.5),
-                      decoration: BoxDecoration(color: const Color(0xFFDC2626), borderRadius: BorderRadius.circular(6)),
-                      child: const Text('TGL 01 JATUH TEMPO', style: TextStyle(fontSize: 9.5, fontWeight: FontWeight.w800, color: Colors.white)),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 6),
-                Align(
-                  alignment: Alignment.centerLeft,
-                  child: Text(
-                    CurrencyFormatter.format(totalTargetBill > 0 ? totalTargetBill : allTimePaylaterTotal),
-                    style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w900, color: Color(0xFFB45309)),
-                  ),
-                ),
-                const SizedBox(height: 8),
-                Row(
-                  children: [
-                    const Icon(Icons.info_outline_rounded, size: 13, color: Color(0xFFB45309)),
-                    const SizedBox(width: 5),
-                    Expanded(
-                      child: Text(
-                        '${paylaterPurchases.length} transaksi kulakan tercatat menggunakan Paylater.',
-                        style: const TextStyle(fontSize: 11, color: Color(0xFF92400E)),
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
+          // KPI Summary Card & Confirmation Button
+          PaylaterBillSummaryCard(
+            totalTargetBill: totalTargetBill,
+            allTimePaylaterTotal: allTimePaylaterTotal,
+            transactionCount: paylaterPurchases.length,
+            isWindowActive: isWindowActive,
+            targetYear: targetYear,
+            targetMonth: targetMonth,
           ),
           const SizedBox(height: 14),
           Row(
@@ -172,7 +138,7 @@ class PaylaterBillMonitorSheet extends ConsumerWidget {
                 : ListView.separated(
                     physics: const BouncingScrollPhysics(),
                     itemCount: paylaterPurchases.length,
-                    separatorBuilder: (_, __) => const SizedBox(height: 8),
+                    separatorBuilder: (ctx, idx) => const SizedBox(height: 8),
                     itemBuilder: (context, idx) {
                       final p = paylaterPurchases[idx];
                       return InkWell(

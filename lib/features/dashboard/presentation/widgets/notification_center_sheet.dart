@@ -1,13 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:tokona/core/services/in_app_notification_service.dart';
 import 'package:tokona/core/theme/app_colors.dart';
 import 'package:tokona/core/theme/app_typography.dart';
 import 'package:tokona/features/customer/presentation/widgets/kasbon_due_monitor_sheet.dart';
 import 'package:tokona/features/dashboard/domain/models/app_notification_item.dart';
 import 'package:tokona/features/dashboard/presentation/controllers/notification_controller.dart';
+import 'package:tokona/features/dashboard/presentation/widgets/notification_item_tile.dart';
 import 'package:tokona/features/payment/presentation/widgets/paylater_bill_monitor_sheet.dart';
-import 'package:tokona/features/payment/presentation/widgets/payment_account_management_sheet.dart';
 import 'package:tokona/features/pos/presentation/widgets/scheduled_reminder_sheet.dart';
 import 'package:tokona/features/purchase/presentation/widgets/incoming_orders_sheet.dart';
 
@@ -48,6 +47,10 @@ class _NotificationCenterSheetState extends ConsumerState<NotificationCenterShee
     final notifications = ref.watch(notificationListProvider);
     final readIds = ref.watch(readNotificationIdsProvider);
     final unreadCount = notifications.where((n) => !readIds.contains(n.id)).length;
+
+    final now = DateTime.now();
+    final lastDayOfMonth = DateTime(now.year, now.month + 1, 0).day;
+    final isPaylaterWindowActive = (now.day >= (lastDayOfMonth - 2)) || (now.day == 1);
 
     final filteredList = notifications.where((n) {
       if (_selectedFilter == 'Kasbon') return n.targetPayload == 'kasbon';
@@ -132,7 +135,11 @@ class _NotificationCenterSheetState extends ConsumerState<NotificationCenterShee
                 const SizedBox(width: 6),
                 _buildFilterChip('Kasbon', notifications.where((n) => n.targetPayload == 'kasbon').length),
                 const SizedBox(width: 6),
-                _buildFilterChip('Paylater', notifications.where((n) => n.targetPayload == 'paylater').length),
+                _buildFilterChip(
+                  'Paylater',
+                  notifications.where((n) => n.targetPayload == 'paylater').length,
+                  isMuted: !isPaylaterWindowActive,
+                ),
                 const SizedBox(width: 6),
                 _buildFilterChip('Stok', notifications.where((n) => n.targetPayload == 'stock').length),
                 const SizedBox(width: 6),
@@ -164,8 +171,12 @@ class _NotificationCenterSheetState extends ConsumerState<NotificationCenterShee
             Expanded(
               child: ListView.separated(
                 itemCount: filteredList.length,
-                separatorBuilder: (_, __) => const SizedBox(height: 10),
-                itemBuilder: (ctx, i) => _buildNotificationCard(filteredList[i], readIds.contains(filteredList[i].id)),
+                separatorBuilder: (ctx, idx) => const SizedBox(height: 10),
+                itemBuilder: (ctx, i) => NotificationItemTile(
+                  item: filteredList[i],
+                  isRead: readIds.contains(filteredList[i].id),
+                  onTap: () => _handleNotificationTap(filteredList[i]),
+                ),
               ),
             ),
         ],
@@ -173,112 +184,48 @@ class _NotificationCenterSheetState extends ConsumerState<NotificationCenterShee
     );
   }
 
-  Widget _buildFilterChip(String label, int count) {
+  Widget _buildFilterChip(String label, int count, {bool isMuted = false}) {
     final isSelected = _selectedFilter == label;
     return InkWell(
-      onTap: () => setState(() => _selectedFilter = label),
+      onTap: () {
+        setState(() => _selectedFilter = label);
+        if (label == 'Paylater') {
+          // Tetap bisa diklik langsung untuk membuka riwayat tagihan Paylater
+          PaylaterBillMonitorSheet.show(context);
+        }
+      },
       borderRadius: BorderRadius.circular(8),
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
         decoration: BoxDecoration(
-          color: isSelected ? AppColors.primary : AppColors.surfaceElevated,
+          color: isSelected
+              ? (isMuted ? const Color(0xFF64748B) : AppColors.primary)
+              : (isMuted ? const Color(0xFFF1F5F9) : AppColors.surfaceElevated),
           borderRadius: BorderRadius.circular(8),
-          border: Border.all(color: isSelected ? AppColors.primary : AppColors.border),
-        ),
-        child: Text(
-          '$label ($count)',
-          style: TextStyle(fontSize: 11, fontWeight: isSelected ? FontWeight.w700 : FontWeight.w600, color: isSelected ? Colors.white : AppColors.textSecondary),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildNotificationCard(AppNotificationItem item, bool isRead) {
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: () => _handleNotificationTap(item),
-        borderRadius: BorderRadius.circular(12),
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-          decoration: BoxDecoration(
-            color: isRead ? Colors.white : const Color(0xFFF8FAFC),
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(
-              color: isRead ? const Color(0xFFF1F5F9) : item.accentColor.withValues(alpha: 0.28),
-              width: isRead ? 1 : 1.2,
-            ),
+          border: Border.all(
+            color: isSelected
+                ? (isMuted ? const Color(0xFF64748B) : AppColors.primary)
+                : (isMuted ? const Color(0xFFCBD5E1) : AppColors.border),
           ),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              Container(
-                padding: const EdgeInsets.all(7),
-                decoration: BoxDecoration(
-                  color: isRead ? const Color(0xFFF1F5F9) : item.containerColor,
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Icon(item.icon, color: isRead ? AppColors.textMuted : item.accentColor, size: 17),
-              ),
-              const SizedBox(width: 10),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Row(
-                      children: [
-                        Flexible(
-                          child: Text(
-                            item.title,
-                            style: TextStyle(
-                              fontWeight: isRead ? FontWeight.w600 : FontWeight.w800,
-                              fontSize: 12.5,
-                              color: isRead ? const Color(0xFF475569) : AppColors.textPrimary,
-                            ),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ),
-                        const SizedBox(width: 6),
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1),
-                          decoration: BoxDecoration(
-                            color: item.accentColor.withValues(alpha: isRead ? 0.08 : 0.14),
-                            borderRadius: BorderRadius.circular(4),
-                          ),
-                          child: Text(
-                            item.categoryLabel,
-                            style: TextStyle(
-                              fontSize: 8.5,
-                              fontWeight: FontWeight.w800,
-                              color: isRead ? AppColors.textSecondary : item.accentColor,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 2),
-                    Text(
-                      item.body,
-                      style: TextStyle(fontSize: 11, color: isRead ? AppColors.textMuted : AppColors.textSecondary),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(width: 6),
-              if (!isRead)
-                Container(
-                  width: 6,
-                  height: 6,
-                  decoration: const BoxDecoration(color: Color(0xFF10B981), shape: BoxShape.circle),
-                )
-              else
-                const Icon(Icons.chevron_right_rounded, size: 16, color: Color(0xFFCBD5E1)),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            if (isMuted) ...[
+              const Icon(Icons.credit_card_outlined, size: 12, color: Color(0xFF94A3B8)),
+              const SizedBox(width: 4),
             ],
-          ),
+            Text(
+              '$label ($count)',
+              style: TextStyle(
+                fontSize: 11,
+                fontWeight: isSelected ? FontWeight.w700 : FontWeight.w600,
+                color: isSelected
+                    ? Colors.white
+                    : (isMuted ? const Color(0xFF94A3B8) : AppColors.textSecondary),
+              ),
+            ),
+          ],
         ),
       ),
     );

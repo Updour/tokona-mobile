@@ -4,8 +4,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
+import 'package:tokona/core/services/local_push_notification_service.dart';
 import 'package:tokona/core/utils/currency_formatter.dart';
 import 'package:tokona/features/dashboard/domain/models/app_notification_item.dart';
+import 'package:tokona/features/payment/presentation/controllers/paylater_settlement_controller.dart';
 import 'package:tokona/features/pos/presentation/controllers/held_cart_controller.dart';
 import 'package:tokona/features/pos/presentation/controllers/sale_history_controller.dart';
 import 'package:tokona/features/product/presentation/controllers/product_controller.dart';
@@ -16,6 +18,7 @@ final notificationListProvider = Provider<List<AppNotificationItem>>((ref) {
   final products = ref.watch(productListProvider).products;
   final heldOrders = ref.watch(heldCartProvider);
   final activeOrders = ref.watch(activeOrdersProvider);
+  final settlementState = ref.watch(paylaterSettlementProvider);
   final now = DateTime.now();
   final todayDate = DateTime(now.year, now.month, now.day);
 
@@ -138,8 +141,9 @@ final notificationListProvider = Provider<List<AppNotificationItem>>((ref) {
   final currentDay = now.day;
   final lastDayOfMonth = DateTime(now.year, now.month + 1, 0).day;
   final isPaylaterBillingWindow = (currentDay >= (lastDayOfMonth - 2)) || (currentDay == 1);
+  final isCurrentBillingSettled = settlementState.isSettled(now.year, now.month);
 
-  if (isPaylaterBillingWindow) {
+  if (isPaylaterBillingWindow && !isCurrentBillingSettled) {
     items.add(AppNotificationItem(
       id: 'paylater_bill_${now.year}_${now.month}_$currentDay',
       title: '💳 Pengingat Tagihan Paylater (Jatuh Tempo Tgl 1)',
@@ -148,6 +152,15 @@ final notificationListProvider = Provider<List<AppNotificationItem>>((ref) {
       createdAt: now,
       targetPayload: 'paylater',
     ));
+
+    // Kirim push notifikasi lokal ke status bar Android jika belum pernah terkirim hari ini
+    final notifId = now.year * 10000 + now.month * 100 + currentDay;
+    LocalPushNotificationService.instance.showPaylaterNotification(
+      id: notifId,
+      title: '💳 Tagihan Paylater Jatuh Tempo',
+      body: 'Waktunya lunasi tagihan SPayLater / Paylater modal toko sebelum tanggal 1.',
+      payload: 'paylater',
+    );
   }
 
   // Sort: High priority first
