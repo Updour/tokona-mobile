@@ -139,7 +139,7 @@ final notificationListProvider = Provider<List<AppNotificationItem>>((ref) {
     ));
   }
 
-  // 5. Pengingat Tagihan Paylater (SPayLater / GoPay / Akulaku)
+  // 5. Pengingat Tagihan Paylater (SPayLater)
   // Menghitung transaksi aktif yang menggunakan Paylater
   final paylaterPurchases = purchaseState.purchases.where((p) => p.isPaylater && !p.isCancelled).toList();
   final currentDay = now.day;
@@ -150,14 +150,16 @@ final notificationListProvider = Provider<List<AppNotificationItem>>((ref) {
   // Jika ada transaksi paylater, notifikasi selalu ada di daftar riwayat/pusat notifikasi
   if (paylaterPurchases.isNotEmpty && !isCurrentBillingSettled) {
     final totalBill = paylaterPurchases.fold<double>(0.0, (acc, p) => acc + p.grandTotal);
+    final formattedNominal = CurrencyFormatter.format(totalBill);
+
     items.add(AppNotificationItem(
       id: 'paylater_bill_${now.year}_${now.month}',
       title: isPaylaterBillingWindow
-          ? '💳 Pengingat Tagihan Paylater (Jatuh Tempo Tgl 1)'
-          : '💳 Tagihan Paylater Belanja Toko',
+          ? '💳 Tagihan SPayLater: $formattedNominal'
+          : '💳 Tagihan SPayLater: $formattedNominal',
       body: isPaylaterBillingWindow
-          ? 'Waktunya cek & siapkan dana tagihan modal toko (${CurrencyFormatter.format(totalBill)}).'
-          : 'Total tagihan belanja modal toko saat ini ${CurrencyFormatter.format(totalBill)} (Jatuh tempo tgl 01).',
+          ? 'Jatuh tempo tgl 1. Siapkan dana $formattedNominal.'
+          : 'Total tagihan belanja $formattedNominal (Jatuh tempo tgl 1).',
       type: AppNotificationType.paylaterBill,
       createdAt: now,
       targetPayload: 'paylater',
@@ -168,8 +170,8 @@ final notificationListProvider = Provider<List<AppNotificationItem>>((ref) {
       final notifId = now.year * 10000 + now.month * 100 + currentDay;
       LocalPushNotificationService.instance.showPaylaterNotification(
         id: notifId,
-        title: '💳 Tagihan Paylater Jatuh Tempo',
-        body: 'Waktunya lunasi tagihan SPayLater / Paylater modal toko sebelum tanggal 1.',
+        title: '💳 Tagihan SPayLater: $formattedNominal',
+        body: 'Jatuh tempo tgl 1. Segera lunasi $formattedNominal.',
         payload: 'paylater',
       );
     }
