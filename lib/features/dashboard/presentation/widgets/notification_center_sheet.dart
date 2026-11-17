@@ -194,14 +194,14 @@ class _NotificationCenterSheetState extends ConsumerState<NotificationCenterShee
           PaylaterBillMonitorSheet.show(context);
         }
       },
-      borderRadius: BorderRadius.circular(8),
+      borderRadius: BorderRadius.circular(10),
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
         decoration: BoxDecoration(
           color: isSelected
               ? (isMuted ? const Color(0xFF64748B) : AppColors.primary)
               : (isMuted ? const Color(0xFFF1F5F9) : AppColors.surfaceElevated),
-          borderRadius: BorderRadius.circular(8),
+          borderRadius: BorderRadius.circular(10),
           border: Border.all(
             color: isSelected
                 ? (isMuted ? const Color(0xFF64748B) : AppColors.primary)
@@ -216,15 +216,37 @@ class _NotificationCenterSheetState extends ConsumerState<NotificationCenterShee
               const SizedBox(width: 4),
             ],
             Text(
-              '$label ($count)',
+              label,
               style: TextStyle(
-                fontSize: 11,
+                fontSize: 11.5,
                 fontWeight: isSelected ? FontWeight.w700 : FontWeight.w600,
                 color: isSelected
                     ? Colors.white
-                    : (isMuted ? const Color(0xFF94A3B8) : AppColors.textSecondary),
+                    : (isMuted ? const Color(0xFF94A3B8) : AppColors.textPrimary),
               ),
             ),
+            if (count > 0) ...[
+              const SizedBox(width: 5),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1.5),
+                decoration: BoxDecoration(
+                  color: isSelected
+                      ? Colors.white.withValues(alpha: 0.28)
+                      : (isMuted ? const Color(0xFFE2E8F0) : (label == 'Paylater' ? const Color(0xFFFEF3C7) : const Color(0xFFF1F5F9))),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Text(
+                  '$count',
+                  style: TextStyle(
+                    fontSize: 9.5,
+                    fontWeight: FontWeight.w800,
+                    color: isSelected
+                        ? Colors.white
+                        : (isMuted ? const Color(0xFF64748B) : (label == 'Paylater' ? const Color(0xFFB45309) : AppColors.textPrimary)),
+                  ),
+                ),
+              ),
+            ],
           ],
         ),
       ),

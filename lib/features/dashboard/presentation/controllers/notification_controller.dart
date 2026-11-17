@@ -12,12 +12,14 @@ import 'package:tokona/features/pos/presentation/controllers/held_cart_controlle
 import 'package:tokona/features/pos/presentation/controllers/sale_history_controller.dart';
 import 'package:tokona/features/product/presentation/controllers/product_controller.dart';
 import 'package:tokona/features/purchase/presentation/controllers/active_orders_controller.dart';
+import 'package:tokona/features/purchase/presentation/controllers/purchase_controller.dart';
 
 final notificationListProvider = Provider<List<AppNotificationItem>>((ref) {
   final sales = ref.watch(saleHistoryControllerProvider).sales;
   final products = ref.watch(productListProvider).products;
   final heldOrders = ref.watch(heldCartProvider);
   final activeOrders = ref.watch(activeOrdersProvider);
+  final purchaseState = ref.watch(purchaseControllerProvider);
   final settlementState = ref.watch(paylaterSettlementProvider);
   final now = DateTime.now();
   final todayDate = DateTime(now.year, now.month, now.day);
@@ -137,30 +139,40 @@ final notificationListProvider = Provider<List<AppNotificationItem>>((ref) {
     ));
   }
 
-  // 5. Pengingat Tagihan Paylater (SPayLater / GoPay / Akulaku) setiap tgl 29 s/d 01
+  // 5. Pengingat Tagihan Paylater (SPayLater / GoPay / Akulaku)
+  // Menghitung transaksi aktif yang menggunakan Paylater
+  final paylaterPurchases = purchaseState.purchases.where((p) => p.isPaylater && !p.isCancelled).toList();
   final currentDay = now.day;
   final lastDayOfMonth = DateTime(now.year, now.month + 1, 0).day;
   final isPaylaterBillingWindow = (currentDay >= (lastDayOfMonth - 2)) || (currentDay == 1);
   final isCurrentBillingSettled = settlementState.isSettled(now.year, now.month);
 
-  if (isPaylaterBillingWindow && !isCurrentBillingSettled) {
+  // Jika ada transaksi paylater, notifikasi selalu ada di daftar riwayat/pusat notifikasi
+  if (paylaterPurchases.isNotEmpty && !isCurrentBillingSettled) {
+    final totalBill = paylaterPurchases.fold<double>(0.0, (acc, p) => acc + p.grandTotal);
     items.add(AppNotificationItem(
-      id: 'paylater_bill_${now.year}_${now.month}_$currentDay',
-      title: '💳 Pengingat Tagihan Paylater (Jatuh Tempo Tgl 1)',
-      body: 'Waktunya cek & siapkan dana tagihan SPayLater/Paylater belanja modal toko.',
+      id: 'paylater_bill_${now.year}_${now.month}',
+      title: isPaylaterBillingWindow
+          ? '💳 Pengingat Tagihan Paylater (Jatuh Tempo Tgl 1)'
+          : '💳 Tagihan Paylater Belanja Toko',
+      body: isPaylaterBillingWindow
+          ? 'Waktunya cek & siapkan dana tagihan modal toko (${CurrencyFormatter.format(totalBill)}).'
+          : 'Total tagihan belanja modal toko saat ini ${CurrencyFormatter.format(totalBill)} (Jatuh tempo tgl 01).',
       type: AppNotificationType.paylaterBill,
       createdAt: now,
       targetPayload: 'paylater',
     ));
 
-    // Kirim push notifikasi lokal ke status bar Android jika belum pernah terkirim hari ini
-    final notifId = now.year * 10000 + now.month * 100 + currentDay;
-    LocalPushNotificationService.instance.showPaylaterNotification(
-      id: notifId,
-      title: '💳 Tagihan Paylater Jatuh Tempo',
-      body: 'Waktunya lunasi tagihan SPayLater / Paylater modal toko sebelum tanggal 1.',
-      payload: 'paylater',
-    );
+    // Push notifikasi ke status bar Android hanya saat masuk jendela jatuh tempo tgl 29 - 01
+    if (isPaylaterBillingWindow) {
+      final notifId = now.year * 10000 + now.month * 100 + currentDay;
+      LocalPushNotificationService.instance.showPaylaterNotification(
+        id: notifId,
+        title: '💳 Tagihan Paylater Jatuh Tempo',
+        body: 'Waktunya lunasi tagihan SPayLater / Paylater modal toko sebelum tanggal 1.',
+        payload: 'paylater',
+      );
+    }
   }
 
   // Sort: High priority first
