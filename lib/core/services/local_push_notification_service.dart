@@ -14,7 +14,7 @@ class LocalPushNotificationService {
     const initSettings = InitializationSettings(android: androidSettings);
 
     await _plugin.initialize(
-      settings: initSettings,
+      initSettings,
       onDidReceiveNotificationResponse: (response) {
         // Notification tap handler
       },
@@ -45,10 +45,10 @@ class LocalPushNotificationService {
     );
 
     await _plugin.show(
-      id: id,
-      title: title,
-      body: body,
-      notificationDetails: const NotificationDetails(android: androidDetails),
+      id,
+      title,
+      body,
+      const NotificationDetails(android: androidDetails),
       payload: payload,
     );
   }
