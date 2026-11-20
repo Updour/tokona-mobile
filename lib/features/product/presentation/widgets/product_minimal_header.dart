@@ -11,6 +11,7 @@ class ProductMinimalHeader extends StatelessWidget {
   final VoidCallback onBarcodeScan;
   final VoidCallback onOpenFilter;
   final int activeFilterCount;
+  final VoidCallback? onOpenMonitor;
   final VoidCallback? onAddProduct;
 
   const ProductMinimalHeader({
@@ -23,6 +24,7 @@ class ProductMinimalHeader extends StatelessWidget {
     required this.onBarcodeScan,
     required this.onOpenFilter,
     required this.activeFilterCount,
+    this.onOpenMonitor,
     this.onAddProduct,
   });
 
@@ -156,12 +158,21 @@ class ProductMinimalHeader extends StatelessWidget {
               ),
           ],
         ),
+        if (onOpenMonitor != null) ...[
+          const SizedBox(width: 6),
+          _buildActionPill(
+            icon: Icons.bar_chart_rounded,
+            color: const Color(0xFF6366F1),
+            tooltip: 'Monitor Stok Device',
+            onTap: onOpenMonitor!,
+          ),
+        ],
         if (onAddProduct != null) ...[
           const SizedBox(width: 6),
           _buildActionPill(
             icon: Icons.add_rounded,
             color: const Color(0xFF4F46E5),
-            tooltip: 'Tambah Produk Baru',
+            tooltip: 'Tambah Produk',
             onTap: onAddProduct!,
           ),
         ],
@@ -181,7 +192,7 @@ class ProductMinimalHeader extends StatelessWidget {
       decoration: BoxDecoration(
         color: AppColors.surface,
         borderRadius: BorderRadius.circular(11),
-        border: Border.all(color: AppColors.border),
+        border: Border.all(color: AppColors.border.withValues(alpha: 0.55), width: 0.6),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.02),

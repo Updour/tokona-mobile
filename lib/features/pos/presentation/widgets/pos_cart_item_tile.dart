@@ -3,6 +3,7 @@ import 'package:intl/intl.dart';
 import 'package:tokona/core/theme/app_colors.dart';
 import 'package:tokona/core/theme/app_typography.dart';
 import 'package:tokona/features/pos/domain/models/cart_item_model.dart';
+import 'package:tokona/features/pos/presentation/widgets/pos_manual_qty_dialog.dart';
 import 'package:tokona/features/product/domain/models/product_unit_model.dart';
 
 class PosCartItemTile extends StatelessWidget {
@@ -85,7 +86,7 @@ class PosCartItemTile extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              _buildQtyStepper(),
+              _buildQtyStepper(context),
               Text(
                 currency.format(item.subtotal),
                 style: AppTypography.headingSmall.copyWith(
@@ -101,7 +102,9 @@ class PosCartItemTile extends StatelessWidget {
     );
   }
 
-  Widget _buildQtyStepper() {
+  Widget _buildQtyStepper(BuildContext context) {
+    final maxInUnit = item.conversionFactor > 0 ? (item.product.stockBase / item.conversionFactor) : item.product.stockBase;
+
     return Container(
       decoration: BoxDecoration(
         color: AppColors.surfaceElevated,
@@ -115,11 +118,31 @@ class PosCartItemTile extends StatelessWidget {
             icon: Icons.remove,
             onTap: () => onUpdateQty(item.quantity - 1),
           ),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 10),
-            child: Text(
-              item.quantity.toStringAsFixed(0),
-              style: AppTypography.labelMedium.copyWith(fontSize: 13),
+          InkWell(
+            onTap: () async {
+              final newQty = await PosManualQtyDialog.show(
+                context,
+                productName: item.product.name,
+                unitName: item.unitName,
+                initialQty: item.quantity,
+                maxStock: maxInUnit,
+              );
+              if (newQty != null) onUpdateQty(newQty);
+            },
+            borderRadius: BorderRadius.circular(6),
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(6),
+                border: Border.all(color: const Color(0xFFE2E8F0)),
+              ),
+              child: Text(
+                item.quantity == item.quantity.roundToDouble()
+                    ? item.quantity.toInt().toString()
+                    : item.quantity.toString(),
+                style: AppTypography.labelMedium.copyWith(fontSize: 13, fontWeight: FontWeight.w800, color: AppColors.primary),
+              ),
             ),
           ),
           _stepperButton(

@@ -22,11 +22,11 @@ class EditPurchaseInvoiceDialog {
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            TextField(controller: invController, decoration: const InputDecoration(labelText: 'No. Faktur / Nota Toko', hintText: 'Contoh: INV-SHOPEE-991')),
+            TextField(controller: invController, decoration: const InputDecoration(labelText: 'No. Faktur', hintText: 'Contoh: INV-SHOPEE-991')),
             const SizedBox(height: 10),
-            TextField(controller: supplierController, decoration: const InputDecoration(labelText: 'Nama Toko / Distributor', hintText: 'Contoh: Toko Jaya')),
+            TextField(controller: supplierController, decoration: const InputDecoration(labelText: 'Nama Supplier', hintText: 'Contoh: UD. Mustakim')),
             const SizedBox(height: 10),
-            TextField(controller: notesController, decoration: const InputDecoration(labelText: 'Catatan Faktur (Opsional)')),
+            TextField(controller: notesController, decoration: const InputDecoration(labelText: 'Catatan Faktur')),
           ],
         ),
         actions: [
@@ -51,7 +51,7 @@ class EditPurchaseInvoiceDialog {
           storeId: storeId,
         );
         if (success && context.mounted) {
-          AppToast.showSuccess(context, 'Info faktur & nama toko berhasil diperbarui');
+          AppToast.showSuccess(context, 'Info faktur berhasil diubah');
           Navigator.of(context).pop();
         }
       }

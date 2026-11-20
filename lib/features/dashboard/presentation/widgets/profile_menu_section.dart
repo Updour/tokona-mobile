@@ -5,6 +5,7 @@ import 'package:tokona/core/theme/app_colors.dart';
 import 'package:tokona/features/backup/presentation/widgets/backup_restore_bottom_sheet.dart';
 import 'package:tokona/features/customer/presentation/widgets/customer_list_bottom_sheet.dart';
 import 'package:tokona/features/customer/presentation/widgets/kasbon_due_monitor_sheet.dart';
+import 'package:tokona/features/dashboard/presentation/widgets/about_app_dialog.dart';
 import 'package:tokona/features/dashboard/presentation/widgets/profile_menu_data.dart';
 import 'package:tokona/features/payment/presentation/widgets/payment_account_management_sheet.dart';
 import 'package:tokona/features/payment/presentation/widgets/store_capital_management_sheet.dart';
@@ -178,6 +179,14 @@ class ProfileMenuSection extends ConsumerWidget {
             subtitle: 'Cadangkan data ke cloud atau pulihkan database',
             onTap: () => BackupRestoreBottomSheet.show(context),
           ),
+          ProfileMenuItem(
+            icon: Icons.info_outline_rounded,
+            color: const Color(0xFF6366F1),
+            bg: const Color(0xFFEEF2FF),
+            title: 'Tentang Aplikasi',
+            subtitle: 'Tokona POS v1.0.0, info sistem & lisensi',
+            onTap: () => AboutAppDialog.show(context),
+          ),
         ],
       ),
     ];
@@ -194,17 +203,19 @@ class ProfileMenuSection extends ConsumerWidget {
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(
-        color: AppColors.surface,
         borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: AppColors.border.withValues(alpha: 0.65)),
+        border: Border.all(color: AppColors.border.withValues(alpha: 0.55), width: 0.6),
         boxShadow: [
           BoxShadow(color: Colors.black.withValues(alpha: 0.02), blurRadius: 10, offset: const Offset(0, 3)),
         ],
       ),
-      clipBehavior: Clip.antiAlias,
-      child: Theme(
-        data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
-        child: ExpansionTile(
+      child: Material(
+        color: AppColors.surface,
+        borderRadius: BorderRadius.circular(18),
+        clipBehavior: Clip.antiAlias,
+        child: Theme(
+          data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
+          child: ExpansionTile(
           initiallyExpanded: group.initiallyExpanded,
           tilePadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 3),
           childrenPadding: const EdgeInsets.only(bottom: 6),
@@ -228,7 +239,7 @@ class ProfileMenuSection extends ConsumerWidget {
           ],
         ),
       ),
-    );
+    ));
   }
 
   Widget _buildTile(BuildContext context, ProfileMenuItem item, bool isLast) {

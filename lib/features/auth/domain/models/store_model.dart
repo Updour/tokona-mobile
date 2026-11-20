@@ -60,4 +60,11 @@ class StoreModel {
       syncedAt: syncedAt ?? this.syncedAt,
     );
   }
+
+  bool get isProfileComplete =>
+      name.trim().isNotEmpty &&
+      address != null &&
+      address!.trim().isNotEmpty &&
+      phone != null &&
+      phone!.trim().isNotEmpty;
 }

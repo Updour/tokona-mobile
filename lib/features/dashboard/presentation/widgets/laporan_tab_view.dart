@@ -87,8 +87,8 @@ class _LaporanTabViewState extends ConsumerState<LaporanTabView> {
     setState(() => _currentTabIndex = idx);
     _pageController.animateToPage(
       idx,
-      duration: const Duration(milliseconds: 320),
-      curve: Curves.easeOutCubic,
+      duration: const Duration(milliseconds: 360),
+      curve: Curves.easeInOutCubic,
     );
   }
 
@@ -114,7 +114,7 @@ class _LaporanTabViewState extends ConsumerState<LaporanTabView> {
       child: Column(
         children: [
           Padding(
-            padding: const EdgeInsets.fromLTRB(16, 10, 16, 0),
+            padding: const EdgeInsets.fromLTRB(10, 10, 10, 0),
             child: Column(
               children: [
                 ReportMinimalHeader(
@@ -145,6 +145,7 @@ class _LaporanTabViewState extends ConsumerState<LaporanTabView> {
           Expanded(
             child: PageView(
               controller: _pageController,
+              physics: const BouncingScrollPhysics(),
               onPageChanged: (idx) {
                 if (_currentTabIndex != idx) {
                   setState(() => _currentTabIndex = idx);
@@ -176,7 +177,7 @@ class _LaporanTabViewState extends ConsumerState<LaporanTabView> {
   Widget _buildPageContainer(Widget child) {
     return SingleChildScrollView(
       physics: const AlwaysScrollableScrollPhysics(parent: BouncingScrollPhysics()),
-      padding: const EdgeInsets.fromLTRB(16, 6, 16, 32),
+      padding: const EdgeInsets.fromLTRB(10, 8, 10, 36),
       child: child,
     );
   }

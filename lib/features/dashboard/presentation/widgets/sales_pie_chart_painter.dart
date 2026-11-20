@@ -28,61 +28,62 @@ class SalesPieChartPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    if (slices.isEmpty) return;
+    if (slices.isEmpty || animationProgress <= 0) return;
 
     final center = Offset(size.width / 2, size.height / 2);
     final outerRadius = math.min(size.width, size.height) / 2;
-    final innerRadius = outerRadius * 0.58;
+    final innerRadius = outerRadius * 0.56;
+    final strokeWidth = outerRadius - innerRadius;
+    final midRadius = (outerRadius + innerRadius) / 2;
 
     double startAngle = -math.pi / 2;
-    final totalSweep = 2 * math.pi * animationProgress;
+    final totalSweep = 2 * math.pi * animationProgress.clamp(0.001, 1.0);
 
     for (int i = 0; i < slices.length; i++) {
       final slice = slices[i];
-      final sweepAngle = (slice.percentage / 100.0) * totalSweep;
+      final rawSweep = (slice.percentage / 100.0) * totalSweep;
+      if (rawSweep <= 0) continue;
+
+      // Hindari Skia modulo 2*pi bug (arcTo/drawArc 2*pi dianggap 0 radians)
+      final sweepAngle = math.min(rawSweep, 2 * math.pi - 0.0002);
       final isSelected = selectedIndex == i;
 
-      final currentOuter = isSelected ? outerRadius + 4 : outerRadius;
-      final currentInner = isSelected ? innerRadius - 2 : innerRadius;
+      final currentStroke = isSelected ? strokeWidth + 4 : strokeWidth;
+      final currentRadius = isSelected ? midRadius + 2 : midRadius;
+
+      // Jarak halus antar-slice jika lebih dari 1 produk
+      final gap = slices.length > 1 ? 0.045 : 0.0;
+      final effectiveSweep = math.max(0.005, sweepAngle - gap);
+      final sliceStart = startAngle + (gap / 2);
 
       final paint = Paint()
-        ..color = slice.color
-        ..style = PaintingStyle.fill;
+        ..color = isSelected ? slice.color : slice.color.withValues(alpha: 0.92)
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = currentStroke
+        ..strokeCap = StrokeCap.round;
 
-      final path = Path();
-      path.arcTo(
-        Rect.fromCircle(center: center, radius: currentOuter),
-        startAngle,
-        sweepAngle,
+      canvas.drawArc(
+        Rect.fromCircle(center: center, radius: currentRadius),
+        sliceStart,
+        effectiveSweep,
         false,
+        paint,
       );
-      path.arcTo(
-        Rect.fromCircle(center: center, radius: currentInner),
-        startAngle + sweepAngle,
-        -sweepAngle,
-        false,
-      );
-      path.close();
-
-      canvas.drawPath(path, paint);
-
-      // White slice separator gap
-      if (slices.length > 1) {
-        final separatorPaint = Paint()
-          ..color = Colors.white
-          ..style = PaintingStyle.stroke
-          ..strokeWidth = 2.0;
-        canvas.drawPath(path, separatorPaint);
-      }
 
       startAngle += sweepAngle;
     }
 
-    // Draw inner circle core
-    final innerCorePaint = Paint()
-      ..color = Colors.white
+    // Lingkaran tengah halus (soft donut hole)
+    final holePaint = Paint()
+      ..color = const Color(0xFFF8FAFC)
       ..style = PaintingStyle.fill;
-    canvas.drawCircle(center, innerRadius - 3, innerCorePaint);
+    canvas.drawCircle(center, innerRadius - 2, holePaint);
+
+    final holeBorder = Paint()
+      ..color = const Color(0xFFE2E8F0)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 1.0;
+    canvas.drawCircle(center, innerRadius - 2, holeBorder);
   }
 
   @override
@@ -92,4 +93,3 @@ class SalesPieChartPainter extends CustomPainter {
         oldDelegate.slices != slices;
   }
 }
-

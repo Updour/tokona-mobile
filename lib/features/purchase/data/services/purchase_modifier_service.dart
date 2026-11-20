@@ -122,6 +122,49 @@ class PurchaseModifierService {
     });
   }
 
+  Future<void> revertReceivedToShipping(String purchaseId) async {
+    final db = await appDatabase.database;
+    final now = DateTime.now();
+
+    await db.transaction((txn) async {
+      final purchase = await purchaseDao.getById(txn, purchaseId);
+      if (purchase == null) throw StateError('Data pembelian tidak ditemukan');
+      if (purchase.status != 'received') return;
+
+      final items = await purchaseItemDao.getByPurchaseId(txn, purchaseId);
+
+      // Rollback penambahan stok yang sempat masuk
+      for (final item in items) {
+        await _adjustStock(
+          txn: txn,
+          productId: item.productId,
+          deltaQtyBase: -item.totalBaseQuantity,
+          now: now,
+          reason: 'Koreksi pembatalan terima barang (revert to shipping)',
+        );
+      }
+
+      // Bersihkan catatan auto-receive dan kembalikan status ke shipping
+      String? cleanedNotes = purchase.notes;
+      if (cleanedNotes != null) {
+        cleanedNotes = cleanedNotes
+            .replaceAll(RegExp(r'\n?pesanan di terima otomatis by sistem[^\n]*', caseSensitive: false), '')
+            .replaceAll(RegExp(r'\n?Diterima otomatis dari notifikasi Shopee[^\n]*', caseSensitive: false), '')
+            .trim();
+        if (cleanedNotes.isEmpty) cleanedNotes = null;
+      }
+
+      await purchaseDao.updateStatus(
+        txn,
+        purchaseId,
+        status: 'shipping',
+        isAutoReceived: false,
+        notes: cleanedNotes,
+        updatedAt: now,
+      );
+    });
+  }
+
   Future<void> _adjustStock({
     required Transaction txn,
     required String productId,

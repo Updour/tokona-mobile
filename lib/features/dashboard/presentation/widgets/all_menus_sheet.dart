@@ -46,8 +46,15 @@ class _AllMenusSheetState extends ConsumerState<AllMenusSheet> {
 
     return Container(
       decoration: const BoxDecoration(
-        color: AppColors.surface,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+        color: Colors.white,
+        borderRadius: BorderRadius.vertical(top: Radius.circular(22)),
+        boxShadow: [
+          BoxShadow(
+            color: Color(0x140F172A),
+            blurRadius: 20,
+            offset: Offset(0, -4),
+          ),
+        ],
       ),
       constraints: BoxConstraints(
         maxHeight: MediaQuery.of(context).size.height * 0.88,

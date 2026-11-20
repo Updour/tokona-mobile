@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:tokona/core/theme/app_colors.dart';
-import 'package:tokona/core/theme/app_typography.dart';
 import 'package:tokona/features/report/domain/models/report_filter_type.dart';
 
 class ReportFilterSheet extends StatefulWidget {
@@ -67,9 +66,7 @@ class _ReportFilterSheetState extends State<ReportFilterSheet> {
       setState(() {
         _startDate = picked;
         _selectedFilter = ReportFilterType.custom;
-        if (_endDate.isBefore(_startDate)) {
-          _endDate = _startDate;
-        }
+        if (_endDate.isBefore(_startDate)) _endDate = _startDate;
       });
     }
   }
@@ -92,8 +89,7 @@ class _ReportFilterSheetState extends State<ReportFilterSheet> {
   @override
   Widget build(BuildContext context) {
     final dateFormat = DateFormat('dd MMM yyyy');
-
-    final presets = [
+    const presets = [
       (ReportFilterType.today, 'Hari Ini'), (ReportFilterType.yesterday, 'Kemarin'),
       (ReportFilterType.last7Days, '7 Hari Terakhir'), (ReportFilterType.thisMonth, 'Bulan Ini'),
       (ReportFilterType.lastMonth, 'Bulan Lalu'), (ReportFilterType.thisYear, 'Tahun Ini'),
@@ -102,20 +98,26 @@ class _ReportFilterSheetState extends State<ReportFilterSheet> {
     return SafeArea(
       top: false,
       child: Container(
-        decoration: const BoxDecoration(color: AppColors.surface, borderRadius: BorderRadius.vertical(top: Radius.circular(24))),
-        padding: const EdgeInsets.fromLTRB(20, 14, 20, 24),
+        decoration: const BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(22)),
+          boxShadow: [
+            BoxShadow(color: Color(0x140F172A), blurRadius: 20, offset: Offset(0, -4)),
+          ],
+        ),
+        padding: const EdgeInsets.fromLTRB(16, 12, 16, 18),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           mainAxisSize: MainAxisSize.min,
           children: [
             Center(
               child: Container(
-                width: 40,
+                width: 38,
                 height: 4,
-                decoration: BoxDecoration(color: AppColors.border, borderRadius: BorderRadius.circular(2)),
+                decoration: BoxDecoration(color: const Color(0xFFE2E8F0), borderRadius: BorderRadius.circular(2)),
               ),
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: 10),
             Row(
               children: [
                 Expanded(
@@ -123,11 +125,8 @@ class _ReportFilterSheetState extends State<ReportFilterSheet> {
                     children: [
                       Container(
                         padding: const EdgeInsets.all(6),
-                        decoration: BoxDecoration(
-                          color: AppColors.primaryContainer,
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: const Icon(Icons.tune_rounded, color: AppColors.primaryDark, size: 16),
+                        decoration: BoxDecoration(color: const Color(0xFFF1F5F9), borderRadius: BorderRadius.circular(8)),
+                        child: const Icon(Icons.tune_rounded, color: Color(0xFF334155), size: 16),
                       ),
                       const SizedBox(width: 8),
                       const Expanded(
@@ -149,7 +148,7 @@ class _ReportFilterSheetState extends State<ReportFilterSheet> {
                   },
                   borderRadius: BorderRadius.circular(8),
                   child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                    padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 4.5),
                     decoration: BoxDecoration(
                       color: const Color(0xFFFEF2F2),
                       borderRadius: BorderRadius.circular(8),
@@ -158,24 +157,19 @@ class _ReportFilterSheetState extends State<ReportFilterSheet> {
                     child: const Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Icon(Icons.restart_alt_rounded, size: 13, color: Color(0xFFDC2626)),
-                        SizedBox(width: 4),
-                        Text('Reset', style: TextStyle(color: Color(0xFFDC2626), fontWeight: FontWeight.w800, fontSize: 11)),
+                        Icon(Icons.restart_alt_rounded, size: 12.5, color: Color(0xFFDC2626)),
+                        SizedBox(width: 3),
+                        Text('Reset', style: TextStyle(color: Color(0xFFDC2626), fontWeight: FontWeight.w800, fontSize: 10.5)),
                       ],
                     ),
                   ),
                 ),
               ],
             ),
-            const Divider(height: 20),
-            const Text(
-              'PRESET PERIODE',
-              style: TextStyle(fontSize: 10.5, fontWeight: FontWeight.w800, color: AppColors.textMuted, letterSpacing: 0.4),
-            ),
-            const SizedBox(height: 8),
+            const Divider(height: 18, color: Color(0xFFF1F5F9)),
             Wrap(
-              spacing: 8,
-              runSpacing: 8,
+              spacing: 6,
+              runSpacing: 6,
               children: presets.map((p) {
                 final isSelected = _selectedFilter == p.$1;
                 return ChoiceChip(
@@ -185,95 +179,35 @@ class _ReportFilterSheetState extends State<ReportFilterSheet> {
                     if (val) setState(() => _selectedFilter = p.$1);
                   },
                   selectedColor: AppColors.primary,
+                  backgroundColor: const Color(0xFFF8FAFC),
+                  side: BorderSide(color: isSelected ? AppColors.primary : const Color(0xFFE2E8F0)),
                   labelStyle: TextStyle(
-                    fontSize: 11.5,
+                    fontSize: 11,
                     fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
-                    color: isSelected ? Colors.white : AppColors.textSecondary,
+                    color: isSelected ? Colors.white : const Color(0xFF475569),
                   ),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(9)),
                   visualDensity: const VisualDensity(horizontal: -1, vertical: -2),
                 );
               }).toList(),
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 14),
             const Text(
               'RENTANG TANGGAL KUSTOM',
-              style: TextStyle(fontSize: 10.5, fontWeight: FontWeight.w800, color: AppColors.textMuted, letterSpacing: 0.4),
+              style: TextStyle(fontSize: 10, fontWeight: FontWeight.w800, color: Color(0xFF94A3B8), letterSpacing: 0.4),
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: 7),
             Row(
               children: [
-                Expanded(
-                  child: InkWell(
-                    onTap: _pickStartDate,
-                    borderRadius: BorderRadius.circular(10),
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
-                      decoration: BoxDecoration(
-                        color: AppColors.surfaceElevated,
-                        borderRadius: BorderRadius.circular(10),
-                        border: Border.all(
-                          color: _selectedFilter == ReportFilterType.custom
-                              ? AppColors.primary
-                              : AppColors.border,
-                        ),
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const Text('Dari Tanggal', style: TextStyle(fontSize: 10, color: AppColors.textMuted)),
-                          const SizedBox(height: 2),
-                          Row(
-                            children: [
-                              const Icon(Icons.calendar_today_rounded, size: 13, color: AppColors.primary),
-                              const SizedBox(width: 6),
-                              Text(dateFormat.format(_startDate), style: const TextStyle(fontSize: 11.5, fontWeight: FontWeight.w700)),
-                            ],
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
+                Expanded(child: _buildDateBox('Dari Tanggal', _startDate, _pickStartDate, dateFormat)),
                 const SizedBox(width: 8),
-                Expanded(
-                  child: InkWell(
-                    onTap: _pickEndDate,
-                    borderRadius: BorderRadius.circular(10),
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
-                      decoration: BoxDecoration(
-                        color: AppColors.surfaceElevated,
-                        borderRadius: BorderRadius.circular(10),
-                        border: Border.all(
-                          color: _selectedFilter == ReportFilterType.custom
-                              ? AppColors.primary
-                              : AppColors.border,
-                        ),
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const Text('Sampai Tanggal', style: TextStyle(fontSize: 10, color: AppColors.textMuted)),
-                          const SizedBox(height: 2),
-                          Row(
-                            children: [
-                              const Icon(Icons.calendar_today_rounded, size: 13, color: AppColors.primary),
-                              const SizedBox(width: 6),
-                              Text(dateFormat.format(_endDate), style: const TextStyle(fontSize: 11.5, fontWeight: FontWeight.w700)),
-                            ],
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
+                Expanded(child: _buildDateBox('Sampai Tanggal', _endDate, _pickEndDate, dateFormat)),
               ],
             ),
-            const SizedBox(height: 20),
+            const SizedBox(height: 16),
             SizedBox(
               width: double.infinity,
-              height: 44,
+              height: 42,
               child: ElevatedButton(
                 onPressed: () {
                   if (_selectedFilter == ReportFilterType.custom) {
@@ -291,6 +225,36 @@ class _ReportFilterSheetState extends State<ReportFilterSheet> {
                 ),
                 child: const Text('Terapkan Filter', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 13)),
               ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildDateBox(String title, DateTime date, VoidCallback onTap, DateFormat format) {
+    final isCustom = _selectedFilter == ReportFilterType.custom;
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(10),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8.5),
+        decoration: BoxDecoration(
+          color: const Color(0xFFF8FAFC),
+          borderRadius: BorderRadius.circular(10),
+          border: Border.all(color: isCustom ? AppColors.primary : const Color(0xFFE2E8F0)),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(title, style: const TextStyle(fontSize: 9.5, color: Color(0xFF94A3B8))),
+            const SizedBox(height: 2),
+            Row(
+              children: [
+                const Icon(Icons.calendar_today_rounded, size: 12, color: AppColors.primary),
+                const SizedBox(width: 5),
+                Text(format.format(date), style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: Color(0xFF1E293B))),
+              ],
             ),
           ],
         ),

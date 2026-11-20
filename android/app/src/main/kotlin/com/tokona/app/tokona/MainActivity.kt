@@ -1,11 +1,13 @@
 package com.tokona.app.tokona
 
+import android.app.Activity
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import android.os.Build
+import android.provider.ContactsContract
 import android.provider.Settings
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
@@ -17,6 +19,10 @@ import io.flutter.plugin.common.MethodChannel
 class MainActivity : FlutterActivity() {
     private val channelName = "com.tokona.app/native_notifications"
     private val listenerChannelName = "com.tokona.app/shopee_notification_stream"
+    private val contactChannelName = "com.tokona.app/native_contacts"
+    private val pickContactRequestCode = 9042
+    private val pickAddressRequestCode = 9043
+    private var pendingContactResult: MethodChannel.Result? = null
 
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
@@ -76,6 +82,125 @@ class MainActivity : FlutterActivity() {
                 else -> result.notImplemented()
             }
         }
+
+        // MethodChannel untuk import kontak & alamat bawaan HP (ACTION_PICK tanpa izin penuh)
+        MethodChannel(flutterEngine.dartExecutor.binaryMessenger, contactChannelName).setMethodCallHandler { call, result ->
+            when (call.method) {
+                "pickContact" -> {
+                    if (pendingContactResult != null) {
+                        result.error("BUSY", "Pemilih kontak sedang terbuka", null)
+                        return@setMethodCallHandler
+                    }
+                    try {
+                        pendingContactResult = result
+                        val intent = Intent(Intent.ACTION_PICK, ContactsContract.CommonDataKinds.Phone.CONTENT_URI)
+                        @Suppress("DEPRECATION")
+                        startActivityForResult(intent, pickContactRequestCode)
+                    } catch (e: Exception) {
+                        pendingContactResult = null
+                        result.error("ERR_CONTACT", e.message, null)
+                    }
+                }
+                "pickAddress" -> {
+                    if (pendingContactResult != null) {
+                        result.error("BUSY", "Pemilih kontak sedang terbuka", null)
+                        return@setMethodCallHandler
+                    }
+                    try {
+                        pendingContactResult = result
+                        val intent = Intent(Intent.ACTION_PICK, ContactsContract.CommonDataKinds.StructuredPostal.CONTENT_URI)
+                        @Suppress("DEPRECATION")
+                        startActivityForResult(intent, pickAddressRequestCode)
+                    } catch (e: Exception) {
+                        pendingContactResult = null
+                        result.error("ERR_ADDRESS", e.message, null)
+                    }
+                }
+                else -> result.notImplemented()
+            }
+        }
+    }
+
+    @Deprecated("Deprecated in Java")
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        if (requestCode == pickContactRequestCode) {
+            val callback = pendingContactResult
+            pendingContactResult = null
+            if (resultCode == Activity.RESULT_OK && data?.data != null) {
+                try {
+                    val uri = data.data!!
+                    val projection = arrayOf(
+                        ContactsContract.CommonDataKinds.Phone.CONTACT_ID,
+                        ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME,
+                        ContactsContract.CommonDataKinds.Phone.NUMBER
+                    )
+                    contentResolver.query(uri, projection, null, null, null)?.use { cursor ->
+                        if (cursor.moveToFirst()) {
+                            val contactId = cursor.getString(0) ?: ""
+                            val name = cursor.getString(1) ?: ""
+                            val phone = cursor.getString(2) ?: ""
+                            var address = ""
+                            if (contactId.isNotEmpty()) {
+                                try {
+                                    contentResolver.query(
+                                        ContactsContract.CommonDataKinds.StructuredPostal.CONTENT_URI,
+                                        arrayOf(ContactsContract.CommonDataKinds.StructuredPostal.FORMATTED_ADDRESS),
+                                        "${ContactsContract.CommonDataKinds.StructuredPostal.CONTACT_ID} = ?",
+                                        arrayOf(contactId),
+                                        null
+                                    )?.use { postalCursor ->
+                                        if (postalCursor.moveToFirst()) {
+                                            address = postalCursor.getString(0) ?: ""
+                                        }
+                                    }
+                                } catch (_: Exception) {}
+                            }
+                            callback?.success(mapOf("name" to name, "phone" to phone, "address" to address))
+                            return
+                        }
+                    }
+                    callback?.success(null)
+                } catch (e: Exception) {
+                    callback?.error("ERR_READ_CONTACT", e.message, null)
+                }
+            } else {
+                callback?.success(null)
+            }
+            return
+        } else if (requestCode == pickAddressRequestCode) {
+            val callback = pendingContactResult
+            pendingContactResult = null
+            if (resultCode == Activity.RESULT_OK && data?.data != null) {
+                try {
+                    val uri = data.data!!
+                    val projection = arrayOf(
+                        ContactsContract.CommonDataKinds.StructuredPostal.FORMATTED_ADDRESS,
+                        ContactsContract.CommonDataKinds.StructuredPostal.STREET,
+                        ContactsContract.CommonDataKinds.StructuredPostal.CITY
+                    )
+                    contentResolver.query(uri, projection, null, null, null)?.use { cursor ->
+                        if (cursor.moveToFirst()) {
+                            var addr = cursor.getString(0) ?: ""
+                            if (addr.isEmpty()) {
+                                val street = cursor.getString(1) ?: ""
+                                val city = cursor.getString(2) ?: ""
+                                addr = listOf(street, city).filter { it.isNotEmpty() }.joinToString(", ")
+                            }
+                            callback?.success(mapOf("address" to addr))
+                            return
+                        }
+                    }
+                    callback?.success(null)
+                } catch (e: Exception) {
+                    callback?.error("ERR_READ_ADDRESS", e.message, null)
+                }
+            } else {
+                callback?.success(null)
+            }
+            return
+        }
+        @Suppress("DEPRECATION")
+        super.onActivityResult(requestCode, resultCode, data)
     }
 
     private fun showPushNotification(id: Int, title: String, body: String) {

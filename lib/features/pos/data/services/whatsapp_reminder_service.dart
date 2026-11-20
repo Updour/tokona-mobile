@@ -2,8 +2,12 @@ import 'package:intl/intl.dart';
 import 'package:tokona/core/services/whatsapp_service.dart';
 import 'package:tokona/core/utils/currency_formatter.dart';
 import 'package:tokona/features/pos/domain/models/held_cart_model.dart';
+import 'package:tokona/features/pos/domain/models/wa_message_log.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:tokona/features/pos/presentation/controllers/held_cart_controller.dart';
+import 'package:tokona/features/pos/presentation/controllers/wa_history_controller.dart';
+import 'package:tokona/features/settings/domain/models/app_preferences.dart';
+import 'package:tokona/features/settings/presentation/controllers/app_preferences_controller.dart';
 
 class WhatsAppReminderService {
   WhatsAppReminderService._();
@@ -11,6 +15,7 @@ class WhatsAppReminderService {
   static String formatMessage({
     required HeldCartModel order,
     required String storeName,
+    String? template,
   }) {
     final customer = order.customerName?.trim().isNotEmpty == true ? order.customerName!.trim() : 'Pelanggan';
     final dateStr = order.plannedDate != null
@@ -26,13 +31,17 @@ class WhatsAppReminderService {
 
     final extraItems = order.items.length > 3 ? '\n• ...dan ${order.items.length - 3} item lainnya' : '';
 
-    return 'Halo Kak *$customer*! 👋\n\n'
-        'Mengingatkan pesanan Anda di *$storeName*:\n'
-        '$itemsSummary$extraItems\n\n'
-        '💰 Total: *${CurrencyFormatter.format(order.finalAmount)}*\n'
-        '📅 Jadwal: *$dateStr*\n'
-        '📍 Layanan: ${order.deliveryMethodLabel}\n\n'
-        'Pesanan sudah siap disiapkan di toko. Ditunggu kedatangannya ya Kak. Terima kasih! 🙏';
+    return AppPreferences.renderTemplate(
+      template ?? AppPreferences.defaultBookingTemplate,
+      {
+        'nama': customer,
+        'toko': storeName,
+        'daftar_barang': '$itemsSummary$extraItems',
+        'total': CurrencyFormatter.format(order.finalAmount),
+        'jadwal': dateStr,
+        'metode': order.deliveryMethodLabel,
+      },
+    );
   }
 
   static Future<bool> sendReminder({
@@ -46,13 +55,14 @@ class WhatsAppReminderService {
     if (digitsOnly.length < 9) {
       ref.read(heldCartProvider.notifier).markWaFailed(
             order.id,
-            reason: 'Nomor WhatsApp tidak terdaftar/kurang dari 9 digit ($rawPhone)',
+            reason: 'Nomor handphone tidak terdaftar/kurang dari 9 digit ($rawPhone)',
           );
       return false;
     }
 
     final cleanPhone = WhatsAppService.sanitizePhoneNumber(rawPhone);
-    final message = formatMessage(order: order, storeName: storeName);
+    final template = ref.read(appPreferencesProvider).waBookingTemplate;
+    final message = formatMessage(order: order, storeName: storeName, template: template);
 
     try {
       final success = await WhatsAppService.sendReceipt(
@@ -69,12 +79,34 @@ class WhatsAppReminderService {
               phone: cleanPhone,
               logMessage: 'Berhasil dikirim ke WhatsApp (+$cleanPhone) pada $timeStr',
             );
+        ref.read(waHistoryProvider.notifier).recordLog(WaMessageLog(
+              id: 'wa_${DateTime.now().millisecondsSinceEpoch}',
+              recipientName: order.customerName ?? 'Pelanggan',
+              phone: cleanPhone,
+              category: 'booking',
+              message: message,
+              status: 'sent',
+              referenceId: 'booking_${order.id}',
+              createdAt: now,
+              sentAt: now,
+            ));
         return true;
       } else {
         ref.read(heldCartProvider.notifier).markWaFailed(
               order.id,
               reason: 'Gagal membuka aplikasi WhatsApp di perangkat',
             );
+        ref.read(waHistoryProvider.notifier).recordLog(WaMessageLog(
+              id: 'wa_${DateTime.now().millisecondsSinceEpoch}',
+              recipientName: order.customerName ?? 'Pelanggan',
+              phone: cleanPhone,
+              category: 'booking',
+              message: message,
+              status: 'failed',
+              errorReason: 'Gagal membuka aplikasi WhatsApp',
+              referenceId: 'booking_${order.id}',
+              createdAt: now,
+            ));
         return false;
       }
     } catch (e) {

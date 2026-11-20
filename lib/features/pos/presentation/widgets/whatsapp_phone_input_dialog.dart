@@ -68,7 +68,7 @@ class _WhatsAppPhoneInputDialogState extends State<WhatsAppPhoneInputDialog> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const Text(
-            'Masukkan nomor WhatsApp pelanggan tujuan:',
+            'Masukkan nomor Handphone pelanggan:',
             style: TextStyle(fontSize: 12, color: AppColors.textSecondary),
           ),
           const SizedBox(height: 12),

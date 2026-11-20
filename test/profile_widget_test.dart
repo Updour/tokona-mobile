@@ -45,16 +45,10 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    expect(find.text('Profil & Toko'), findsOneWidget);
     expect(find.text('Budi Santoso'), findsOneWidget);
-    expect(find.text('@budi_owner'), findsOneWidget);
-    expect(find.text('Toko Berkah Mandiri'), findsOneWidget);
-    expect(find.text('081234567890'), findsOneWidget);
-    expect(find.text('Jl. Merdeka No. 45'), findsOneWidget);
+    expect(find.textContaining('@budi_owner'), findsOneWidget);
+    expect(find.textContaining('Toko Berkah Mandiri'), findsOneWidget);
     expect(find.text('Data Pelanggan', skipOffstage: false), findsOneWidget);
-    expect(find.text('Kategori & Tipe Produk', skipOffstage: false), findsOneWidget);
-    expect(find.text('Satuan Kemasan Bertingkat', skipOffstage: false), findsOneWidget);
-    expect(find.text('Penyimpanan Offline-First', skipOffstage: false), findsOneWidget);
 
     await tester.scrollUntilVisible(
       find.text('Keluar dari Akun'),

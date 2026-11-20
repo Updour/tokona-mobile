@@ -39,7 +39,7 @@ class BerandaActiveOrdersCard extends ConsumerWidget {
       decoration: BoxDecoration(
         color: AppColors.surface,
         borderRadius: BorderRadius.circular(22),
-        border: Border.all(color: AppColors.border),
+        border: Border.all(color: AppColors.border.withValues(alpha: 0.55), width: 0.6),
         boxShadow: [
           BoxShadow(
             color: const Color(0xFF0F172A).withValues(alpha: 0.04),

@@ -153,7 +153,14 @@ class _PosCartBottomSheetState extends ConsumerState<PosCartBottomSheet> {
                     return PosCartItemTile(
                       index: idx,
                       item: item,
-                      onUpdateQty: (qty) => ref.read(cartProvider.notifier).updateQuantity(idx, qty),
+                      onUpdateQty: (qty) {
+                        final ok = ref.read(cartProvider.notifier).updateQuantity(idx, qty);
+                        if (!ok) {
+                          final max = item.product.stockBase;
+                          final sisa = max == max.roundToDouble() ? max.toInt().toString() : max.toString();
+                          AppToast.showWarning(context, 'Stok ${item.product.name} sudah maksimal (sisa $sisa ${item.product.baseUnit})');
+                        }
+                      },
                       onChangeUnit: (unit) => ref.read(cartProvider.notifier).changeUnit(idx, unit),
                       onRemove: () => ref.read(cartProvider.notifier).removeItem(idx),
                     );
@@ -187,10 +194,10 @@ class _PosCartBottomSheetState extends ConsumerState<PosCartBottomSheet> {
                   ProofPhotoPicker(
                     imagePath: _paymentProofPath,
                     label: _isKasbonSelected
-                        ? 'Foto Nota Kasbon / Tanda Tangan'
+                        ? 'Foto Bukti Kasbon'
                         : (_selectedAccount != null && _selectedAccount!.type != 'cash'
                             ? 'Foto Bukti Transfer ${_selectedAccount!.name}'
-                            : 'Foto Bukti Pembayaran / Struk'),
+                            : 'Foto Bukti Pembayaran'),
                     hint: 'Ambil foto kamera atau pilih galeri (opsional)',
                     onImagePicked: (p) => setState(() => _paymentProofPath = p),
                   ),

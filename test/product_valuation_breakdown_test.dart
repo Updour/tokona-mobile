@@ -43,7 +43,6 @@ void main() {
               onPressed: () => ProductDetailBottomSheet.show(
                 context,
                 product: dummyProduct,
-                onRestock: () {},
               ),
               child: const Text('Open Detail'),
             ),

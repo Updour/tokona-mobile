@@ -37,7 +37,7 @@ class CloudBackupTabView extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('Supabase PostgreSQL Cloud', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w800, color: Color(0xFF1E40AF))),
+                    Text('PostgreSQL Cloud', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w800, color: Color(0xFF1E40AF))),
                     Text('db.gjgfdwzqjypzalzleqgt.supabase.co:5432', style: TextStyle(fontSize: 10, color: Color(0xFF3B82F6))),
                   ],
                 ),
@@ -51,7 +51,7 @@ class CloudBackupTabView extends StatelessWidget {
           child: ElevatedButton.icon(
             onPressed: isProcessing ? null : onCreate,
             icon: isProcessing ? const SizedBox(width: 14, height: 14, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white)) : const Icon(Icons.cloud_upload_rounded, size: 16),
-            label: const Text('Unggah Cadangan ke Cloud Supabase', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 12.5)),
+            label: const Text('Unggah Cadangan ke Cloud', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 12.5)),
             style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF2563EB), foregroundColor: Colors.white, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10))),
           ),
         ),
@@ -60,7 +60,7 @@ class CloudBackupTabView extends StatelessWidget {
           child: isLoading
               ? const Center(child: CircularProgressIndicator(strokeWidth: 2))
               : backups.isEmpty
-                  ? const Center(child: Text('Belum ada cadangan di Cloud Supabase', style: TextStyle(color: AppColors.textMuted, fontSize: 12)))
+                  ? const Center(child: Text('Belum ada cadangan di Cloud', style: TextStyle(color: AppColors.textMuted, fontSize: 12)))
                   : ListView.builder(
                       itemCount: backups.length,
                       itemBuilder: (ctx, idx) => CloudBackupListTile(

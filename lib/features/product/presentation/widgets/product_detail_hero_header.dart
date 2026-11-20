@@ -39,7 +39,7 @@ class ProductDetailHeroHeader extends StatelessWidget {
                   Text(
                     (product.sku != null && product.sku!.isNotEmpty)
                         ? product.sku!
-                        : 'Tanpa Barcode/SKU',
+                        : 'Tanpa Barcode',
                     style: AppTypography.bodySmall.copyWith(fontSize: 12),
                   ),
                 ],

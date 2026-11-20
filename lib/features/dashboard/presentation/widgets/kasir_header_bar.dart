@@ -6,6 +6,7 @@ import 'package:tokona/features/pos/presentation/controllers/held_cart_controlle
 import 'package:tokona/features/pos/presentation/widgets/held_orders_bottom_sheet.dart';
 import 'package:tokona/features/pos/presentation/widgets/sales_history_sheet.dart';
 import 'package:tokona/features/product/domain/models/product_model.dart';
+import 'package:tokona/features/sync/presentation/widgets/sync_status_pill.dart';
 
 class KasirHeaderBar extends StatelessWidget {
   final List<ProductModel> products;
@@ -114,6 +115,8 @@ class KasirHeaderBar extends StatelessWidget {
             ],
           ),
         ),
+        const SyncStatusPill(showLabel: false),
+        const SizedBox(width: 6),
         _buildActionPill(
           icon: Icons.search_rounded,
           color: AppColors.textPrimary,
@@ -185,7 +188,7 @@ class KasirHeaderBar extends StatelessWidget {
       decoration: BoxDecoration(
         color: AppColors.surface,
         borderRadius: BorderRadius.circular(11),
-        border: Border.all(color: AppColors.border),
+        border: Border.all(color: AppColors.border.withValues(alpha: 0.55), width: 0.6),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.02),

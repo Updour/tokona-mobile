@@ -7,6 +7,8 @@ import 'package:tokona/features/product/domain/dtos/update_product_dto.dart';
 import 'package:tokona/features/product/domain/models/product_filter_state.dart';
 import 'package:tokona/features/product/domain/models/product_list_state.dart';
 import 'package:tokona/features/product/presentation/controllers/classification_controller.dart';
+import 'package:tokona/features/settings/data/services/audit_log_service.dart';
+import 'package:tokona/features/settings/domain/models/audit_log_model.dart';
 
 final productRepositoryProvider = Provider<ProductRepository>((ref) {
   final db = ref.watch(appDatabaseProvider);
@@ -16,14 +18,15 @@ final productRepositoryProvider = Provider<ProductRepository>((ref) {
 final productListProvider = StateNotifierProvider<ProductController, ProductListState>((ref) {
   final repository = ref.watch(productRepositoryProvider);
   final classificationRepo = ref.watch(classificationRepositoryProvider);
-  return ProductController(repository, classificationRepo);
+  return ProductController(repository, classificationRepo, ref);
 });
 
 class ProductController extends StateNotifier<ProductListState> {
   final ProductRepository _repository;
   final ClassificationRepository? _classificationRepo;
+  final Ref? _ref;
 
-  ProductController(this._repository, [this._classificationRepo]) : super(const ProductListState());
+  ProductController(this._repository, [this._classificationRepo, this._ref]) : super(const ProductListState());
 
   Future<void> loadProducts(String storeId) async {
     state = state.copyWith(isLoading: true, clearError: true);
@@ -97,6 +100,16 @@ class ProductController extends StateNotifier<ProductListState> {
         }
       }
       await loadProducts(storeId);
+      final user = _ref?.read(authProvider).currentUser;
+      AuditLogService.log(
+        storeId: storeId,
+        userId: user?.id ?? '',
+        userName: user?.fullName ?? 'Admin/Owner',
+        userRole: user?.role.label ?? 'Admin',
+        actionType: AuditActionType.product,
+        title: 'Tambah Produk: ${dto.name}',
+        description: 'Kategori: ${dto.category ?? "-"} • Stok: ${dto.initialStock} • Jual: Rp ${dto.baseSellingPrice.toInt()}',
+      );
       state = state.copyWith(
         searchQuery: null,
         successMessage: 'Produk berhasil ditambahkan',
@@ -143,6 +156,16 @@ class ProductController extends StateNotifier<ProductListState> {
     try {
       await _repository.updateStock(productId, newStock);
       await loadProducts(storeId);
+      final user = _ref?.read(authProvider).currentUser;
+      AuditLogService.log(
+        storeId: storeId,
+        userId: user?.id ?? '',
+        userName: user?.fullName ?? 'Admin/Owner',
+        userRole: user?.role.label ?? 'Admin',
+        actionType: AuditActionType.inventory,
+        title: 'Opname Stok (ID: $productId)',
+        description: 'Penyesuaian stok menjadi $newStock unit',
+      );
       state = state.copyWith(
         isLoading: false,
         successMessage: 'Stok berhasil diperbarui',
@@ -162,6 +185,16 @@ class ProductController extends StateNotifier<ProductListState> {
     try {
       await _repository.updatePrices(productId, baseCostPrice, baseSellingPrice);
       await loadProducts(storeId);
+      final user = _ref?.read(authProvider).currentUser;
+      AuditLogService.log(
+        storeId: storeId,
+        userId: user?.id ?? '',
+        userName: user?.fullName ?? 'Admin/Owner',
+        userRole: user?.role.label ?? 'Admin',
+        actionType: AuditActionType.product,
+        title: 'Ubah Harga Produk (ID: $productId)',
+        description: 'HPP: Rp ${baseCostPrice.toInt()} • Jual: Rp ${baseSellingPrice.toInt()}',
+      );
       state = state.copyWith(
         isLoading: false,
         successMessage: 'Harga & HPP berhasil diperbarui',
@@ -185,6 +218,16 @@ class ProductController extends StateNotifier<ProductListState> {
       state = state.copyWith(clearError: true, clearSuccess: true);
       await _repository.deleteProduct(productId, force: force);
       await loadProducts(storeId);
+      final user = _ref?.read(authProvider).currentUser;
+      AuditLogService.log(
+        storeId: storeId,
+        userId: user?.id ?? '',
+        userName: user?.fullName ?? 'Admin/Owner',
+        userRole: user?.role.label ?? 'Admin',
+        actionType: AuditActionType.product,
+        title: 'Hapus Produk',
+        description: 'Menghapus produk (ID: $productId) dari katalog',
+      );
       state = state.copyWith(successMessage: 'Produk berhasil dihapus');
       return true;
     } catch (e) {

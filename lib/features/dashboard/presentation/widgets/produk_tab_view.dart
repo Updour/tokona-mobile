@@ -1,20 +1,22 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:tokona/core/theme/app_colors.dart';
 import 'package:tokona/core/widgets/app_dialog.dart';
 import 'package:tokona/core/widgets/app_toast.dart';
 import 'package:tokona/core/widgets/camera_barcode_scanner.dart';
+import 'package:tokona/features/auth/domain/models/store_model.dart';
 import 'package:tokona/features/auth/presentation/controllers/auth_controller.dart';
+import 'package:tokona/features/dashboard/presentation/widgets/store_edit_bottom_sheet.dart';
+import 'package:tokona/features/dashboard/presentation/widgets/store_profile_incomplete_banner.dart';
 import 'package:tokona/features/product/domain/models/product_model.dart';
 import 'package:tokona/features/product/presentation/controllers/classification_controller.dart';
 import 'package:tokona/features/product/presentation/controllers/product_controller.dart';
 import 'package:tokona/features/product/presentation/widgets/add_product_bottom_sheet.dart';
 import 'package:tokona/features/product/presentation/widgets/edit_product_bottom_sheet.dart';
 import 'package:tokona/features/product/presentation/widgets/product_card_item.dart';
+import 'package:tokona/features/product/presentation/widgets/device_stock_monitoring_sheet.dart';
 import 'package:tokona/features/product/presentation/widgets/product_category_filter_bar.dart';
 import 'package:tokona/features/product/presentation/widgets/product_detail_bottom_sheet.dart';
-import 'package:tokona/features/product/presentation/widgets/product_device_filter_bar.dart';
 import 'package:tokona/features/product/presentation/widgets/product_empty_state.dart';
 import 'package:tokona/features/product/presentation/widgets/product_filter_bottom_sheet.dart';
 import 'package:tokona/features/product/presentation/widgets/product_minimal_header.dart';
@@ -22,6 +24,8 @@ import 'package:tokona/features/product/presentation/widgets/quick_stock_hpp_she
 import 'package:tokona/features/product/presentation/widgets/stock_adjustment_sheet.dart';
 import 'package:tokona/features/product/presentation/widgets/stock_card_history_sheet.dart';
 import 'package:tokona/features/purchase/presentation/widgets/add_purchase_bottom_sheet.dart';
+import 'package:tokona/features/settings/domain/models/app_permission.dart';
+import 'package:tokona/features/settings/presentation/controllers/rbac_controller.dart';
 
 class ProdukTabView extends ConsumerStatefulWidget {
   const ProdukTabView({super.key});
@@ -54,6 +58,11 @@ class _ProdukTabViewState extends ConsumerState<ProdukTabView> {
 
   void _openAddProductModal(String storeId) {
     _searchController.clear();
+    final store = ref.read(authProvider).currentStore;
+    if (store != null && !store.isProfileComplete) {
+      StoreProfileIncompleteBanner.showProfileAlert(context, store);
+      return;
+    }
     final classification = ref.read(classificationProvider);
     AddProductBottomSheet.show(
       context,
@@ -117,9 +126,13 @@ class _ProdukTabViewState extends ConsumerState<ProdukTabView> {
   }
 
   void _openFilterSheet(String storeId) {
+    final state = ref.read(productListProvider);
     ProductFilterBottomSheet.show(
       context,
-      initialFilter: ref.read(productListProvider).filterState,
+      initialFilter: state.filterState,
+      deviceSummaries: state.deviceSummaries,
+      selectedDeviceTag: state.selectedDeviceTag,
+      onSelectDevice: (dev) => ref.read(productListProvider.notifier).setDeviceTag(dev, storeId),
       onApply: (filter) => ref.read(productListProvider.notifier).setFilterState(storeId, filter),
       onReset: () => ref.read(productListProvider.notifier).resetFilters(storeId),
     );
@@ -160,8 +173,9 @@ class _ProdukTabViewState extends ConsumerState<ProdukTabView> {
       color: AppColors.primary,
       child: ListView(
         physics: const AlwaysScrollableScrollPhysics(),
-        padding: const EdgeInsets.fromLTRB(16, 6, 16, 24),
+        padding: const EdgeInsets.fromLTRB(10, 6, 10, 24),
         children: [
+          const StoreProfileIncompleteBanner(),
           ProductMinimalHeader(
             productCount: productState.products.length,
             isSearching: _isSearching,
@@ -173,8 +187,26 @@ class _ProdukTabViewState extends ConsumerState<ProdukTabView> {
             onSearchChanged: (val) { if (store != null) productNotifier.setSearchQuery(val, store.id); },
             onBarcodeScan: () => _handleBarcodeScan(store?.id),
             onOpenFilter: () { if (store != null) _openFilterSheet(store.id); },
+            onOpenMonitor: () => DeviceStockMonitoringSheet.show(
+              context,
+              summaries: productState.deviceSummaries,
+              selectedDeviceTag: productState.selectedDeviceTag,
+              onSelectDevice: (dev) {
+                if (store != null) productNotifier.setDeviceTag(dev, store.id);
+              },
+            ),
             activeFilterCount: activeFilterCount,
-            onAddProduct: store == null ? null : () => _openAddProductModal(store.id),
+            onAddProduct: store == null
+                ? null
+                : () {
+                    final user = ref.read(authProvider).currentUser;
+                    final canManage = ref.read(rbacProvider.notifier).hasPermission(user, AppPermission.manageProducts);
+                    if (!canManage) {
+                      AppToast.showWarning(context, 'Tambah produk dibatasi oleh Owner untuk role ${user?.role.label ?? "Pengguna"}');
+                      return;
+                    }
+                    _openAddProductModal(store.id);
+                  },
           ),
           const SizedBox(height: 8),
           ProductCategoryFilterBar(
@@ -182,14 +214,6 @@ class _ProdukTabViewState extends ConsumerState<ProdukTabView> {
             selectedCategory: productState.selectedCategory,
             onSelectCategory: (cat) {
               if (store != null) productNotifier.setCategory(cat, store.id);
-            },
-          ),
-          if (categories.length > 1) const SizedBox(height: 8),
-          ProductDeviceFilterBar(
-            deviceSummaries: productState.deviceSummaries,
-            selectedDevice: productState.selectedDeviceTag,
-            onSelectDevice: (dev) {
-              if (store != null) productNotifier.setDeviceTag(dev, store.id);
             },
           ),
           const SizedBox(height: 8),

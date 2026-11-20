@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:intl/intl.dart';
 import 'package:tokona/core/theme/app_colors.dart';
 import 'package:tokona/core/theme/app_typography.dart';
 import 'package:tokona/core/widgets/app_toast.dart';
@@ -12,6 +11,7 @@ import 'package:tokona/features/dashboard/presentation/widgets/notification_cent
 import 'package:tokona/features/dashboard/presentation/widgets/product_quick_info_sheet.dart';
 import 'package:tokona/features/product/domain/models/product_model.dart';
 import 'package:tokona/features/product/presentation/controllers/product_controller.dart';
+import 'package:tokona/features/sync/presentation/widgets/sync_status_pill.dart';
 
 class BerandaHeaderBar extends ConsumerWidget {
   final StoreModel? store;
@@ -31,17 +31,6 @@ class BerandaHeaderBar extends ConsumerWidget {
     if (hour < 15) return 'Selamat Siang';
     if (hour < 18) return 'Selamat Sore';
     return 'Selamat Malam';
-  }
-
-  String _getTodayFormatted() {
-    try {
-      return DateFormat('EEEE, d MMM', 'id_ID').format(DateTime.now());
-    } catch (_) {
-      final now = DateTime.now();
-      const days = ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu', 'Minggu'];
-      const months = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
-      return '${days[now.weekday - 1]}, ${now.day} ${months[now.month - 1]}';
-    }
   }
 
   Future<void> _handleQuickScan(BuildContext context, WidgetRef ref) async {
@@ -67,7 +56,6 @@ class BerandaHeaderBar extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final todayFormatted = _getTodayFormatted();
     final unreadNotifs = ref.watch(unreadNotificationCountProvider);
 
     return Row(
@@ -146,22 +134,7 @@ class BerandaHeaderBar extends ConsumerWidget {
         Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-              decoration: BoxDecoration(
-                color: AppColors.surface,
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: AppColors.border),
-              ),
-              child: Text(
-                todayFormatted,
-                style: const TextStyle(
-                  fontSize: 11,
-                  fontWeight: FontWeight.w700,
-                  color: AppColors.textPrimary,
-                ),
-              ),
-            ),
+            const SyncStatusPill(),
             const SizedBox(width: 6),
             InkWell(
               onTap: () => _handleQuickScan(context, ref),

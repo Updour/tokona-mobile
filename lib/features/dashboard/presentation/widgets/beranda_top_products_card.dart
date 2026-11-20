@@ -4,8 +4,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:tokona/core/theme/app_colors.dart';
 import 'package:tokona/core/theme/app_typography.dart';
 import 'package:tokona/core/utils/currency_formatter.dart';
+import 'package:tokona/features/auth/presentation/controllers/auth_controller.dart';
 import 'package:tokona/features/report/domain/models/top_product_model.dart';
 import 'package:tokona/features/report/presentation/controllers/report_controller.dart';
+import 'package:tokona/features/settings/domain/models/app_permission.dart';
+import 'package:tokona/features/settings/presentation/controllers/rbac_controller.dart';
 
 class BerandaTopProductsCard extends ConsumerWidget {
   final VoidCallback? onNavigateToProducts;
@@ -25,7 +28,7 @@ class BerandaTopProductsCard extends ConsumerWidget {
       decoration: BoxDecoration(
         color: AppColors.surface,
         borderRadius: BorderRadius.circular(22),
-        border: Border.all(color: AppColors.border),
+        border: Border.all(color: AppColors.border.withValues(alpha: 0.55), width: 0.6),
         boxShadow: [
           BoxShadow(
             color: const Color(0xFF0F172A).withValues(alpha: 0.04),
@@ -178,9 +181,19 @@ class BerandaTopProductsCard extends ConsumerWidget {
                     CurrencyFormatter.format(item.revenue),
                     style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 12, color: AppColors.textPrimary),
                   ),
-                  Text(
-                    '+${CurrencyFormatter.format(item.profit)}',
-                    style: const TextStyle(fontSize: 10, fontWeight: FontWeight.w700, color: Color(0xFF059669)),
+                  Consumer(
+                    builder: (context, cRef, _) {
+                      final user = cRef.watch(authProvider).currentUser;
+                      final canViewProfit = cRef.watch(rbacProvider.notifier).hasPermission(user, AppPermission.viewProfit);
+                      return Text(
+                        canViewProfit ? '+${CurrencyFormatter.format(item.profit)}' : 'Laba: ••••••',
+                        style: TextStyle(
+                          fontSize: 10,
+                          fontWeight: FontWeight.w700,
+                          color: canViewProfit ? const Color(0xFF059669) : const Color(0xFF94A3B8),
+                        ),
+                      );
+                    },
                   ),
                 ],
               ),

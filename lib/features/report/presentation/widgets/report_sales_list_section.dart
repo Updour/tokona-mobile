@@ -46,34 +46,8 @@ class ReportSalesListSection extends ConsumerWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-          decoration: BoxDecoration(
-            color: const Color(0xFFEFF6FF),
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: const Color(0xFFBFDBFE)),
-          ),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Row(
-                children: [
-                  const Icon(Icons.receipt_long_rounded, size: 16, color: Color(0xFF2563EB)),
-                  const SizedBox(width: 6),
-                  Text(
-                    '$totalNota Nota Transaksi',
-                    style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: Color(0xFF1E40AF)),
-                  ),
-                ],
-              ),
-              Text(
-                CurrencyFormatter.format(totalOmzet),
-                style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w900, color: Color(0xFF1E40AF)),
-              ),
-            ],
-          ),
-        ),
-        const SizedBox(height: 12),
+        _buildSeamlessHeader(totalNota, totalOmzet),
+        const SizedBox(height: 10),
         if (filtered.isEmpty)
           _buildEmptyState()
         else
@@ -87,6 +61,58 @@ class ReportSalesListSection extends ConsumerWidget {
     );
   }
 
+  Widget _buildSeamlessHeader(int totalNota, double totalOmzet) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 11),
+      decoration: BoxDecoration(
+        color: const Color(0xFFF8FAFC),
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: const Color(0xFFE2E8F0), width: 0.9),
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(6),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFEEF2FF),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: const Icon(Icons.receipt_long_rounded, size: 15, color: Color(0xFF4F46E5)),
+              ),
+              const SizedBox(width: 8),
+              Text(
+                '$totalNota Transaksi Selesai',
+                style: const TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w700,
+                  color: Color(0xFF334155),
+                ),
+              ),
+            ],
+          ),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+            decoration: BoxDecoration(
+              color: const Color(0xFFF1F5F9),
+              borderRadius: BorderRadius.circular(16),
+            ),
+            child: Text(
+              CurrencyFormatter.format(totalOmzet),
+              style: const TextStyle(
+                fontSize: 12.5,
+                fontWeight: FontWeight.w800,
+                color: Color(0xFF0F172A),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildEmptyState() {
     return Container(
       width: double.infinity,
@@ -94,7 +120,7 @@ class ReportSalesListSection extends ConsumerWidget {
       decoration: BoxDecoration(
         color: AppColors.surface,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AppColors.border),
+        border: Border.all(color: const Color(0xFFE2E8F0)),
       ),
       child: Column(
         children: [

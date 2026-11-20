@@ -23,42 +23,51 @@ class _SplashScreenState extends ConsumerState<SplashScreen> with TickerProvider
   late final Animation<double> _squashAnimation;
   late final Animation<double> _shadowAnimation;
 
+  Timer? _minTimer;
   bool _minDurationElapsed = false;
 
   @override
   void initState() {
     super.initState();
 
-    // Teks fade-in instan & halus
     _textFadeController = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 200),
+      duration: const Duration(milliseconds: 400),
     );
     _textFadeAnimation = CurvedAnimation(parent: _textFadeController, curve: Curves.easeOut);
     _textFadeController.forward();
 
-    // Animasi bounce cepat mikro
+    // Animasi bounce melompat halus dan ritmis tanpa beban raster
     _bounceController = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 200),
+      duration: const Duration(milliseconds: 650),
     );
 
-    _jumpAnimation = Tween<double>(begin: 0.0, end: -16.0).animate(
-      CurvedAnimation(parent: _bounceController, curve: Curves.easeOutQuad),
+    _jumpAnimation = Tween<double>(begin: 0.0, end: -24.0).animate(
+      CurvedAnimation(
+        parent: _bounceController,
+        curve: Curves.easeInOutCubic,
+      ),
     );
 
-    _squashAnimation = Tween<double>(begin: 0.96, end: 1.02).animate(
-      CurvedAnimation(parent: _bounceController, curve: Curves.easeInOut),
+    _squashAnimation = Tween<double>(begin: 0.94, end: 1.04).animate(
+      CurvedAnimation(
+        parent: _bounceController,
+        curve: Curves.easeInOutSine,
+      ),
     );
 
-    _shadowAnimation = Tween<double>(begin: 1.0, end: 0.70).animate(
-      CurvedAnimation(parent: _bounceController, curve: Curves.easeInOut),
+    _shadowAnimation = Tween<double>(begin: 1.0, end: 0.55).animate(
+      CurvedAnimation(
+        parent: _bounceController,
+        curve: Curves.easeInOutSine,
+      ),
     );
 
-    _bounceController.forward();
+    _bounceController.repeat(reverse: true);
 
-    // Langsung navigasi sesegera mungkin saat auth siap (tanpa delay buatan)
-    WidgetsBinding.instance.addPostFrameCallback((_) {
+    // Durasi minimum halus agar transisi tidak freeze/hang
+    _minTimer = Timer(const Duration(milliseconds: 900), () {
       if (mounted) {
         _minDurationElapsed = true;
         _checkAndNavigate();
@@ -68,6 +77,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen> with TickerProvider
 
   @override
   void dispose() {
+    _minTimer?.cancel();
     _textFadeController.dispose();
     _bounceController.dispose();
     super.dispose();
@@ -81,9 +91,9 @@ class _SplashScreenState extends ConsumerState<SplashScreen> with TickerProvider
 
     Navigator.of(context).pushReplacement(
       PageRouteBuilder(
-        pageBuilder: (_, animation, __) => targetScreen,
-        transitionsBuilder: (_, animation, __, child) => FadeTransition(opacity: animation, child: child),
-        transitionDuration: const Duration(milliseconds: 150),
+        pageBuilder: (context, animation, secondaryAnimation) => targetScreen,
+        transitionsBuilder: (context, animation, secondaryAnimation, child) => FadeTransition(opacity: animation, child: child),
+        transitionDuration: const Duration(milliseconds: 300),
       ),
     );
   }
@@ -94,29 +104,17 @@ class _SplashScreenState extends ConsumerState<SplashScreen> with TickerProvider
       fit: BoxFit.contain,
       width: logoSize,
       height: logoSize,
-      errorBuilder: (_, __, ___) => Image.asset(
-        'assets/images/splash_screen.jpeg',
-        fit: BoxFit.contain,
-        width: logoSize,
-        height: logoSize,
-        errorBuilder: (_, __, ___) => Image.asset(
-          'assets/splash_screen.jpeg',
-          fit: BoxFit.contain,
-          width: logoSize,
-          height: logoSize,
-          errorBuilder: (_, __, ___) => Icon(
-            Icons.storefront_rounded,
-            size: logoSize * 0.6,
-            color: AppColors.primary,
-          ),
-        ),
+      errorBuilder: (context, error, stackTrace) => Icon(
+        Icons.storefront_rounded,
+        size: logoSize * 0.6,
+        color: AppColors.primary,
       ),
     );
   }
 
   @override
   Widget build(BuildContext context) {
-    ref.listen(authProvider, (_, next) {
+    ref.listen(authProvider, (previous, next) {
       if (next.isInitialized && _minDurationElapsed) {
         _checkAndNavigate();
       }
@@ -129,11 +127,11 @@ class _SplashScreenState extends ConsumerState<SplashScreen> with TickerProvider
       backgroundColor: Colors.white,
       body: Stack(
         children: [
-          // Centered animated bouncing logo (seamless from Android native cold start)
           Center(
             child: AnimatedBuilder(
               animation: _bounceController,
-              builder: (context, child) {
+              child: _buildLogo(logoSize),
+              builder: (context, logoChild) {
                 final jumpY = _jumpAnimation.value;
                 final squash = _squashAnimation.value;
                 final shadowScale = _shadowAnimation.value;
@@ -141,27 +139,24 @@ class _SplashScreenState extends ConsumerState<SplashScreen> with TickerProvider
                 return Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    // Bouncing logo with squash & stretch
                     Transform.translate(
                       offset: Offset(0, jumpY),
                       child: Transform.scale(
                         scaleY: squash,
                         scaleX: 2.0 - squash,
-                        child: _buildLogo(logoSize),
+                        child: logoChild,
                       ),
                     ),
                     const SizedBox(height: 10),
-                    // Dynamic ground shadow that shrinks when jumping up
                     Container(
                       width: logoSize * 0.62 * shadowScale,
-                      height: 9 * shadowScale,
+                      height: 8 * shadowScale,
                       decoration: BoxDecoration(
                         color: Colors.black.withValues(alpha: 0.08 * (2.0 - shadowScale)),
-                        borderRadius: BorderRadius.all(Radius.elliptical(logoSize * 0.6, 9)),
+                        borderRadius: BorderRadius.all(Radius.elliptical(logoSize * 0.6, 8)),
                       ),
                     ),
                     const SizedBox(height: 22),
-                    // App Brand Title & Subtitle with fade-in
                     FadeTransition(
                       opacity: _textFadeAnimation,
                       child: Column(
@@ -201,8 +196,6 @@ class _SplashScreenState extends ConsumerState<SplashScreen> with TickerProvider
               },
             ),
           ),
-
-          // Bottom loading indicator & version
           Positioned(
             bottom: 24,
             left: 0,

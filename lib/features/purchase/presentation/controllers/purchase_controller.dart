@@ -10,6 +10,8 @@ import 'package:tokona/features/purchase/domain/models/purchase_model.dart';
 import 'package:tokona/features/purchase/domain/models/purchase_state.dart';
 import 'package:tokona/features/purchase/presentation/controllers/active_orders_controller.dart';
 import 'package:tokona/features/report/presentation/controllers/report_controller.dart';
+import 'package:tokona/features/settings/data/services/audit_log_service.dart';
+import 'package:tokona/features/settings/domain/models/audit_log_model.dart';
 
 final purchaseControllerProvider = StateNotifierProvider<PurchaseController, PurchaseState>((ref) {
   final repository = ref.watch(purchaseRepositoryProvider);
@@ -49,6 +51,18 @@ class PurchaseController extends StateNotifier<PurchaseState> {
         isLoading: false,
         purchases: updatedList,
         successMessage: 'Pembelian barang berhasil disimpan. Stok dan HPP diperbarui.',
+      );
+
+      final itemSummary = purchase.items.map((e) => '${e.productName ?? "Barang"} (+${e.quantity.toInt()} ${e.unitName})').join(', ');
+      AuditLogService.log(
+        storeId: dto.storeId,
+        userId: dto.userId,
+        userName: 'Staf Pengadaan',
+        userRole: 'manager',
+        actionType: AuditActionType.inventory,
+        title: 'Restok Masuk #${purchase.invoiceNumber}',
+        description: 'Tambah stok: $itemSummary • Supplier: ${purchase.supplierName ?? "-"}',
+        deviceTag: purchase.deviceTag,
       );
 
       // Refresh product list state to reflect updated stock and HPP immediately
@@ -119,6 +133,21 @@ class PurchaseController extends StateNotifier<PurchaseState> {
       return true;
     } catch (e) {
       debugPrint('Error updating purchase invoice/supplier: $e');
+      return false;
+    }
+  }
+
+  Future<bool> revertToShipping(String purchaseId, String storeId) async {
+    try {
+      final modifierService = _ref.read(purchaseModifierServiceProvider);
+      await modifierService.revertReceivedToShipping(purchaseId);
+      await loadPurchases(storeId);
+      await _ref.read(activeOrdersProvider.notifier).loadOrders(storeId);
+      await _ref.read(productListProvider.notifier).loadProducts(storeId);
+      _ref.read(reportControllerProvider.notifier).loadReport(storeId);
+      return true;
+    } catch (e) {
+      debugPrint('Error reverting purchase status: $e');
       return false;
     }
   }

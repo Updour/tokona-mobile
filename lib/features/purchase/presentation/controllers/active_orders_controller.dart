@@ -2,8 +2,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:tokona/features/payment/presentation/controllers/payment_account_controller.dart';
 import 'package:tokona/features/product/presentation/controllers/product_controller.dart';
 import 'package:tokona/features/purchase/data/repositories/purchase_repository.dart';
+import 'package:tokona/features/purchase/data/services/jt_cargo_sync_service.dart';
 import 'package:tokona/features/purchase/domain/models/purchase_model.dart';
 import 'package:tokona/features/report/presentation/controllers/report_controller.dart';
+import 'package:tokona/features/settings/presentation/controllers/app_preferences_controller.dart';
 
 final activeOrdersProvider = StateNotifierProvider<ActiveOrdersController, List<PurchaseModel>>((ref) {
   final repo = ref.watch(purchaseRepositoryProvider);
@@ -18,13 +20,26 @@ class ActiveOrdersController extends StateNotifier<List<PurchaseModel>> {
 
   Future<void> loadOrders(String storeId) async {
     try {
-      // Periksa dan otomatis terima pesanan yang melewati batas estimasi maksimal
-      final autoReceivedCount = await _repository.checkAndAutoReceiveExpiredOrders(storeId);
-      if (autoReceivedCount > 0) {
-        _ref.read(productListProvider.notifier).loadProducts(storeId);
-        _ref.read(reportControllerProvider.notifier).loadReport(storeId);
+      final prefs = _ref.read(appPreferencesProvider);
+      if (prefs.autoReceiveOnExpiredEstimate) {
+        final autoReceivedCount = await _repository.checkAndAutoReceiveExpiredOrders(storeId);
+        if (autoReceivedCount > 0) {
+          _ref.read(productListProvider.notifier).loadProducts(storeId);
+          _ref.read(reportControllerProvider.notifier).loadReport(storeId);
+        }
       }
-      final list = await _repository.getActiveOrders(storeId);
+      var list = await _repository.getActiveOrders(storeId);
+
+      // Cek live status kurir J&T Cargo secara background
+      final jtDelivered = await JtCargoSyncService.checkActiveDeliveries(
+        activeOrders: list,
+        storeId: storeId,
+        ref: _ref,
+      );
+      if (jtDelivered > 0) {
+        list = await _repository.getActiveOrders(storeId);
+      }
+
       state = list;
     } catch (_) {}
   }

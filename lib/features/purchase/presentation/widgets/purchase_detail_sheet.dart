@@ -15,6 +15,7 @@ import 'package:tokona/features/purchase/domain/models/purchase_model.dart';
 import 'package:tokona/features/purchase/presentation/controllers/purchase_controller.dart';
 import 'package:tokona/features/purchase/presentation/widgets/edit_purchase_items_sheet.dart';
 import 'package:tokona/features/purchase/presentation/widgets/purchase_detail_item_tile.dart';
+import 'package:tokona/features/purchase/presentation/widgets/purchase_financial_summary_card.dart';
 import 'package:tokona/features/purchase/presentation/widgets/purchase_tracking_section.dart';
 
 class PurchaseDetailSheet extends ConsumerWidget {
@@ -50,8 +51,32 @@ class PurchaseDetailSheet extends ConsumerWidget {
         ref.read(productListProvider.notifier).loadProducts(sId);
         ref.read(purchaseControllerProvider.notifier).loadPurchases(sId);
       }
-      AppToast.showSuccess(context, 'Stok barang berhasil ditambahkan ke inventaris');
+      AppToast.showSuccess(context, 'Stok barang berhasil ditambahkan');
       Navigator.of(context).pop();
+    }
+  }
+
+  Future<void> _handleRevertToShipping(BuildContext context, WidgetRef ref) async {
+    final confirmed = await AppDialog.showConfirmation(
+      context,
+      title: 'Kembalikan ke Dalam Pengiriman?',
+      message: 'Barang faktur ${purchase.invoiceNumber} belum tiba? Status akan dikembalikan ke Dalam Pengiriman dan stok disesuaikan.',
+      confirmText: 'Ya, Kembalikan',
+      icon: Icons.undo_rounded,
+    );
+    if (confirmed == true && context.mounted) {
+      final sId = ref.read(authProvider).currentStore?.id;
+      if (sId != null) {
+        final ok = await ref.read(purchaseControllerProvider.notifier).revertToShipping(purchase.id, sId);
+        if (context.mounted) {
+          if (ok) {
+            AppToast.showSuccess(context, 'Pesanan dikembalikan ke status OTW');
+            Navigator.of(context).pop();
+          } else {
+            AppToast.showError(context, 'Gagal mengembalikan status pesanan');
+          }
+        }
+      }
     }
   }
 
@@ -97,7 +122,7 @@ class PurchaseDetailSheet extends ConsumerWidget {
                   const SizedBox(height: 16),
                   _buildItemsSection(context),
                   const SizedBox(height: 16),
-                  _buildFinancialSummaryCard(),
+                  PurchaseFinancialSummaryCard(purchase: purchase),
                   if (purchase.notes != null && purchase.notes!.trim().isNotEmpty) ...[
                     const SizedBox(height: 16),
                     _buildNotesCard(),
@@ -111,8 +136,26 @@ class PurchaseDetailSheet extends ConsumerWidget {
               ElevatedButton.icon(
                 onPressed: () => _handleConfirmArrival(context, ref),
                 icon: const Icon(Icons.check_circle_outline_rounded, size: 18),
-                label: const Text('Konfirmasi Barang Sudah Tiba', style: TextStyle(fontWeight: FontWeight.w700)),
-                style: ElevatedButton.styleFrom(backgroundColor: AppColors.primary, foregroundColor: Colors.white, padding: const EdgeInsets.symmetric(vertical: 14), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))),
+                label: const Text('Barang Sudah Diterima', style: TextStyle(fontWeight: FontWeight.w700)),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.primary,
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(vertical: 14),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                ),
+              ),
+            ] else if (purchase.isReceived) ...[
+              const SizedBox(height: 12),
+              OutlinedButton.icon(
+                onPressed: () => _handleRevertToShipping(context, ref),
+                icon: const Icon(Icons.undo_rounded, size: 16, color: Color(0xFFD97706)),
+                label: const Text('Barang Belum Tiba? Kembalikan ke Dalam Pengiriman', style: TextStyle(fontSize: 12.5, fontWeight: FontWeight.w700, color: Color(0xFFB45309))),
+                style: OutlinedButton.styleFrom(
+                  side: const BorderSide(color: Color(0xFFFDE68A)),
+                  backgroundColor: const Color(0xFFFFFBEB),
+                  padding: const EdgeInsets.symmetric(vertical: 12),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                ),
               ),
             ],
           ],
@@ -129,9 +172,9 @@ class PurchaseDetailSheet extends ConsumerWidget {
         children: [
           _buildInfoRow('Tanggal Pembelian', dateFormat.format(purchase.createdAt)),
           const SizedBox(height: 7),
-          _buildInfoRow('No. Faktur Toko', purchase.invoiceNumber),
+          _buildInfoRow('No. Faktur', purchase.invoiceNumber),
           const SizedBox(height: 7),
-          _buildInfoRow('Nama Toko / Supplier', purchase.supplierName ?? 'Tanpa Nama Toko'),
+          _buildInfoRow('Nama Supplier', purchase.supplierName ?? 'Tanpa Nama Supplier'),
           const SizedBox(height: 7),
           _buildInfoRow('Saluran Pembelian', purchase.isOnline ? 'Online (${purchase.platform ?? "Marketplace"})' : 'Toko Fisik / Offline'),
           if (purchase.deviceTag != null && purchase.deviceTag!.isNotEmpty) ...[
@@ -140,7 +183,7 @@ class PurchaseDetailSheet extends ConsumerWidget {
           ],
           if (purchase.paymentAccount != null && purchase.paymentAccount!.trim().isNotEmpty) ...[
             const SizedBox(height: 7),
-            _buildInfoRow('Akun Kas / Pembayaran', purchase.paymentAccount!),
+            _buildInfoRow('Akun Pembayaran', purchase.paymentAccount!),
           ],
           if (purchase.trackingNumber != null && purchase.trackingNumber!.isNotEmpty) ...[
             const SizedBox(height: 7),
@@ -167,76 +210,42 @@ class PurchaseDetailSheet extends ConsumerWidget {
     );
   }
 
-  Widget _buildInfoRow(String label, String value) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Text(label, style: AppTypography.bodySmall.copyWith(color: AppColors.textMuted)),
-        const SizedBox(width: 8),
-        Flexible(
-          child: Text(value, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.textPrimary), textAlign: TextAlign.end, overflow: TextOverflow.ellipsis),
-        ),
-      ],
-    );
-  }
+  Widget _buildInfoRow(String label, String value) => Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(label, style: AppTypography.bodySmall.copyWith(color: AppColors.textMuted)),
+          const SizedBox(width: 8),
+          Flexible(child: Text(value, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.textPrimary), textAlign: TextAlign.end, overflow: TextOverflow.ellipsis)),
+        ],
+      );
 
-  Widget _buildItemsSection(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text('Rincian Barang (${purchase.items.length})', style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w700)),
-            InkWell(
-              onTap: () => EditPurchaseItemsSheet.show(context, purchase),
-              borderRadius: BorderRadius.circular(6),
-              child: const Padding(
-                padding: EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                child: Row(
-                  children: [
-                    Icon(Icons.add_circle_outline_rounded, size: 13, color: AppColors.primary),
-                    SizedBox(width: 4),
-                    Text('Edit / Tambah', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: AppColors.primary)),
-                  ],
+  Widget _buildItemsSection(BuildContext context) => Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text('Rincian Barang (${purchase.items.length})', style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w700)),
+              InkWell(
+                onTap: () => EditPurchaseItemsSheet.show(context, purchase),
+                borderRadius: BorderRadius.circular(6),
+                child: const Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                  child: Row(
+                    children: [
+                      Icon(Icons.add_circle_outline_rounded, size: 13, color: AppColors.primary),
+                      SizedBox(width: 4),
+                      Text('Edit / Tambah', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: AppColors.primary)),
+                    ],
+                  ),
                 ),
               ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 8),
-        ...purchase.items.map((item) => PurchaseDetailItemTile(item: item)),
-      ],
-    );
-  }
-
-  Widget _buildFinancialSummaryCard() {
-    return Container(
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(color: AppColors.surface, borderRadius: BorderRadius.circular(12), border: Border.all(color: AppColors.border)),
-      child: Column(
-        children: [
-          _buildFinanceRow('Subtotal Barang', CurrencyFormatter.format(purchase.totalAmount)),
-          if (purchase.shippingFee > 0) ...[const SizedBox(height: 6), _buildFinanceRow('Ongkos Kirim', CurrencyFormatter.format(purchase.shippingFee))],
-          if (purchase.serviceFee > 0) ...[const SizedBox(height: 6), _buildFinanceRow('Biaya Layanan', CurrencyFormatter.format(purchase.serviceFee))],
+            ],
+          ),
           const SizedBox(height: 8),
-          const Divider(height: 1, color: AppColors.border),
-          const SizedBox(height: 8),
-          _buildFinanceRow('Total Belanja', CurrencyFormatter.format(purchase.grandTotal), isBold: true),
+          ...purchase.items.map((item) => PurchaseDetailItemTile(item: item)),
         ],
-      ),
-    );
-  }
-
-  Widget _buildFinanceRow(String label, String value, {bool isBold = false}) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Text(label, style: TextStyle(fontSize: isBold ? 13.5 : 12, fontWeight: isBold ? FontWeight.w700 : FontWeight.w500, color: isBold ? AppColors.textPrimary : AppColors.textSecondary)),
-        Text(value, style: TextStyle(fontSize: isBold ? 14 : 12, fontWeight: isBold ? FontWeight.w800 : FontWeight.w600, color: isBold ? AppColors.primary : AppColors.textPrimary)),
-      ],
-    );
-  }
+      );
 
   Widget _buildNotesCard() {
     return Container(
@@ -268,7 +277,7 @@ class PurchaseDetailSheet extends ConsumerWidget {
           const Row(children: [
             Icon(Icons.photo_camera_back_outlined, size: 16, color: AppColors.primary),
             SizedBox(width: 6),
-            Text('Foto Nota / Faktur Terlampir', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 12.5)),
+            Text('Foto Faktur', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 12.5)),
           ]),
           const SizedBox(height: 10),
           GestureDetector(
@@ -279,13 +288,10 @@ class PurchaseDetailSheet extends ConsumerWidget {
                 child: InteractiveViewer(child: ClipRRect(borderRadius: BorderRadius.circular(12), child: Image.file(file))),
               ),
             ),
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(10),
-              child: Image.file(file, height: 160, width: double.infinity, fit: BoxFit.cover),
-            ),
+            child: ClipRRect(borderRadius: BorderRadius.circular(10), child: Image.file(file, height: 160, width: double.infinity, fit: BoxFit.cover)),
           ),
           const SizedBox(height: 6),
-          const Text('Ketuk foto untuk perbesar (zoom)', style: TextStyle(fontSize: 10, color: AppColors.textMuted)),
+          const Text('Ketuk untuk perbesar', style: TextStyle(fontSize: 10, color: AppColors.textMuted)),
         ],
       ),
     );

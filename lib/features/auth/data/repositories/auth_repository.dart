@@ -156,4 +156,105 @@ class AuthRepository {
     await _storeDao.updateStore(updatedStore);
     return updatedStore;
   }
+
+  Future<UserModel?> findUserByUsername(String username) async {
+    await initialize();
+    return await _userDao.findByUsername(username);
+  }
+
+  Future<void> resetPassword({
+    required String username,
+    required String newPassword,
+  }) async {
+    await initialize();
+    final user = await _userDao.findByUsername(username);
+    if (user == null) {
+      throw StateError('Pengguna dengan nama tersebut tidak ditemukan');
+    }
+    if (newPassword.length < 6) {
+      throw ArgumentError('Kata sandi minimal 6 karakter');
+    }
+    final salt = PasswordHasher.generateSalt();
+    final passwordHash = PasswordHasher.hashPassword(newPassword, salt);
+    await _userDao.updatePassword(user.id, passwordHash, salt);
+  }
+
+  Future<List<UserModel>> getStoreUsers(String storeId) async {
+    await initialize();
+    return await _userDao.getUsersByStoreId(storeId);
+  }
+
+  Future<UserModel> createStaffUser({
+    required String storeId,
+    required String username,
+    required String fullName,
+    required String password,
+    required UserRole role,
+  }) async {
+    await initialize();
+    final existing = await _userDao.findByUsername(username);
+    if (existing != null) {
+      throw StateError('Username $username sudah digunakan');
+    }
+    if (password.length < 6) {
+      throw ArgumentError('Kata sandi minimal 6 karakter');
+    }
+
+    final now = DateTime.now();
+    final salt = PasswordHasher.generateSalt();
+    final hash = PasswordHasher.hashPassword(password, salt);
+    final user = UserModel(
+      id: IdGenerator.generateId(prefix: 'USR'),
+      storeId: storeId,
+      username: username.trim(),
+      fullName: fullName.trim(),
+      passwordHash: hash,
+      salt: salt,
+      role: role,
+      isActive: true,
+      createdAt: now,
+      updatedAt: now,
+    );
+
+    await _userDao.insertUser(user);
+    return user;
+  }
+
+  Future<void> deleteStaffUser(String userId) async {
+    await initialize();
+    await _userDao.deleteUser(userId);
+  }
+
+  Future<({StoreModel store, UserModel user})> importPairingData(Map<String, dynamic> data) async {
+    await initialize();
+    final store = StoreModel(
+      id: data['store_id'] as String,
+      name: (data['store_name'] as String?) ?? 'Tokona Store',
+      address: data['store_address'] as String?,
+      phone: data['store_phone'] as String?,
+      createdAt: DateTime.now(),
+      updatedAt: DateTime.now(),
+    );
+
+    final user = UserModel(
+      id: data['user_id'] as String? ?? IdGenerator.generateId(prefix: 'USR'),
+      storeId: store.id,
+      username: data['username'] as String,
+      fullName: (data['full_name'] as String?) ?? data['username'] as String,
+      passwordHash: data['password_hash'] as String,
+      salt: data['salt'] as String,
+      role: UserRole.fromString((data['role'] as String?) ?? 'cashier'),
+      isActive: true,
+      createdAt: DateTime.now(),
+      updatedAt: DateTime.now(),
+    );
+
+    await _db!.transaction((txn) async {
+      await _storeDao.insertStore(store, txn: txn);
+      await _userDao.insertUser(user, txn: txn);
+      await _sessionDao.setActiveUserId(user.id, txn: txn);
+    });
+
+    return (store: store, user: user);
+  }
 }

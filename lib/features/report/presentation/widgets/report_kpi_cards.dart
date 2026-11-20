@@ -17,56 +17,10 @@ class ReportKpiCards extends StatelessWidget {
     return Column(
       children: [
         _buildHeroProfitCard(),
-        const SizedBox(height: 12),
-        Row(
-          children: [
-            Expanded(
-              child: _buildMetricTile(
-                title: 'Total HPP Modal',
-                value: CurrencyFormatter.format(summary.totalCogs),
-                subtitle: 'Biaya pokok barang terjual',
-                icon: Icons.inventory_2_outlined,
-                accentColor: const Color(0xFF64748B),
-              ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: _buildMetricTile(
-                title: 'Belanja Stok Masuk',
-                value: CurrencyFormatter.format(summary.totalPurchaseSpend),
-                subtitle: 'Pembelian barang periode ini',
-                icon: Icons.shopping_bag_outlined,
-                accentColor: const Color(0xFF0284C7),
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 12),
-        Row(
-          children: [
-            Expanded(
-              child: _buildMetricTile(
-                title: 'Total Transaksi',
-                value: '${summary.transactionCount} Nota',
-                subtitle: 'Pelanggan dilayani kasir',
-                icon: Icons.receipt_long_outlined,
-                accentColor: const Color(0xFF8B5CF6),
-              ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: _buildMetricTile(
-                title: 'Rata-rata Nota',
-                value: CurrencyFormatter.format(summary.averageBasket),
-                subtitle: 'Nilai per belanjaan',
-                icon: Icons.analytics_outlined,
-                accentColor: const Color(0xFF10B981),
-              ),
-            ),
-          ],
-        ),
+        const SizedBox(height: 10),
+        _buildSeamlessMetricsGrid(),
         if (summary.totalPendingRefund > 0) ...[
-          const SizedBox(height: 12),
+          const SizedBox(height: 10),
           _buildPendingRefundNotice(),
         ],
       ],
@@ -77,22 +31,19 @@ class ReportKpiCards extends StatelessWidget {
     final isProfitable = summary.grossProfit >= 0;
 
     return Container(
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
         gradient: LinearGradient(
-          colors: [
-            const Color(0xFF0F172A),
-            AppColors.primaryDark,
-          ],
+          colors: [const Color(0xFF0F172A), AppColors.primaryDark],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(18),
         boxShadow: [
           BoxShadow(
-            color: AppColors.primary.withValues(alpha: 0.16),
-            blurRadius: 18,
-            offset: const Offset(0, 8),
+            color: AppColors.primary.withValues(alpha: 0.14),
+            blurRadius: 16,
+            offset: const Offset(0, 6),
           ),
         ],
       ),
@@ -102,12 +53,9 @@ class ReportKpiCards extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(
-                'Omset Penjualan Bersih',
-                style: AppTypography.bodySmall.copyWith(color: Colors.white70, fontSize: 13),
-              ),
+              Text('Omset Penjualan Bersih', style: AppTypography.bodySmall.copyWith(color: Colors.white70, fontSize: 12.5)),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 3.5),
                 decoration: BoxDecoration(
                   color: (isProfitable ? const Color(0xFF10B981) : const Color(0xFFEF4444)).withValues(alpha: 0.2),
                   borderRadius: BorderRadius.circular(20),
@@ -119,29 +67,24 @@ class ReportKpiCards extends StatelessWidget {
                   'Margin ${summary.profitMargin.toStringAsFixed(1)}%',
                   style: TextStyle(
                     color: isProfitable ? const Color(0xFF34D399) : const Color(0xFFFCA5A5),
-                    fontSize: 11,
+                    fontSize: 10.5,
                     fontWeight: FontWeight.w700,
                   ),
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 6),
+          const SizedBox(height: 5),
           Text(
             CurrencyFormatter.format(summary.totalRevenue),
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: 26,
-              fontWeight: FontWeight.w800,
-              letterSpacing: -0.5,
-            ),
+            style: const TextStyle(color: Colors.white, fontSize: 25, fontWeight: FontWeight.w800, letterSpacing: -0.5),
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 14),
           Container(
-            padding: const EdgeInsets.all(12),
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 11),
             decoration: BoxDecoration(
               color: Colors.white.withValues(alpha: 0.08),
-              borderRadius: BorderRadius.circular(14),
+              borderRadius: BorderRadius.circular(13),
             ),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -149,13 +92,13 @@ class ReportKpiCards extends StatelessWidget {
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('Estimasi Laba Kotor', style: TextStyle(color: Colors.white60, fontSize: 11)),
+                    const Text('Estimasi Laba Kotor', style: TextStyle(color: Colors.white60, fontSize: 10.5)),
                     const SizedBox(height: 2),
                     Text(
                       CurrencyFormatter.format(summary.grossProfit),
                       style: TextStyle(
                         color: isProfitable ? const Color(0xFF4ADE80) : const Color(0xFFF87171),
-                        fontSize: 16,
+                        fontSize: 15.5,
                         fontWeight: FontWeight.w700,
                       ),
                     ),
@@ -164,15 +107,11 @@ class ReportKpiCards extends StatelessWidget {
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
-                    Text('Total HPP', style: TextStyle(color: Colors.white60, fontSize: 11)),
+                    const Text('Total HPP', style: TextStyle(color: Colors.white60, fontSize: 10.5)),
                     const SizedBox(height: 2),
                     Text(
                       CurrencyFormatter.format(summary.totalCogs),
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 14,
-                        fontWeight: FontWeight.w600,
-                      ),
+                      style: const TextStyle(color: Colors.white, fontSize: 13.5, fontWeight: FontWeight.w600),
                     ),
                   ],
                 ),
@@ -184,54 +123,124 @@ class ReportKpiCards extends StatelessWidget {
     );
   }
 
-  Widget _buildMetricTile({
+  Widget _buildSeamlessMetricsGrid() {
+    return Container(
+      decoration: BoxDecoration(
+        color: AppColors.surface,
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(color: const Color(0xFFE2E8F0), width: 0.9),
+        boxShadow: [
+          BoxShadow(
+            color: const Color(0xFF0F172A).withValues(alpha: 0.04),
+            blurRadius: 18,
+            offset: const Offset(0, 6),
+          ),
+          BoxShadow(
+            color: const Color(0xFF0F172A).withValues(alpha: 0.02),
+            blurRadius: 6,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(
+        children: [
+          Row(
+            children: [
+              Expanded(
+                child: _buildMetricCell(
+                  title: 'HPP Modal',
+                  value: CurrencyFormatter.format(summary.totalCogs),
+                  subtitle: 'Biaya pokok barang',
+                  icon: Icons.inventory_2_outlined,
+                  accentColor: const Color(0xFF64748B),
+                  accentBg: const Color(0xFFF1F5F9),
+                ),
+              ),
+              Container(width: 0.9, height: 74, color: const Color(0xFFF1F5F9)),
+              Expanded(
+                child: _buildMetricCell(
+                  title: 'Belanja Masuk',
+                  value: CurrencyFormatter.format(summary.totalPurchaseSpend),
+                  subtitle: 'Kulakan periode ini',
+                  icon: Icons.shopping_bag_outlined,
+                  accentColor: const Color(0xFF0284C7),
+                  accentBg: const Color(0xFFE0F2FE),
+                ),
+              ),
+            ],
+          ),
+          const Divider(height: 1, thickness: 0.9, color: Color(0xFFF1F5F9)),
+          Row(
+            children: [
+              Expanded(
+                child: _buildMetricCell(
+                  title: 'Total Transaksi',
+                  value: '${summary.transactionCount} Nota',
+                  subtitle: 'Struk kasir dilayani',
+                  icon: Icons.receipt_long_outlined,
+                  accentColor: const Color(0xFF8B5CF6),
+                  accentBg: const Color(0xFFF3E8FF),
+                ),
+              ),
+              Container(width: 0.9, height: 74, color: const Color(0xFFF1F5F9)),
+              Expanded(
+                child: _buildMetricCell(
+                  title: 'Rata-rata Nota',
+                  value: CurrencyFormatter.format(summary.averageBasket),
+                  subtitle: 'Nilai per belanjaan',
+                  icon: Icons.analytics_outlined,
+                  accentColor: const Color(0xFF10B981),
+                  accentBg: const Color(0xFFD1FAE5),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildMetricCell({
     required String title,
     required String value,
     required String subtitle,
     required IconData icon,
     required Color accentColor,
+    required Color accentBg,
   }) {
-    return Container(
-      padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-        color: AppColors.surface,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AppColors.border, width: 0.8),
-      ),
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
               Container(
-                padding: const EdgeInsets.all(6),
-                decoration: BoxDecoration(
-                  color: accentColor.withValues(alpha: 0.12),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Icon(icon, size: 16, color: accentColor),
+                padding: const EdgeInsets.all(5.5),
+                decoration: BoxDecoration(color: accentBg, borderRadius: BorderRadius.circular(7)),
+                child: Icon(icon, size: 14, color: accentColor),
               ),
-              const SizedBox(width: 8),
+              const SizedBox(width: 7),
               Expanded(
                 child: Text(
                   title,
-                  style: AppTypography.bodySmall.copyWith(fontSize: 11, fontWeight: FontWeight.w600),
+                  style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: Color(0xFF475569)),
                   overflow: TextOverflow.ellipsis,
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 10),
+          const SizedBox(height: 8),
           Text(
             value,
-            style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w700, color: AppColors.textPrimary),
+            style: const TextStyle(fontSize: 14.5, fontWeight: FontWeight.w800, color: AppColors.textPrimary, letterSpacing: -0.2),
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
           ),
-          const SizedBox(height: 2),
+          const SizedBox(height: 1.5),
           Text(
             subtitle,
-            style: TextStyle(fontSize: 10, color: AppColors.textMuted),
+            style: const TextStyle(fontSize: 10, color: AppColors.textMuted),
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
           ),
@@ -242,28 +251,22 @@ class ReportKpiCards extends StatelessWidget {
 
   Widget _buildPendingRefundNotice() {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+      padding: const EdgeInsets.symmetric(horizontal: 13, vertical: 10),
       decoration: BoxDecoration(
         color: const Color(0xFFFEF2F2),
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: const Color(0xFFFCA5A5), width: 0.8),
+        borderRadius: BorderRadius.circular(13),
+        border: Border.all(color: const Color(0xFFFECACA), width: 0.8),
       ),
       child: Row(
         children: [
-          const Icon(Icons.warning_amber_rounded, color: Color(0xFFDC2626), size: 20),
-          const SizedBox(width: 10),
+          const Icon(Icons.warning_amber_rounded, color: Color(0xFFDC2626), size: 18),
+          const SizedBox(width: 8),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
-                  'Ada Dana Tertahan di Rekening HP',
-                  style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: Color(0xFF991B1B)),
-                ),
-                Text(
-                  'Total ${CurrencyFormatter.format(summary.totalPendingRefund)} menunggu konfirmasi penarikan',
-                  style: const TextStyle(fontSize: 11, color: Color(0xFFB91C1C)),
-                ),
+                const Text('Dana Tertahan di Rekening HP', style: TextStyle(fontSize: 11.5, fontWeight: FontWeight.w700, color: Color(0xFF991B1B))),
+                Text('${CurrencyFormatter.format(summary.totalPendingRefund)} menunggu penarikan', style: const TextStyle(fontSize: 10.5, color: Color(0xFFB91C1C))),
               ],
             ),
           ),

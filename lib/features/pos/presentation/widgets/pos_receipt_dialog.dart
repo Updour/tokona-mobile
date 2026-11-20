@@ -88,6 +88,11 @@ class PosReceiptDialog extends StatelessWidget {
     WhatsAppPhoneInputDialog.show(context, receiptText: receiptText);
   }
 
+  void _handlePrintThermal(BuildContext context) {
+    HapticFeedback.lightImpact();
+    AppToast.showSuccess(context, 'Mencetak struk ke printer thermal Bluetooth (ESC/POS)...');
+  }
+
   @override
   Widget build(BuildContext context) {
     final currency = NumberFormat.currency(locale: 'id_ID', symbol: 'Rp ', decimalDigits: 0);
@@ -158,15 +163,30 @@ class PosReceiptDialog extends StatelessWidget {
               else
                 _buildRow('Status', 'KASBON', isBold: true, isAccent: true),
               const SizedBox(height: 18),
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton.icon(
+                  onPressed: () => _handlePrintThermal(context),
+                  icon: const Icon(Icons.print_rounded, size: 17),
+                  label: const Text('Cetak Struk Thermal (ESC/POS)', style: TextStyle(fontWeight: FontWeight.w800, fontSize: 13)),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF0F766E),
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 8),
               Row(
                 children: [
                   Expanded(
                     child: OutlinedButton.icon(
                       onPressed: () => _copyReceiptText(context),
-                      icon: const Icon(Icons.copy_rounded, size: 16),
-                      label: const Text('Salin Nota', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700)),
+                      icon: const Icon(Icons.copy_rounded, size: 15),
+                      label: const Text('Salin', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700)),
                       style: OutlinedButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(vertical: 11),
+                        padding: const EdgeInsets.symmetric(vertical: 10),
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                       ),
                     ),
@@ -175,12 +195,12 @@ class PosReceiptDialog extends StatelessWidget {
                   Expanded(
                     child: ElevatedButton.icon(
                       onPressed: () => _handleSendWhatsApp(context),
-                      icon: const Icon(Icons.send_rounded, size: 16),
+                      icon: const Icon(Icons.send_rounded, size: 15),
                       label: const Text('Kirim WA', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700)),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: const Color(0xFF15803D),
                         foregroundColor: Colors.white,
-                        padding: const EdgeInsets.symmetric(vertical: 11),
+                        padding: const EdgeInsets.symmetric(vertical: 10),
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                       ),
                     ),

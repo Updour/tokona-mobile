@@ -60,11 +60,11 @@ class AppShortcutRegistry {
       icon: Icons.event_busy_rounded,
       iconColor: Color(0xFFDC2626),
       bgColor: Color(0xFFFEE2E2),
-      description: 'Monitor tagihan kasbon yang mendekati/lewat tempo',
+      description: 'Monitor tagihan kasbon yang jatuh tempo',
     ),
     ShortcutMenuItem(
       id: 'pesanan_masuk',
-      label: 'Pesanan Masuk',
+      label: 'Order',
       category: 'Kasir & Penjualan',
       icon: Icons.local_shipping_rounded,
       iconColor: Color(0xFFEA580C),
@@ -102,7 +102,7 @@ class AppShortcutRegistry {
     ),
     ShortcutMenuItem(
       id: 'tambah_produk',
-      label: 'Tambah Item',
+      label: 'Tambah Produk',
       category: 'Produk & Inventaris',
       icon: Icons.add_circle_outline_rounded,
       iconColor: Color(0xFF0D9488),
@@ -111,7 +111,7 @@ class AppShortcutRegistry {
     ),
     ShortcutMenuItem(
       id: 'restok',
-      label: 'Restok Barang',
+      label: 'Restok',
       category: 'Produk & Inventaris',
       icon: Icons.add_shopping_cart_rounded,
       iconColor: Color(0xFF0284C7),
@@ -120,7 +120,7 @@ class AppShortcutRegistry {
     ),
     ShortcutMenuItem(
       id: 'kategori',
-      label: 'Kategori Item',
+      label: 'Kategori',
       category: 'Produk & Inventaris',
       icon: Icons.category_rounded,
       iconColor: Color(0xFF7C3AED),
@@ -129,7 +129,7 @@ class AppShortcutRegistry {
     ),
     ShortcutMenuItem(
       id: 'riwayat_kulakan',
-      label: 'Riwayat Kulak',
+      label: 'Log Pembelian',
       category: 'Produk & Inventaris',
       icon: Icons.history_rounded,
       iconColor: Color(0xFF0891B2),
@@ -157,12 +157,12 @@ class AppShortcutRegistry {
     ),
     ShortcutMenuItem(
       id: 'hp_belanja',
-      label: 'HP Belanja',
+      label: 'Akun Belanja',
       category: 'Produk & Inventaris',
       icon: Icons.phone_android_rounded,
       iconColor: Color(0xFF0D9488),
       bgColor: Color(0xFFCCFBF1),
-      description: 'Kelola HP / akun marketplace pengadaan stok',
+      description: 'Kelola akun marketplace pengadaan stok',
     ),
 
     // --- Kategori Keuangan & Laporan ---
@@ -186,7 +186,7 @@ class AppShortcutRegistry {
     ),
     ShortcutMenuItem(
       id: 'rekening_bayar',
-      label: 'Rekening/QRIS',
+      label: 'Metode Bayar',
       category: 'Keuangan & Laporan',
       icon: Icons.credit_card_rounded,
       iconColor: Color(0xFF0284C7),
@@ -209,7 +209,7 @@ class AppShortcutRegistry {
       icon: Icons.cloud_sync_rounded,
       iconColor: Color(0xFF0F766E),
       bgColor: Color(0xFFE6FFFA),
-      description: 'Cadangkan database ke Cloud Supabase atau lokal HP',
+      description: 'Cadangkan database ke Cloud atau Lokal',
     ),
 
     // --- Kategori Pelanggan & Relasi ---
@@ -230,6 +230,15 @@ class AppShortcutRegistry {
       iconColor: Color(0xFF64748B),
       bgColor: Color(0xFFF8FAFC),
       description: 'Daftar mitra distributor & pemasok barang',
+    ),
+    ShortcutMenuItem(
+      id: 'pengaturan_dinamis',
+      label: 'Pengaturan',
+      category: 'Pelanggan & Relasi',
+      icon: Icons.tune_rounded,
+      iconColor: Color(0xFF0D9488),
+      bgColor: Color(0xFFCCFBF1),
+      description: 'Atur notifikasi, pengiriman, stok default & template WA',
     ),
   ];
 

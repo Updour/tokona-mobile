@@ -9,6 +9,8 @@ import 'package:tokona/features/pos/domain/models/sale_model.dart';
 import 'package:tokona/features/pos/presentation/controllers/cart_controller.dart';
 import 'package:tokona/features/product/presentation/controllers/product_controller.dart';
 import 'package:tokona/features/report/presentation/controllers/report_controller.dart';
+import 'package:tokona/features/settings/data/services/audit_log_service.dart';
+import 'package:tokona/features/settings/domain/models/audit_log_model.dart';
 
 class SaleState {
   final bool isProcessing;
@@ -87,6 +89,17 @@ class SaleController extends StateNotifier<SaleState> {
       );
 
       final sale = await _repository.recordSale(dto);
+
+      final itemSummary = cart.items.map((e) => '${e.product.name} (${e.quantity.toInt()} ${e.unitName})').join(', ');
+      AuditLogService.log(
+        storeId: storeId,
+        userId: userId,
+        userName: cart.customerName != null && cart.customerName!.isNotEmpty ? 'Kasir (Plg: ${cart.customerName})' : 'Kasir',
+        userRole: 'cashier',
+        actionType: AuditActionType.transaction,
+        title: 'Penjualan #${sale.invoiceNumber} (${paymentMethod.toUpperCase()})',
+        description: 'Input: $itemSummary • Total: Rp ${sale.finalAmount.toStringAsFixed(0)}',
+      );
 
       _ref.read(cartProvider.notifier).clearCart();
       await _ref.read(productListProvider.notifier).loadProducts(storeId);

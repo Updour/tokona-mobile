@@ -202,7 +202,7 @@ class _AddPurchaseBottomSheetState extends ConsumerState<AddPurchaseBottomSheet>
                     TextField(
                       controller: _invoiceController,
                       decoration: const InputDecoration(
-                        labelText: 'No. Faktur / Nota Toko (Opsional)',
+                        labelText: 'No. Faktur Toko (Opsional)',
                         hintText: 'Otomatis: INV-[TOKO]-[PRODUK]-[ACAK]',
                         prefixIcon: Icon(Icons.receipt_outlined, size: 20),
                       ),

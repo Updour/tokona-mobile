@@ -201,7 +201,7 @@ class ScheduledBackupTab extends ConsumerWidget {
             contentPadding: EdgeInsets.zero,
             value: cfg.backupToCloud,
             activeColor: const Color(0xFF0F766E),
-            title: const Text('Upload ke Cloud Supabase', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700)),
+            title: const Text('Upload ke Cloud', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700)),
             subtitle: const Text('Tersimpan di cloud anti hilang', style: TextStyle(fontSize: 10.5, color: AppColors.textSecondary)),
             onChanged: (v) => ref.read(scheduledBackupProvider.notifier).updateConfig(backupToCloud: v ?? true),
           ),

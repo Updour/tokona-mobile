@@ -6,7 +6,7 @@ class ProductCardOptionsMenu extends StatelessWidget {
   final VoidCallback? onStockCard;
   final VoidCallback? onRestock;
   final VoidCallback? onEdit;
-  final VoidCallback onDelete;
+  final VoidCallback? onDelete;
 
   const ProductCardOptionsMenu({
     super.key,
@@ -14,7 +14,7 @@ class ProductCardOptionsMenu extends StatelessWidget {
     this.onStockCard,
     this.onRestock,
     this.onEdit,
-    required this.onDelete,
+    this.onDelete,
   });
 
   @override
@@ -40,7 +40,7 @@ class ProductCardOptionsMenu extends StatelessWidget {
             onEdit?.call();
             break;
           case 'delete':
-            onDelete();
+            onDelete?.call();
             break;
         }
       },
@@ -89,17 +89,19 @@ class ProductCardOptionsMenu extends StatelessWidget {
               ],
             ),
           ),
-        const PopupMenuDivider(height: 1),
-        const PopupMenuItem(
-          value: 'delete',
-          child: Row(
-            children: [
-              Icon(Icons.delete_outline_rounded, size: 18, color: AppColors.error),
-              SizedBox(width: 10),
-              Text('Hapus Produk', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13, color: AppColors.error)),
-            ],
+        if (onDelete != null) ...[
+          const PopupMenuDivider(height: 1),
+          const PopupMenuItem(
+            value: 'delete',
+            child: Row(
+              children: [
+                Icon(Icons.delete_outline_rounded, size: 18, color: AppColors.error),
+                SizedBox(width: 10),
+                Text('Hapus Produk', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13, color: AppColors.error)),
+              ],
+            ),
           ),
-        ),
+        ],
       ],
       child: Container(
         padding: const EdgeInsets.all(6),

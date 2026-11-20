@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:tokona/core/theme/app_colors.dart';
 import 'package:tokona/core/utils/currency_formatter.dart';
@@ -6,8 +7,10 @@ import 'package:tokona/features/customer/domain/models/customer_model.dart';
 import 'package:tokona/features/customer/presentation/widgets/pay_kasbon_bottom_sheet.dart';
 import 'package:tokona/features/pos/domain/models/sale_model.dart';
 import 'package:tokona/features/pos/presentation/widgets/reminder_message_dialog.dart';
+import 'package:tokona/features/settings/domain/models/app_preferences.dart';
+import 'package:tokona/features/settings/presentation/controllers/app_preferences_controller.dart';
 
-class ReminderInvoiceTile extends StatelessWidget {
+class ReminderInvoiceTile extends ConsumerWidget {
   final SaleModel sale;
   final CustomerModel? customer;
   final String storeName;
@@ -19,22 +22,21 @@ class ReminderInvoiceTile extends StatelessWidget {
     required this.storeName,
   });
 
-  void _openWhatsAppReminder(BuildContext context) {
+  void _openWhatsAppReminder(BuildContext context, WidgetRef ref) {
     final customerName = sale.customerName ?? customer?.name ?? 'Pelanggan';
     final dateFormat = DateFormat('dd MMM yyyy');
     final createdStr = dateFormat.format(sale.createdAt);
     final dueStr = sale.dueDate != null ? dateFormat.format(sale.dueDate!) : 'Belum ditentukan';
+    final template = ref.read(appPreferencesProvider).waKasbonTemplate;
 
-    final defaultMessage =
-        'Halo Kak *$customerName*! 🙏\n'
-        'Semoga selalu sehat dan lancar rezekinya.\n\n'
-        'Kami dari *$storeName* menginformasikan tagihan nota belanja Anda:\n'
-        '🧾 No. Nota: *${sale.invoiceNumber}*\n'
-        '📅 Tanggal Belanja: $createdStr\n'
-        '⏰ Jatuh Tempo: *$dueStr*\n'
-        '💰 Total Tagihan: *${CurrencyFormatter.format(sale.finalAmount)}*\n\n'
-        'Pembayaran dapat dilakukan secara tunai di kasir toko atau via transfer.\n'
-        'Mohon konfirmasinya jika sudah melakukan pembayaran ya Kak. Terima kasih banyak! 🙏';
+    final defaultMessage = AppPreferences.renderTemplate(template, {
+      'nama': customerName,
+      'toko': storeName,
+      'no_nota': sale.invoiceNumber,
+      'tanggal': createdStr,
+      'jatuh_tempo': dueStr,
+      'total': CurrencyFormatter.format(sale.finalAmount),
+    });
 
     ReminderMessageDialog.show(
       context,
@@ -42,11 +44,13 @@ class ReminderInvoiceTile extends StatelessWidget {
       recipientName: customerName,
       initialPhone: customer?.phone,
       initialMessage: defaultMessage,
+      category: 'kasbon',
+      referenceId: 'kasbon_${sale.id}',
     );
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final now = DateTime.now();
     final dateFormat = DateFormat('dd MMM yyyy');
     final isOverdue = sale.dueDate != null && now.isAfter(sale.dueDate!);
@@ -72,11 +76,18 @@ class ReminderInvoiceTile extends StatelessWidget {
     final phone = customer?.phone;
 
     return Container(
-      padding: const EdgeInsets.all(13),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
       decoration: BoxDecoration(
-        color: isOverdue ? const Color(0xFFFEF2F2).withValues(alpha: 0.6) : AppColors.surfaceElevated,
+        color: isOverdue ? const Color(0xFFFEF2F2).withValues(alpha: 0.6) : AppColors.surface,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: isOverdue ? const Color(0xFFFCA5A5) : AppColors.border),
+        border: Border.all(color: isOverdue ? const Color(0xFFFCA5A5) : const Color(0xFFE2E8F0), width: 0.9),
+        boxShadow: [
+          BoxShadow(
+            color: const Color(0xFF0F172A).withValues(alpha: 0.03),
+            blurRadius: 10,
+            offset: const Offset(0, 3),
+          ),
+        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -143,7 +154,7 @@ class ReminderInvoiceTile extends StatelessWidget {
             children: [
               Expanded(
                 child: ElevatedButton.icon(
-                  onPressed: () => _openWhatsAppReminder(context),
+                  onPressed: () => _openWhatsAppReminder(context, ref),
                   icon: const Icon(Icons.send_rounded, size: 14, color: Colors.white),
                   label: const Text(
                     'Kirim Tagihan',

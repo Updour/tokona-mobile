@@ -23,20 +23,20 @@ class ReminderFilterChip extends StatelessWidget {
   Widget build(BuildContext context) {
     return InkWell(
       onTap: onTap,
-      borderRadius: BorderRadius.circular(8),
-      child: Container(
+      borderRadius: BorderRadius.circular(10),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 150),
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
         decoration: BoxDecoration(
-          color: isSelected ? AppColors.primaryContainer : AppColors.surfaceElevated,
-          borderRadius: BorderRadius.circular(8),
-          border: Border.all(color: isSelected ? AppColors.primary : AppColors.border),
+          color: isSelected ? const Color(0xFF0F172A) : const Color(0xFFF1F5F9),
+          borderRadius: BorderRadius.circular(10),
         ),
         child: Text(
           label,
           style: TextStyle(
             fontSize: 11,
-            fontWeight: isSelected ? FontWeight.w800 : FontWeight.w600,
-            color: isSelected ? AppColors.primaryDark : AppColors.textSecondary,
+            fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
+            color: isSelected ? Colors.white : const Color(0xFF64748B),
           ),
         ),
       ),

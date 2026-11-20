@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:tokona/features/pos/domain/models/cart_item_model.dart';
 import 'package:tokona/features/pos/domain/models/cart_state.dart';
 import 'package:tokona/features/pos/domain/models/held_cart_model.dart';
 
@@ -97,13 +98,14 @@ class HeldCartController extends StateNotifier<List<HeldCartModel>> {
     _persist();
   }
 
-  void addManualReminder({
+  HeldCartModel addManualReminder({
     required String customerName,
     required String customerPhone,
     String? note,
     double totalAmount = 0.0,
     String deliveryMethod = 'pickup',
     DateTime? plannedDate,
+    List<CartItemModel> items = const [],
   }) {
     final newHeld = HeldCartModel(
       id: DateTime.now().millisecondsSinceEpoch.toString(),
@@ -113,14 +115,15 @@ class HeldCartController extends StateNotifier<List<HeldCartModel>> {
       deliveryMethod: deliveryMethod,
       plannedDate: plannedDate,
       heldAt: DateTime.now(),
-      items: const [],
+      items: List.from(items),
       discountAmount: 0.0,
-      manualAmount: totalAmount,
+      manualAmount: items.isEmpty ? totalAmount : null,
       waStatus: 'MENUNGGU',
     );
 
     state = [newHeld, ...state];
     _persist();
+    return newHeld;
   }
 
   void updatePlannedDate(String id, DateTime? newDate) {

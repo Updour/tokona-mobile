@@ -75,6 +75,14 @@ class ShipmentTrackingService {
         latestStatus.toLowerCase().contains('delivered') ||
         latestStatus.toLowerCase().contains('selesai');
 
+    // Kumpulkan foto bukti serah terima paket jika ada
+    final allProofPhotos = <String>[];
+    for (final t in timeline) {
+      if (t.proofPhotos.isNotEmpty) {
+        allProofPhotos.addAll(t.proofPhotos);
+      }
+    }
+
     return ShipmentTrackingResult(
       isSuccess: true,
       waybillNo: waybillNo,
@@ -87,6 +95,7 @@ class ShipmentTrackingService {
       latestStatus: latestStatus,
       isDelivered: isDelivered,
       timeline: timeline,
+      proofPhotos: allProofPhotos,
       fetchedAt: DateTime.now(),
     );
   }

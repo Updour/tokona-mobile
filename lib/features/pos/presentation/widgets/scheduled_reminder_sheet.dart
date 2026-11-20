@@ -9,6 +9,7 @@ import 'package:tokona/features/pos/presentation/controllers/sale_history_contro
 import 'package:tokona/features/pos/presentation/widgets/add_scheduled_reminder_dialog.dart';
 import 'package:tokona/features/pos/presentation/widgets/reminder_tab_helpers.dart';
 import 'package:tokona/features/pos/presentation/widgets/scheduled_backup_tab.dart';
+import 'package:tokona/features/pos/presentation/widgets/wa_history_tab_view.dart';
 
 class ScheduledReminderSheet extends ConsumerStatefulWidget {
   final int initialTab;
@@ -37,7 +38,7 @@ class _ScheduledReminderSheetState extends ConsumerState<ScheduledReminderSheet>
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 3, vsync: this, initialIndex: widget.initialTab);
+    _tabController = TabController(length: 4, vsync: this, initialIndex: widget.initialTab.clamp(0, 3));
     _tabController.addListener(() {
       if (mounted) setState(() {});
     });
@@ -72,28 +73,32 @@ class _ScheduledReminderSheetState extends ConsumerState<ScheduledReminderSheet>
 
     return Container(
       decoration: const BoxDecoration(
-        color: AppColors.surface,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+        color: Colors.white,
+        borderRadius: BorderRadius.vertical(top: Radius.circular(22)),
+        boxShadow: [
+          BoxShadow(
+            color: Color(0x140F172A),
+            blurRadius: 20,
+            offset: Offset(0, -4),
+          ),
+        ],
       ),
       constraints: BoxConstraints(maxHeight: MediaQuery.of(context).size.height * 0.88),
       child: SafeArea(
         top: false,
         child: Padding(
-          padding: const EdgeInsets.fromLTRB(18, 14, 18, 16),
+          padding: const EdgeInsets.fromLTRB(16, 12, 16, 14),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               Center(
                 child: Container(
-                  width: 40,
+                  width: 38,
                   height: 4,
-                  decoration: BoxDecoration(
-                    color: AppColors.border,
-                    borderRadius: BorderRadius.circular(2),
-                  ),
+                  decoration: BoxDecoration(color: const Color(0xFFE2E8F0), borderRadius: BorderRadius.circular(2)),
                 ),
               ),
-              const SizedBox(height: 12),
+              const SizedBox(height: 10),
               Row(
                 children: [
                   Expanded(
@@ -103,22 +108,21 @@ class _ScheduledReminderSheetState extends ConsumerState<ScheduledReminderSheet>
                         Flexible(
                           child: Text(
                             'Jadwal & Pengingat',
-                            style: AppTypography.headingSmall.copyWith(fontSize: 15.5, fontWeight: FontWeight.w800),
+                            style: AppTypography.headingSmall.copyWith(fontSize: 15, fontWeight: FontWeight.w800),
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                           ),
                         ),
                         const SizedBox(width: 6),
                         Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1.5),
                           decoration: BoxDecoration(
-                            color: const Color(0xFFECFDF5),
-                            borderRadius: BorderRadius.circular(20),
-                            border: Border.all(color: const Color(0xFFA7F3D0)),
+                            color: const Color(0xFFF1F5F9),
+                            borderRadius: BorderRadius.circular(16),
                           ),
                           child: Text(
                             '$totalCount',
-                            style: const TextStyle(fontSize: 10, fontWeight: FontWeight.w800, color: Color(0xFF059669)),
+                            style: const TextStyle(fontSize: 10, fontWeight: FontWeight.w800, color: Color(0xFF475569)),
                           ),
                         ),
                       ],
@@ -129,7 +133,7 @@ class _ScheduledReminderSheetState extends ConsumerState<ScheduledReminderSheet>
                     onTap: () => AddScheduledReminderDialog.show(context),
                     borderRadius: BorderRadius.circular(8),
                     child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 5),
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4.5),
                       decoration: BoxDecoration(
                         color: const Color(0xFFF0FDF4),
                         borderRadius: BorderRadius.circular(8),
@@ -140,7 +144,7 @@ class _ScheduledReminderSheetState extends ConsumerState<ScheduledReminderSheet>
                         children: [
                           Icon(Icons.add_rounded, size: 14, color: Color(0xFF16A34A)),
                           SizedBox(width: 2),
-                          Text('Tambah', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: Color(0xFF15803D))),
+                          Text('Tambah', style: TextStyle(fontSize: 10.5, fontWeight: FontWeight.w700, color: Color(0xFF15803D))),
                         ],
                       ),
                     ),
@@ -148,18 +152,17 @@ class _ScheduledReminderSheetState extends ConsumerState<ScheduledReminderSheet>
                   const SizedBox(width: 4),
                   IconButton(
                     onPressed: () => Navigator.of(context).pop(),
-                    icon: const Icon(Icons.close_rounded, color: AppColors.textMuted, size: 20),
-                    padding: EdgeInsets.zero,
-                    constraints: const BoxConstraints(minWidth: 28, minHeight: 28),
+                    icon: const Icon(Icons.close_rounded, color: Color(0xFF64748B), size: 19),
+                    visualDensity: VisualDensity.compact,
                   ),
                 ],
               ),
-              const SizedBox(height: 12),
+              const SizedBox(height: 10),
               Container(
-                height: 38,
+                height: 36,
                 decoration: BoxDecoration(
                   color: const Color(0xFFF1F5F9),
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius: BorderRadius.circular(11),
                 ),
                 padding: const EdgeInsets.all(3),
                 child: TabBar(
@@ -169,37 +172,39 @@ class _ScheduledReminderSheetState extends ConsumerState<ScheduledReminderSheet>
                     borderRadius: BorderRadius.circular(9),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.06),
+                        color: const Color(0xFF0F172A).withValues(alpha: 0.04),
                         blurRadius: 4,
-                        offset: const Offset(0, 1.5),
+                        offset: const Offset(0, 1),
                       ),
                     ],
                   ),
                   indicatorSize: TabBarIndicatorSize.tab,
                   labelColor: const Color(0xFF0F172A),
                   unselectedLabelColor: const Color(0xFF64748B),
-                  labelStyle: const TextStyle(fontWeight: FontWeight.w800, fontSize: 11.5),
-                  unselectedLabelStyle: const TextStyle(fontWeight: FontWeight.w600, fontSize: 11.5),
+                  labelStyle: const TextStyle(fontWeight: FontWeight.w700, fontSize: 11),
+                  unselectedLabelStyle: const TextStyle(fontWeight: FontWeight.w500, fontSize: 11),
                   dividerColor: Colors.transparent,
                   tabs: [
                     Tab(text: 'Ambil (${heldOrders.length})'),
                     Tab(text: 'Kasbon (${kasbonSales.length})'),
-                    const Tab(text: 'Backup Data'),
+                    const Tab(text: 'Riwayat WA'),
+                    const Tab(text: 'Backup'),
                   ],
                 ),
               ),
-              if (_tabController.index != 2) ...[
-                const SizedBox(height: 10),
+              if (_tabController.index != 3) ...[
+                const SizedBox(height: 8),
                 TextField(
                   controller: _searchController,
                   onChanged: (v) => setState(() => _searchQuery = v.trim().toLowerCase()),
-                  style: const TextStyle(fontSize: 12.5),
+                  style: const TextStyle(fontSize: 12),
                   decoration: InputDecoration(
                     hintText: 'Cari pelanggan atau nomor nota...',
-                    prefixIcon: const Icon(Icons.search_rounded, size: 18),
+                    hintStyle: const TextStyle(fontSize: 11.5, color: Color(0xFF94A3B8)),
+                    prefixIcon: const Icon(Icons.search_rounded, size: 17, color: Color(0xFF94A3B8)),
                     suffixIcon: _searchQuery.isNotEmpty
                         ? IconButton(
-                            icon: const Icon(Icons.clear_rounded, size: 16),
+                            icon: const Icon(Icons.clear_rounded, size: 15, color: Color(0xFF94A3B8)),
                             onPressed: () {
                               _searchController.clear();
                               setState(() => _searchQuery = '');
@@ -208,9 +213,10 @@ class _ScheduledReminderSheetState extends ConsumerState<ScheduledReminderSheet>
                         : null,
                     isDense: true,
                     filled: true,
-                    fillColor: AppColors.surfaceElevated,
-                    contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
+                    fillColor: const Color(0xFFF8FAFC),
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: const BorderSide(color: Color(0xFFE2E8F0), width: 0.8)),
+                    enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: const BorderSide(color: Color(0xFFE2E8F0), width: 0.8)),
                   ),
                 ),
               ],
@@ -231,6 +237,13 @@ class _ScheduledReminderSheetState extends ConsumerState<ScheduledReminderSheet>
                       customers: customers,
                       storeName: storeName,
                       now: now,
+                      searchQuery: _searchQuery,
+                    ),
+                    WaHistoryTabView(
+                      heldOrders: heldOrders,
+                      kasbonSales: kasbonSales,
+                      customers: customers,
+                      storeName: storeName,
                       searchQuery: _searchQuery,
                     ),
                     const ScheduledBackupTab(),

@@ -5,9 +5,15 @@ import 'package:tokona/core/theme/app_typography.dart';
 import 'package:tokona/core/widgets/app_toast.dart';
 import 'package:tokona/features/auth/domain/models/store_model.dart';
 import 'package:tokona/features/auth/domain/models/user_model.dart';
+import 'package:tokona/features/auth/presentation/widgets/staff_management_sheet.dart';
+import 'package:tokona/features/dashboard/presentation/widgets/about_app_dialog.dart';
 import 'package:tokona/features/dashboard/presentation/widgets/store_edit_bottom_sheet.dart';
 import 'package:tokona/features/product/presentation/widgets/category_type_sheet.dart';
 import 'package:tokona/features/product/presentation/widgets/packaging_info_dialog.dart';
+import 'package:tokona/features/settings/presentation/widgets/app_lock_settings_sheet.dart';
+import 'package:tokona/features/settings/presentation/widgets/audit_log_sheet.dart';
+import 'package:tokona/features/settings/presentation/widgets/rbac_management_sheet.dart';
+import 'package:tokona/features/settings/presentation/widgets/thermal_printer_settings_sheet.dart';
 
 class ProfileSettingsSheet extends ConsumerWidget {
   final StoreModel? store;
@@ -23,6 +29,7 @@ class ProfileSettingsSheet extends ConsumerWidget {
     return showModalBottomSheet(
       context: context,
       isScrollControlled: true,
+      useRootNavigator: true,
       backgroundColor: Colors.transparent,
       builder: (_) => ProfileSettingsSheet(store: store, user: user),
     );
@@ -31,14 +38,13 @@ class ProfileSettingsSheet extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return Container(
+      height: MediaQuery.of(context).size.height * 0.82,
       decoration: const BoxDecoration(
         color: AppColors.surface,
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
       padding: const EdgeInsets.fromLTRB(20, 16, 20, 30),
-      constraints: BoxConstraints(maxHeight: MediaQuery.of(context).size.height * 0.85),
       child: Column(
-        mainAxisSize: MainAxisSize.min,
         children: [
           Center(
             child: Container(
@@ -101,6 +107,68 @@ class ProfileSettingsSheet extends ConsumerWidget {
                     StoreEditBottomSheet.show(context, store: store);
                   },
                 ),
+                if (user?.isOwner ?? false) ...[
+                  _buildSettingTile(
+                    icon: Icons.admin_panel_settings_rounded,
+                    color: const Color(0xFF0F766E),
+                    title: 'Hak Akses & Izin Menu',
+                    subtitle: 'Atur menu & fitur dinamis untuk Kasir dan Admin',
+                    trailing: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                      decoration: BoxDecoration(color: const Color(0xFFCCFBF1), borderRadius: BorderRadius.circular(8)),
+                      child: const Text('Kelola', style: TextStyle(fontSize: 10.5, fontWeight: FontWeight.w800, color: Color(0xFF0F766E))),
+                    ),
+                    onTap: () {
+                      Navigator.of(context).pop();
+                      RbacManagementSheet.show(context);
+                    },
+                  ),
+                  _buildSettingTile(
+                    icon: Icons.group_rounded,
+                    color: const Color(0xFF4F46E5),
+                    title: 'Manajemen Karyawan & Kasir',
+                    subtitle: 'Daftar staf, akun kasir & pairing offline QR',
+                    trailing: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                      decoration: BoxDecoration(color: const Color(0xFFE0E7FF), borderRadius: BorderRadius.circular(8)),
+                      child: const Text('Buka', style: TextStyle(fontSize: 10.5, fontWeight: FontWeight.w800, color: Color(0xFF4F46E5))),
+                    ),
+                    onTap: () {
+                      Navigator.of(context).pop();
+                      StaffManagementSheet.show(context);
+                    },
+                  ),
+                  _buildSettingTile(
+                    icon: Icons.history_toggle_off_rounded,
+                    color: const Color(0xFFD97706),
+                    title: 'Log Aktivitas',
+                    subtitle: 'Monitoring multi-perangkat, login & aksi staf',
+                    trailing: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                      decoration: BoxDecoration(color: const Color(0xFFFEF3C7), borderRadius: BorderRadius.circular(8)),
+                      child: const Text('Lihat', style: TextStyle(fontSize: 10.5, fontWeight: FontWeight.w800, color: Color(0xFFD97706))),
+                    ),
+                    onTap: () {
+                      Navigator.of(context).pop();
+                      AuditLogSheet.show(context);
+                    },
+                  ),
+                ],
+                _buildSettingTile(
+                  icon: Icons.fingerprint_rounded,
+                  color: const Color(0xFF0F766E),
+                  title: 'Kunci Aplikasi & Biometrik',
+                  subtitle: 'Amankan kasir dengan PIN 6 digit & Sidik Jari HP',
+                  trailing: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                    decoration: BoxDecoration(color: const Color(0xFFCCFBF1), borderRadius: BorderRadius.circular(8)),
+                    child: const Text('Atur', style: TextStyle(fontSize: 10.5, fontWeight: FontWeight.w800, color: Color(0xFF0F766E))),
+                  ),
+                  onTap: () {
+                    Navigator.of(context).pop();
+                    AppLockSettingsSheet.show(context);
+                  },
+                ),
                 _buildSettingTile(
                   icon: Icons.print_outlined,
                   color: const Color(0xFF4F46E5),
@@ -108,17 +176,17 @@ class ProfileSettingsSheet extends ConsumerWidget {
                   subtitle: 'Format 58mm / 80mm • ESC/POS Bluetooth',
                   onTap: () {
                     Navigator.of(context).pop();
-                    AppToast.showInfo(context, 'Pengaturan printer thermal ESC/POS aktif');
+                    ThermalPrinterSettingsSheet.show(context);
                   },
                 ),
                 _buildSettingTile(
                   icon: Icons.volume_up_outlined,
                   color: const Color(0xFF0D9488),
-                  title: 'Suara & Efek Sentuhan Kasir',
+                  title: 'Suara & Sentuhan',
                   subtitle: 'Haptic feedback dan respon audio kasir',
                   trailing: Switch(
                     value: true,
-                    activeColor: AppColors.primary,
+                    activeThumbColor: AppColors.primary,
                     onChanged: (val) {
                       AppToast.showSuccess(context, 'Efek haptic kasir aktif');
                     },
@@ -127,7 +195,7 @@ class ProfileSettingsSheet extends ConsumerWidget {
                 _buildSettingTile(
                   icon: Icons.category_outlined,
                   color: const Color(0xFFF59E0B),
-                  title: 'Master Kategori & Tipe Produk',
+                  title: 'Master Kategori & Tipe',
                   subtitle: 'Kelola kategori barang untuk filter kasir',
                   onTap: () {
                     Navigator.of(context).pop();
@@ -147,7 +215,7 @@ class ProfileSettingsSheet extends ConsumerWidget {
                 _buildSettingTile(
                   icon: Icons.storage_rounded,
                   color: const Color(0xFF10B981),
-                  title: 'Status Database SQLite',
+                  title: 'Status Database',
                   subtitle: 'Penyimpanan lokal offline-first aman & cepat',
                   trailing: Container(
                     padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
@@ -157,17 +225,10 @@ class ProfileSettingsSheet extends ConsumerWidget {
                 ),
                 _buildSettingTile(
                   icon: Icons.info_outline_rounded,
-                  color: AppColors.textSecondary,
+                  color: const Color(0xFF6366F1),
                   title: 'Tentang Aplikasi',
-                  subtitle: 'Tokona POS v1.0.0 • Retail & Grosir Indonesia',
-                  onTap: () {
-                    showAboutDialog(
-                      context: context,
-                      applicationName: 'Tokona POS Retail',
-                      applicationVersion: '1.0.0+1',
-                      applicationLegalese: '© 2026 Tokona POS - Solusi Kasir Retail & Grosir Indonesia',
-                    );
-                  },
+                  subtitle: 'Tokona POS v1.0.0 • Retail & Grosir',
+                  onTap: () => AboutAppDialog.show(context),
                 ),
               ],
             ),

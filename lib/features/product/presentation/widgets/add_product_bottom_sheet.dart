@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:tokona/core/theme/app_colors.dart';
 import 'package:tokona/core/theme/app_typography.dart';
 import 'package:tokona/core/utils/currency_formatter.dart';
@@ -9,8 +10,9 @@ import 'package:tokona/features/product/domain/dtos/create_product_unit_dto.dart
 import 'package:tokona/features/product/presentation/widgets/add_product_base_form.dart';
 import 'package:tokona/features/product/presentation/widgets/packaging_tier_section.dart';
 import 'package:tokona/features/product/presentation/widgets/price_tier_section.dart';
+import 'package:tokona/features/settings/presentation/controllers/app_preferences_controller.dart';
 
-class AddProductBottomSheet extends StatefulWidget {
+class AddProductBottomSheet extends ConsumerStatefulWidget {
   final Future<bool> Function(CreateProductDto dto) onSubmit;
   final List<String>? availableCategories;
   final List<String>? availableProductTypes;
@@ -43,10 +45,10 @@ class AddProductBottomSheet extends StatefulWidget {
   }
 
   @override
-  State<AddProductBottomSheet> createState() => _AddProductBottomSheetState();
+  ConsumerState<AddProductBottomSheet> createState() => _AddProductBottomSheetState();
 }
 
-class _AddProductBottomSheetState extends State<AddProductBottomSheet> {
+class _AddProductBottomSheetState extends ConsumerState<AddProductBottomSheet> {
   final _formKey = GlobalKey<FormState>();
   final _nameController = TextEditingController();
   final _skuController = TextEditingController();
@@ -54,7 +56,14 @@ class _AddProductBottomSheetState extends State<AddProductBottomSheet> {
   final _stockController = TextEditingController(text: '0');
   final _costPriceController = TextEditingController(text: '0');
   final _sellingPriceController = TextEditingController(text: '0');
-  final _minStockAlertController = TextEditingController(text: '0');
+  late final TextEditingController _minStockAlertController;
+
+  @override
+  void initState() {
+    super.initState();
+    final defMin = ref.read(appPreferencesProvider).defaultMinStockAlert;
+    _minStockAlertController = TextEditingController(text: CurrencyFormatter.formatNumber(defMin));
+  }
 
   String? _category = 'Makanan';
   String _productType = 'Fisik';

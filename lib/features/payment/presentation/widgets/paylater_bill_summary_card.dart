@@ -3,7 +3,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:tokona/core/utils/currency_formatter.dart';
 import 'package:tokona/core/widgets/app_dialog.dart';
 import 'package:tokona/core/widgets/app_toast.dart';
+import 'package:tokona/features/auth/presentation/controllers/auth_controller.dart';
 import 'package:tokona/features/payment/presentation/controllers/paylater_settlement_controller.dart';
+import 'package:tokona/features/payment/presentation/controllers/payment_account_controller.dart';
+import 'package:tokona/features/payment/presentation/widgets/paylater_settlement_account_sheet.dart';
 
 class PaylaterBillSummaryCard extends ConsumerWidget {
   final double totalTargetBill;
@@ -117,27 +120,52 @@ class PaylaterBillSummaryCard extends ConsumerWidget {
   }
 
   Widget _buildActionButton(BuildContext context, WidgetRef ref, bool isSettled) {
+    final effectiveBill = totalTargetBill > 0 ? totalTargetBill : allTimePaylaterTotal;
+    final store = ref.read(authProvider).currentStore;
+
     if (isSettled) {
-      return OutlinedButton.icon(
-        onPressed: () async {
-          final confirm = await AppDialog.showConfirmation(
-            context,
-            title: 'Batal Status Lunas',
-            message: 'Ubah kembali status tagihan bulan ini menjadi belum lunas?',
-            confirmText: 'Ya, Batalkan',
-          );
-          if (confirm == true) {
-            await ref.read(paylaterSettlementProvider.notifier).unmarkSettled(targetYear, targetMonth);
-            if (context.mounted) AppToast.showSuccess(context, 'Status tagihan diperbarui');
-          }
-        },
-        icon: const Icon(Icons.undo_rounded, size: 14, color: Color(0xFF15803D)),
-        label: const Text('Sudah Lunas (Batalkan)', style: TextStyle(fontSize: 11.5, fontWeight: FontWeight.w700, color: Color(0xFF15803D))),
-        style: OutlinedButton.styleFrom(
-          side: const BorderSide(color: Color(0xFF86EFAC)),
-          padding: const EdgeInsets.symmetric(vertical: 8),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-        ),
+      final record = ref.watch(paylaterSettlementProvider).getRecord(targetYear, targetMonth);
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          if (record?.accountName != null) ...[
+            Text(
+              'Dibayar via: ${record!.accountName!} (${CurrencyFormatter.format(record.amount)})',
+              textAlign: TextAlign.center,
+              style: const TextStyle(fontSize: 10.5, fontWeight: FontWeight.w600, color: Color(0xFF15803D)),
+            ),
+            const SizedBox(height: 6),
+          ],
+          OutlinedButton.icon(
+            onPressed: () async {
+              final confirm = await AppDialog.showConfirmation(
+                context,
+                title: 'Batal Status Lunas',
+                message: 'Ubah kembali status tagihan bulan ini menjadi belum lunas? Saldo kas yang terpotong akan dikembalikan.',
+                confirmText: 'Ya, Batalkan',
+              );
+              if (confirm == true) {
+                final removed = await ref.read(paylaterSettlementProvider.notifier).unmarkSettled(targetYear, targetMonth);
+                if (removed != null && removed.accountId != null && store != null && removed.amount > 0) {
+                  // Kembalikan saldo kas
+                  await ref.read(paymentAccountListProvider.notifier).adjustBalance(
+                        store.id,
+                        removed.accountId!,
+                        removed.amount,
+                      );
+                }
+                if (context.mounted) AppToast.showSuccess(context, 'Status tagihan diperbarui (Saldo kas dikembalikan)');
+              }
+            },
+            icon: const Icon(Icons.undo_rounded, size: 14, color: Color(0xFF15803D)),
+            label: const Text('Sudah Lunas (Batalkan)', style: TextStyle(fontSize: 11.5, fontWeight: FontWeight.w700, color: Color(0xFF15803D))),
+            style: OutlinedButton.styleFrom(
+              side: const BorderSide(color: Color(0xFF86EFAC)),
+              padding: const EdgeInsets.symmetric(vertical: 8),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+            ),
+          ),
+        ],
       );
     }
 
@@ -165,19 +193,47 @@ class PaylaterBillSummaryCard extends ConsumerWidget {
 
     return ElevatedButton.icon(
       onPressed: () async {
-        final confirm = await AppDialog.showConfirmation(
+        final accounts = ref.read(paymentAccountListProvider);
+        if (accounts.isEmpty && store != null) {
+          await ref.read(paymentAccountListProvider.notifier).loadAccounts(store.id);
+        }
+        final currentAccounts = ref.read(paymentAccountListProvider);
+
+        if (!context.mounted) return;
+        final selectedAccount = await PaylaterSettlementAccountSheet.show(
           context,
-          title: 'Konfirmasi Bayar Paylater',
-          message: 'Apakah tagihan Paylater bulan ini (${CurrencyFormatter.format(totalTargetBill > 0 ? totalTargetBill : allTimePaylaterTotal)}) sudah berhasil Anda bayar / transfer?',
-          confirmText: 'Sudah Dibayar',
+          amount: effectiveBill,
+          accounts: currentAccounts,
         );
-        if (confirm == true) {
-          await ref.read(paylaterSettlementProvider.notifier).markSettled(targetYear, targetMonth);
-          if (context.mounted) AppToast.showSuccess(context, 'Tagihan Paylater berhasil ditandai LUNAS!');
+
+        if (selectedAccount == null || !context.mounted) return;
+
+        // Potong saldo dari akun terpilih
+        if (store != null) {
+          await ref.read(paymentAccountListProvider.notifier).adjustBalance(
+                store.id,
+                selectedAccount.id,
+                -effectiveBill,
+              );
+        }
+
+        await ref.read(paylaterSettlementProvider.notifier).markSettled(
+              targetYear,
+              targetMonth,
+              accountId: selectedAccount.id,
+              accountName: selectedAccount.name,
+              amount: effectiveBill,
+            );
+
+        if (context.mounted) {
+          AppToast.showSuccess(
+            context,
+            'Tagihan SPayLater lunas! Dipotong dari ${selectedAccount.name} (${CurrencyFormatter.format(effectiveBill)})',
+          );
         }
       },
       icon: const Icon(Icons.check_circle_outline_rounded, size: 16, color: Colors.white),
-      label: const Text('Konfirmasi Sudah Dibayar', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w800, color: Colors.white)),
+      label: const Text('Konfirmasi & Bayar Tagihan', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w800, color: Colors.white)),
       style: ElevatedButton.styleFrom(
         backgroundColor: const Color(0xFF16A34A),
         padding: const EdgeInsets.symmetric(vertical: 10),

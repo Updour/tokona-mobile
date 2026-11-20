@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:tokona/core/theme/app_colors.dart';
 import 'package:tokona/core/widgets/app_toast.dart';
 import 'package:tokona/features/auth/presentation/controllers/auth_controller.dart';
+import 'package:tokona/features/auth/presentation/screens/auth_screen.dart';
 import 'package:tokona/features/customer/presentation/controllers/customer_controller.dart';
 import 'package:tokona/features/dashboard/presentation/widgets/akun_tab_view.dart';
 import 'package:tokona/features/dashboard/presentation/widgets/beranda_tab_view.dart';
@@ -14,6 +15,8 @@ import 'package:tokona/features/dashboard/presentation/widgets/produk_tab_view.d
 import 'package:tokona/features/pos/presentation/controllers/sale_history_controller.dart';
 import 'package:tokona/features/product/presentation/controllers/product_controller.dart';
 import 'package:tokona/features/report/presentation/controllers/report_controller.dart';
+import 'package:tokona/features/settings/presentation/controllers/app_lock_controller.dart';
+import 'package:tokona/features/settings/presentation/widgets/app_lock_screen.dart';
 
 class DashboardScreen extends ConsumerStatefulWidget {
   const DashboardScreen({super.key});
@@ -22,7 +25,7 @@ class DashboardScreen extends ConsumerStatefulWidget {
   ConsumerState<DashboardScreen> createState() => _DashboardScreenState();
 }
 
-class _DashboardScreenState extends ConsumerState<DashboardScreen> {
+class _DashboardScreenState extends ConsumerState<DashboardScreen> with WidgetsBindingObserver {
   int _currentIndex = 0;
   final List<int> _tabHistory = [];
   DateTime? _lastBackPressTime;
@@ -30,6 +33,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final storeId = ref.read(authProvider).currentStore?.id;
       if (storeId != null) {
@@ -39,6 +43,19 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
         ref.read(customerListProvider.notifier).loadCustomers(storeId);
       }
     });
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.paused || state == AppLifecycleState.inactive) {
+      ref.read(appLockProvider.notifier).lockApp();
+    }
   }
 
   void _onSelectTab(int index) {
@@ -90,9 +107,27 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
       }
     });
 
+    ref.listen(authProvider.select((s) => s.isAuthenticated), (prev, next) {
+      if (next == false) {
+        Navigator.of(context).pushAndRemoveUntil(
+          PageRouteBuilder(
+            pageBuilder: (context, animation, secondaryAnimation) => const AuthScreen(),
+            transitionsBuilder: (context, animation, secondaryAnimation, child) => FadeTransition(opacity: animation, child: child),
+            transitionDuration: const Duration(milliseconds: 300),
+          ),
+          (route) => false,
+        );
+      }
+    });
+
     final authState = ref.watch(authProvider);
     final user = authState.currentUser;
     final store = authState.currentStore;
+    final lockState = ref.watch(appLockProvider);
+
+    if (lockState.isLocked) {
+      return const AppLockScreen();
+    }
 
     final List<Widget> pages = [
       BerandaTabView(

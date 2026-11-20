@@ -92,7 +92,7 @@ class ScheduledBackupController extends StateNotifier<ScheduledBackupState> {
       }
 
       if (state.config.backupToCloud && storeId != null && storeId.trim().isNotEmpty) {
-        state = state.copyWith(message: 'Mengunggah cadangan ke cloud Supabase...');
+        state = state.copyWith(message: 'Mengunggah cadangan ke cloud...');
         await SupabaseBackupService.createCloudBackup(
           storeId: storeId,
           storeName: storeName ?? 'Tokona Store',

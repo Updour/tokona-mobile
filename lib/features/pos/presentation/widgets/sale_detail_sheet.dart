@@ -158,7 +158,7 @@ class SaleDetailSheet extends ConsumerWidget {
           const Row(children: [
             Icon(Icons.photo_camera_back_outlined, size: 16, color: AppColors.primary),
             SizedBox(width: 6),
-            Text('Foto Bukti Pembayaran / Nota', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 12.5)),
+            Text('Foto Bukti Pembayaran', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 12.5)),
           ]),
           const SizedBox(height: 10),
           GestureDetector(

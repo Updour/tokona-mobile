@@ -137,7 +137,7 @@ class _BackupRestoreBottomSheetState extends ConsumerState<BackupRestoreBottomSh
     final df = DateFormat('dd MMM yyyy, HH:mm', 'id_ID');
     final confirm = await AppDialog.showConfirmation(
       context,
-      title: 'Pulihkan Data Cloud Supabase',
+      title: 'Pulihkan Data Cloud',
       message: 'Pulihkan ${b.totalRecords} data toko dari Cloud tanggal ${df.format(b.createdAt)}? Data lokal saat ini akan diselaraskan.',
       confirmText: 'Ya, Pulihkan dari Cloud',
       isDestructive: true,
@@ -184,7 +184,7 @@ class _BackupRestoreBottomSheetState extends ConsumerState<BackupRestoreBottomSh
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text('Cadangan & Pulihkan Data', style: AppTypography.headingSmall.copyWith(fontSize: 16), maxLines: 1, overflow: TextOverflow.ellipsis),
-                    Text('Sinkronisasi offline lokal dan Cloud Supabase', style: AppTypography.bodySmall.copyWith(fontSize: 11), maxLines: 1, overflow: TextOverflow.ellipsis),
+                    Text('Sinkronisasi offline lokal dan Cloud', style: AppTypography.bodySmall.copyWith(fontSize: 11), maxLines: 1, overflow: TextOverflow.ellipsis),
                   ],
                 ),
               ),
@@ -209,7 +209,7 @@ class _BackupRestoreBottomSheetState extends ConsumerState<BackupRestoreBottomSh
               labelStyle: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700),
               tabs: [
                 Tab(text: 'Lokal Offline (${_localBackups.length})'),
-                Tab(text: 'Cloud Supabase (${_cloudBackups.length})'),
+                Tab(text: 'Cloud (${_cloudBackups.length})'),
               ],
             ),
           ),

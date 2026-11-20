@@ -100,7 +100,7 @@ class StoreClosingCloudCard extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('Auto-Backup Cloud Supabase', style: TextStyle(fontWeight: FontWeight.w800, fontSize: 13, color: Color(0xFF166534))),
+                    Text('Auto-Backup Cloud', style: TextStyle(fontWeight: FontWeight.w800, fontSize: 13, color: Color(0xFF166534))),
                     Text('db.gjgfdwzqjypzalzleqgt.supabase.co', style: TextStyle(fontSize: 10, color: Color(0xFF15803D))),
                   ],
                 ),
@@ -114,7 +114,7 @@ class StoreClosingCloudCard extends StatelessWidget {
           ),
           const SizedBox(height: 6),
           const Text(
-            'Saat toko ditutup, seluruh katalog produk, mutasi stok, transaksi, & pelanggan otomatis di-upload ke database cloud Supabase.',
+            'Saat toko ditutup, seluruh katalog produk, mutasi stok, transaksi, & pelanggan otomatis di-upload ke database cloud.',
             style: TextStyle(fontSize: 10.5, color: Color(0xFF166534), height: 1.3),
           ),
         ],
@@ -147,7 +147,7 @@ class StoreClosingSuccessCard extends StatelessWidget {
               children: [
                 const Text('Cadangan Cloud Berhasil!', style: TextStyle(fontSize: 12.5, fontWeight: FontWeight.w800, color: Color(0xFF065F46))),
                 Text(
-                  '${backupResult?.totalRecords ?? 0} data • ${backupResult?.formattedSize ?? ""} tersimpan aman di Supabase',
+                  '${backupResult?.totalRecords ?? 0} data • ${backupResult?.formattedSize ?? ""} tersimpan di Cloud',
                   style: const TextStyle(fontSize: 11, color: Color(0xFF047857)),
                 ),
               ],

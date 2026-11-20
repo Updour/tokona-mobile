@@ -52,4 +52,36 @@ class LocalPushNotificationService {
       payload: payload,
     );
   }
+
+  Future<void> showDeliveryNotification({
+    required int id,
+    required String title,
+    required String body,
+    String? payload,
+  }) async {
+    await init();
+
+    const androidDetails = AndroidNotificationDetails(
+      'tokona_delivery_channel',
+      'Status Pengiriman Ekspedisi',
+      channelDescription: 'Notifikasi saat paket kulakan J&T Cargo sudah tiba atau diterima',
+      importance: Importance.max,
+      priority: Priority.high,
+      showWhen: true,
+      enableVibration: true,
+    );
+
+    await _plugin.show(
+      id,
+      title,
+      body,
+      const NotificationDetails(android: androidDetails),
+      payload: payload,
+    );
+  }
+
+  Future<void> cancel(int id) async {
+    await init();
+    await _plugin.cancel(id);
+  }
 }

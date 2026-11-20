@@ -210,7 +210,7 @@ class _ReportExportBottomSheetState extends ConsumerState<ReportExportBottomShee
                 ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
                 : const Icon(Icons.file_download_rounded, size: 18),
             label: Text(
-              _isExporting ? 'Menyiapkan File...' : 'Download File Excel (.CSV)',
+              _isExporting ? 'Menyiapkan File...' : 'Download File Excel',
               style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 13),
             ),
             style: ElevatedButton.styleFrom(

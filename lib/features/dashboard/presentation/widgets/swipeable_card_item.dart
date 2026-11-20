@@ -37,12 +37,12 @@ class SwipeableCardItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 4),
+      margin: const EdgeInsets.symmetric(horizontal: 2),
       decoration: BoxDecoration(
         gradient: LinearGradient(colors: gradient, begin: Alignment.topLeft, end: Alignment.bottomRight),
         borderRadius: BorderRadius.circular(22),
         boxShadow: [
-          BoxShadow(color: gradient.first.withValues(alpha: 0.35), blurRadius: 16, offset: const Offset(0, 6)),
+          BoxShadow(color: gradient.first.withValues(alpha: 0.16), blurRadius: 16, offset: const Offset(0, 5)),
         ],
       ),
       clipBehavior: Clip.antiAlias,

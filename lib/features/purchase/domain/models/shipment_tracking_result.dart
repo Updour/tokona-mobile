@@ -6,6 +6,7 @@ class TrackingTimelinePoint {
   final String? officerName;
   final String? contactPhone;
   final String? nextStop;
+  final List<String> proofPhotos;
 
   const TrackingTimelinePoint({
     required this.scanTime,
@@ -15,9 +16,13 @@ class TrackingTimelinePoint {
     this.officerName,
     this.contactPhone,
     this.nextStop,
+    this.proofPhotos = const [],
   });
 
   factory TrackingTimelinePoint.fromJson(Map<String, dynamic> json) {
+    final rawPics = json['picUrl'] as List<dynamic>? ?? [];
+    final photos = rawPics.map((p) => p.toString()).where((s) => s.isNotEmpty).toList();
+
     return TrackingTimelinePoint(
       scanTime: json['scanTime']?.toString() ?? '',
       statusName: json['status']?.toString() ?? json['scanTypeName']?.toString() ?? 'Update',
@@ -26,6 +31,7 @@ class TrackingTimelinePoint {
       officerName: json['staffName']?.toString() ?? json['scanByName']?.toString(),
       contactPhone: json['staffContact']?.toString() ?? json['scanNetworkContact']?.toString(),
       nextStop: json['nextStopName']?.toString(),
+      proofPhotos: photos,
     );
   }
 }
@@ -42,6 +48,7 @@ class ShipmentTrackingResult {
   final String latestStatus;
   final bool isDelivered;
   final List<TrackingTimelinePoint> timeline;
+  final List<String> proofPhotos;
   final String? errorMessage;
   final DateTime fetchedAt;
 
@@ -57,6 +64,7 @@ class ShipmentTrackingResult {
     required this.latestStatus,
     this.isDelivered = false,
     this.timeline = const [],
+    this.proofPhotos = const [],
     this.errorMessage,
     required this.fetchedAt,
   });

@@ -5,6 +5,7 @@ import 'package:tokona/core/theme/app_typography.dart';
 import 'package:tokona/core/widgets/app_toast.dart';
 import 'package:tokona/features/purchase/data/services/shipment_tracking_service.dart';
 import 'package:tokona/features/purchase/domain/models/shipment_tracking_result.dart';
+import 'package:tokona/features/purchase/presentation/widgets/shipment_proof_photo_card.dart';
 import 'package:tokona/features/purchase/presentation/widgets/shipment_timeline_tile.dart';
 import 'package:tokona/features/purchase/presentation/widgets/shipment_tracking_header_card.dart';
 
@@ -89,9 +90,16 @@ class _ShipmentTrackingSheetState extends State<ShipmentTrackingSheet> {
       child: Container(
         decoration: const BoxDecoration(
           color: Colors.white,
-          borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+          borderRadius: BorderRadius.vertical(top: Radius.circular(22)),
+          boxShadow: [
+            BoxShadow(
+              color: Color(0x140F172A),
+              blurRadius: 20,
+              offset: Offset(0, -4),
+            ),
+          ],
         ),
-        padding: const EdgeInsets.fromLTRB(20, 16, 20, 24),
+        padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
         constraints: BoxConstraints(maxHeight: MediaQuery.of(context).size.height * 0.88),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -206,6 +214,7 @@ class _ShipmentTrackingSheetState extends State<ShipmentTrackingSheet> {
       physics: const BouncingScrollPhysics(),
       children: [
         ShipmentTrackingHeaderCard(result: res),
+        if (res.proofPhotos.isNotEmpty) ShipmentProofPhotoCard(proofPhotos: res.proofPhotos),
         const SizedBox(height: 18),
         Text(
           'RIWAYAT PERJALANAN PAKET (${res.timeline.length})',

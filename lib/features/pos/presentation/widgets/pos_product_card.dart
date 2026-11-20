@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:tokona/core/theme/app_colors.dart';
 import 'package:tokona/core/theme/app_typography.dart';
+import 'package:tokona/features/pos/presentation/widgets/pos_manual_qty_dialog.dart';
 import 'package:tokona/features/pos/presentation/widgets/pos_product_image_header.dart';
 import 'package:tokona/features/product/domain/models/product_model.dart';
 import 'package:tokona/features/product/domain/models/product_unit_model.dart';
@@ -12,6 +13,7 @@ class PosProductCard extends StatefulWidget {
   final double inCartQty;
   final void Function(ProductModel product, ProductUnitModel? unit) onAddToCart;
   final void Function(ProductModel product, ProductUnitModel? unit) onDecrement;
+  final void Function(ProductModel product, ProductUnitModel? unit, double qty)? onSetQty;
 
   const PosProductCard({
     super.key,
@@ -19,6 +21,7 @@ class PosProductCard extends StatefulWidget {
     required this.inCartQty,
     required this.onAddToCart,
     required this.onDecrement,
+    this.onSetQty,
   });
 
   @override
@@ -47,9 +50,9 @@ class _PosProductCardState extends State<PosProductCard> {
         color: Colors.transparent,
         child: InkWell(
           onTapDown: isOutOfStock ? null : (_) => setState(() => _isPressed = true),
-          onTapUp: isOutOfStock
+          onTap: isOutOfStock
               ? null
-              : (_) {
+              : () {
                   setState(() => _isPressed = false);
                   HapticFeedback.lightImpact();
                   widget.onAddToCart(p, _selectedUnit);
@@ -67,9 +70,7 @@ class _PosProductCardState extends State<PosProductCard> {
               ),
               boxShadow: [
                 BoxShadow(
-                  color: isInCart
-                      ? AppColors.primary.withValues(alpha: 0.12)
-                      : Colors.black.withValues(alpha: 0.03),
+                  color: isInCart ? AppColors.primary.withValues(alpha: 0.12) : Colors.black.withValues(alpha: 0.03),
                   blurRadius: isInCart ? 10 : 6,
                   offset: const Offset(0, 3),
                 ),
@@ -87,27 +88,22 @@ class _PosProductCardState extends State<PosProductCard> {
                     ),
                   ),
                   Padding(
-                    padding: const EdgeInsets.fromLTRB(10, 8, 10, 9),
+                    padding: const EdgeInsets.fromLTRB(8, 6, 8, 7),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         if (p.units.isNotEmpty) ...[
                           _buildUnitSelectorRow(p),
-                          const SizedBox(height: 5),
+                          const SizedBox(height: 4),
                         ],
                         Text(
                           p.name,
-                          style: AppTypography.labelMedium.copyWith(
-                            fontSize: 12.5,
-                            fontWeight: FontWeight.w700,
-                            color: AppColors.textPrimary,
-                            height: 1.2,
-                          ),
+                          style: AppTypography.labelMedium.copyWith(fontSize: 12, fontWeight: FontWeight.w700, color: AppColors.textPrimary, height: 1.15),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                         ),
-                        const SizedBox(height: 3),
+                        const SizedBox(height: 2),
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           crossAxisAlignment: CrossAxisAlignment.center,
@@ -119,32 +115,20 @@ class _PosProductCardState extends State<PosProductCard> {
                                 children: [
                                   Text(
                                     currency.format(activePrice),
-                                    style: AppTypography.headingSmall.copyWith(
-                                      color: AppColors.primary,
-                                      fontSize: 13.5,
-                                      fontWeight: FontWeight.w800,
-                                      letterSpacing: -0.3,
-                                    ),
+                                    style: AppTypography.headingSmall.copyWith(color: AppColors.primary, fontSize: 13, fontWeight: FontWeight.w800, letterSpacing: -0.3),
                                     maxLines: 1,
                                     overflow: TextOverflow.ellipsis,
                                   ),
                                   Text(
                                     'per $activeUnitName',
-                                    style: AppTypography.bodySmall.copyWith(
-                                      fontSize: 9.5,
-                                      color: AppColors.textMuted,
-                                      height: 1.1,
-                                    ),
+                                    style: AppTypography.bodySmall.copyWith(fontSize: 9, color: AppColors.textMuted, height: 1.1),
                                     maxLines: 1,
                                   ),
                                 ],
                               ),
                             ),
-                            const SizedBox(width: 6),
-                            if (isInCart)
-                              _buildStepper(p, isOutOfStock)
-                            else
-                              _buildAddIndicator(isOutOfStock),
+                            const SizedBox(width: 4),
+                            if (isInCart) _buildStepper(p, isOutOfStock) else _buildAddIndicator(isOutOfStock),
                           ],
                         ),
                       ],
@@ -164,28 +148,14 @@ class _PosProductCardState extends State<PosProductCard> {
       scrollDirection: Axis.horizontal,
       child: Row(
         children: [
-          _buildUnitPill(
-            label: p.baseUnit,
-            isSelected: _selectedUnit == null,
-            onTap: () => setState(() => _selectedUnit = null),
-          ),
-          ...p.units.map((u) {
-            return _buildUnitPill(
-              label: u.unitName,
-              isSelected: _selectedUnit?.id == u.id,
-              onTap: () => setState(() => _selectedUnit = u),
-            );
-          }),
+          _buildUnitPill(label: p.baseUnit, isSelected: _selectedUnit == null, onTap: () => setState(() => _selectedUnit = null)),
+          ...p.units.map((u) => _buildUnitPill(label: u.unitName, isSelected: _selectedUnit?.id == u.id, onTap: () => setState(() => _selectedUnit = u))),
         ],
       ),
     );
   }
 
-  Widget _buildUnitPill({
-    required String label,
-    required bool isSelected,
-    required VoidCallback onTap,
-  }) {
+  Widget _buildUnitPill({required String label, required bool isSelected, required VoidCallback onTap}) {
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
       onTap: onTap,
@@ -195,30 +165,27 @@ class _PosProductCardState extends State<PosProductCard> {
         decoration: BoxDecoration(
           color: isSelected ? AppColors.primaryContainer : AppColors.surfaceElevated,
           borderRadius: BorderRadius.circular(6),
-          border: Border.all(
-            color: isSelected ? AppColors.primary : AppColors.border,
-            width: isSelected ? 1.2 : 0.8,
-          ),
+          border: Border.all(color: isSelected ? AppColors.primary : AppColors.border, width: isSelected ? 1.2 : 0.8),
         ),
         child: Text(
           label,
-          style: TextStyle(
-            color: isSelected ? AppColors.primaryDark : AppColors.textSecondary,
-            fontSize: 9.5,
-            fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
-          ),
+          style: TextStyle(color: isSelected ? AppColors.primaryDark : AppColors.textSecondary, fontSize: 9.5, fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500),
         ),
       ),
     );
   }
 
   Widget _buildStepper(ProductModel p, bool isOutOfStock) {
+    final factor = _selectedUnit?.conversionFactor ?? 1.0;
+    final maxInUnit = factor > 0 ? (p.stockBase / factor) : p.stockBase;
+    final unitLabel = _selectedUnit?.unitName ?? p.baseUnit;
+
     return Container(
-      height: 28,
+      height: 26,
       decoration: BoxDecoration(
         color: AppColors.primaryContainer.withValues(alpha: 0.8),
-        borderRadius: BorderRadius.circular(9),
-        border: Border.all(color: AppColors.primary.withValues(alpha: 0.4), width: 1.2),
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: AppColors.primary.withValues(alpha: 0.4), width: 1.0),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -228,21 +195,45 @@ class _PosProductCardState extends State<PosProductCard> {
               HapticFeedback.lightImpact();
               widget.onDecrement(p, _selectedUnit);
             },
-            borderRadius: const BorderRadius.horizontal(left: Radius.circular(8)),
+            borderRadius: const BorderRadius.horizontal(left: Radius.circular(7)),
             child: const SizedBox(
-              width: 25,
-              height: 28,
-              child: Icon(Icons.remove_rounded, size: 14, color: AppColors.primaryDark),
+              width: 24,
+              height: 26,
+              child: Icon(Icons.remove_rounded, size: 13, color: AppColors.primaryDark),
             ),
           ),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 4),
-            child: Text(
-              widget.inCartQty.toStringAsFixed(0),
-              style: const TextStyle(
-                fontSize: 12,
-                fontWeight: FontWeight.w800,
-                color: AppColors.primaryDark,
+          InkWell(
+            onTap: () async {
+              HapticFeedback.selectionClick();
+              final newQty = await PosManualQtyDialog.show(
+                context,
+                productName: p.name,
+                unitName: unitLabel,
+                initialQty: widget.inCartQty,
+                maxStock: maxInUnit,
+              );
+              if (newQty != null) {
+                widget.onSetQty?.call(p, _selectedUnit, newQty);
+              }
+            },
+            borderRadius: BorderRadius.circular(4),
+            child: Container(
+              constraints: const BoxConstraints(minWidth: 22, minHeight: 22),
+              alignment: Alignment.center,
+              padding: const EdgeInsets.symmetric(horizontal: 4),
+              decoration: BoxDecoration(
+                color: Colors.white.withValues(alpha: 0.85),
+                borderRadius: BorderRadius.circular(4),
+              ),
+              child: Text(
+                widget.inCartQty == widget.inCartQty.roundToDouble()
+                    ? widget.inCartQty.toInt().toString()
+                    : widget.inCartQty.toString(),
+                style: const TextStyle(
+                  fontSize: 11.5,
+                  fontWeight: FontWeight.w800,
+                  color: AppColors.primaryDark,
+                ),
               ),
             ),
           ),
@@ -253,11 +244,15 @@ class _PosProductCardState extends State<PosProductCard> {
                     HapticFeedback.lightImpact();
                     widget.onAddToCart(p, _selectedUnit);
                   },
-            borderRadius: const BorderRadius.horizontal(right: Radius.circular(8)),
-            child: const SizedBox(
-              width: 25,
-              height: 28,
-              child: Icon(Icons.add_rounded, size: 14, color: AppColors.primaryDark),
+            borderRadius: const BorderRadius.horizontal(right: Radius.circular(7)),
+            child: SizedBox(
+              width: 24,
+              height: 26,
+              child: Icon(
+                Icons.add_rounded,
+                size: 13,
+                color: widget.inCartQty >= maxInUnit ? AppColors.textMuted : AppColors.primaryDark,
+              ),
             ),
           ),
         ],
@@ -267,11 +262,11 @@ class _PosProductCardState extends State<PosProductCard> {
 
   Widget _buildAddIndicator(bool isOutOfStock) {
     return Container(
-      width: 28,
-      height: 28,
+      width: 26,
+      height: 26,
       decoration: BoxDecoration(
         color: isOutOfStock ? AppColors.border : AppColors.primary,
-        borderRadius: BorderRadius.circular(9),
+        borderRadius: BorderRadius.circular(8),
         boxShadow: isOutOfStock
             ? null
             : [

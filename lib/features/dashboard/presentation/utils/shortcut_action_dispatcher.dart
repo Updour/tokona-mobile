@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:tokona/core/widgets/app_toast.dart';
 import 'package:tokona/features/auth/presentation/controllers/auth_controller.dart';
 import 'package:tokona/features/backup/presentation/widgets/backup_restore_bottom_sheet.dart';
 import 'package:tokona/features/customer/presentation/widgets/customer_list_bottom_sheet.dart';
@@ -21,6 +22,8 @@ import 'package:tokona/features/purchase/presentation/widgets/device_management_
 import 'package:tokona/features/purchase/presentation/widgets/incoming_orders_sheet.dart';
 import 'package:tokona/features/purchase/presentation/widgets/purchase_history_sheet.dart';
 import 'package:tokona/features/purchase/presentation/widgets/refund_monitor_sheet.dart';
+import 'package:tokona/features/settings/presentation/controllers/rbac_controller.dart';
+import 'package:tokona/features/settings/presentation/widgets/dynamic_settings_sheet.dart';
 import 'package:tokona/features/supplier/presentation/widgets/supplier_list_bottom_sheet.dart';
 
 class ShortcutActionDispatcher {
@@ -33,7 +36,16 @@ class ShortcutActionDispatcher {
     ValueChanged<int>? onNavigateTab,
   }) {
     HapticFeedback.lightImpact();
-    final store = ref.read(authProvider).currentStore;
+    final authState = ref.read(authProvider);
+    final user = authState.currentUser;
+    final rbac = ref.read(rbacProvider.notifier);
+
+    if (!rbac.canAccessShortcut(user, id)) {
+      AppToast.showWarning(context, 'Menu dibatasi oleh Owner untuk role ${user?.role.label ?? "Staf"}');
+      return;
+    }
+
+    final store = authState.currentStore;
 
     switch (id) {
       case 'kasir':
@@ -116,6 +128,9 @@ class ShortcutActionDispatcher {
         break;
       case 'daftar_supplier':
         SupplierListBottomSheet.show(context);
+        break;
+      case 'pengaturan_dinamis':
+        DynamicSettingsSheet.show(context);
         break;
     }
   }

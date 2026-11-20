@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:tokona/core/theme/app_colors.dart';
 import 'package:tokona/features/auth/domain/dtos/login_dto.dart';
 import 'package:tokona/features/auth/presentation/widgets/auth_text_field.dart';
+import 'package:tokona/features/auth/presentation/widgets/forgot_password_bottom_sheet.dart';
 
 class LoginFormWidget extends StatefulWidget {
   final bool isLoading;
@@ -54,8 +55,8 @@ class _LoginFormWidgetState extends State<LoginFormWidget> {
         children: [
           AuthTextField(
             controller: _usernameController,
-            label: 'Nama Pengguna / Akun',
-            hint: 'Contoh: kasir1 / admin',
+            label: 'Nama Pengguna',
+            hint: 'Contoh: kasir / admin',
             prefixIcon: Icons.person_outline_rounded,
             validator: (value) {
               if (value == null || value.trim().isEmpty) {
@@ -83,7 +84,29 @@ class _LoginFormWidgetState extends State<LoginFormWidget> {
               return null;
             },
           ),
-          const SizedBox(height: 22),
+          const SizedBox(height: 8),
+          Align(
+            alignment: Alignment.centerRight,
+            child: InkWell(
+              onTap: () {
+                HapticFeedback.lightImpact();
+                ForgotPasswordBottomSheet.show(context);
+              },
+              borderRadius: BorderRadius.circular(6),
+              child: const Padding(
+                padding: EdgeInsets.symmetric(horizontal: 4, vertical: 4),
+                child: Text(
+                  'Lupa Kata Sandi?',
+                  style: TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.primary,
+                  ),
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(height: 14),
           AnimatedScale(
             scale: _isButtonPressed ? 0.97 : 1.0,
             duration: const Duration(milliseconds: 100),
@@ -138,16 +161,9 @@ class _LoginFormWidgetState extends State<LoginFormWidget> {
                               ),
                             ],
                           )
-                        : const Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Text(
-                                'Masuk ke Toko',
-                                style: TextStyle(color: Colors.white, fontWeight: FontWeight.w800, fontSize: 14),
-                              ),
-                              SizedBox(width: 8),
-                              Icon(Icons.arrow_forward_rounded, color: Colors.white, size: 18),
-                            ],
+                        : const Text(
+                            'Masuk ke Toko',
+                            style: TextStyle(color: Colors.white, fontWeight: FontWeight.w800, fontSize: 14),
                           ),
                   ),
                 ),

@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:tokona/core/services/native_contact_service.dart';
+import 'package:tokona/core/services/whatsapp_service.dart';
 import 'package:tokona/core/theme/app_colors.dart';
 import 'package:tokona/core/theme/app_typography.dart';
 import 'package:tokona/core/widgets/app_toast.dart';
@@ -47,15 +50,50 @@ class _StoreEditBottomSheetState extends ConsumerState<StoreEditBottomSheet> {
     super.dispose();
   }
 
+  Future<void> _pickFromPhone() async {
+    HapticFeedback.lightImpact();
+    final contact = await NativeContactService.pickContact();
+    if (contact == null) return;
+
+    if (contact.phone.isNotEmpty) {
+      _phoneController.text = contact.phone;
+    }
+    if (contact.address != null && contact.address!.isNotEmpty) {
+      _addressController.text = contact.address!;
+      if (mounted) AppToast.showSuccess(context, 'Alamat & No. HP terisi dari kontak');
+    } else {
+      if (mounted) AppToast.showSuccess(context, 'No. HP terisi: ${contact.phone}');
+    }
+  }
+
+  Future<void> _pickAddressOnly() async {
+    HapticFeedback.lightImpact();
+    final address = await NativeContactService.pickAddress();
+    if (address != null && address.isNotEmpty) {
+      setState(() => _addressController.text = address);
+      if (mounted) AppToast.showSuccess(context, 'Alamat terisi dari kontak HP');
+    } else {
+      final contact = await NativeContactService.pickContact();
+      if (contact != null && contact.address != null && contact.address!.isNotEmpty) {
+        setState(() => _addressController.text = contact.address!);
+        if (mounted) AppToast.showSuccess(context, 'Alamat berhasil diambil');
+      } else {
+        if (mounted) AppToast.showInfo(context, 'Pilih kontak yang menyimpan alamat pos atau tulis manual');
+      }
+    }
+  }
+
   Future<void> _handleSave() async {
     if (!_formKey.currentState!.validate()) return;
     if (widget.store == null) return;
 
     setState(() => _isSaving = true);
+    final rawPhone = _phoneController.text.trim();
+    final cleanPhone = rawPhone.isNotEmpty ? WhatsAppService.sanitizePhoneNumber(rawPhone) : '';
     final updatedStore = widget.store!.copyWith(
       name: _nameController.text.trim(),
       address: _addressController.text.trim(),
-      phone: _phoneController.text.trim(),
+      phone: cleanPhone,
     );
 
     final success = await ref.read(authProvider.notifier).updateStore(updatedStore);
@@ -131,12 +169,12 @@ class _StoreEditBottomSheetState extends ConsumerState<StoreEditBottomSheet> {
                 ],
               ),
               const Divider(height: 20),
-              _buildFieldLabel('Nama Toko / Outlet *'),
+              _buildFieldLabel('Nama Toko*'),
               TextFormField(
                 controller: _nameController,
                 textCapitalization: TextCapitalization.words,
                 decoration: _buildInputDecoration(
-                  hint: 'Contoh: Toko Adi Jaya',
+                  hint: 'Contoh: Toko Bangun Kerja Jaya',
                   prefixIcon: Icons.store_rounded,
                 ),
                 validator: (val) {
@@ -145,7 +183,26 @@ class _StoreEditBottomSheetState extends ConsumerState<StoreEditBottomSheet> {
                 },
               ),
               const SizedBox(height: 14),
-              _buildFieldLabel('Nomor Kontak / WhatsApp Outlet'),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  _buildFieldLabel('Nomor Handphone (WhatsApp)'),
+                  InkWell(
+                    onTap: _pickFromPhone,
+                    borderRadius: BorderRadius.circular(6),
+                    child: const Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+                      child: Row(
+                        children: [
+                          Icon(Icons.contacts_rounded, size: 12.5, color: AppColors.primary),
+                          SizedBox(width: 3.5),
+                          Text('Ambil Kontak HP', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: AppColors.primary)),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              ),
               TextFormField(
                 controller: _phoneController,
                 keyboardType: TextInputType.phone,
@@ -155,12 +212,31 @@ class _StoreEditBottomSheetState extends ConsumerState<StoreEditBottomSheet> {
                 ),
               ),
               const SizedBox(height: 14),
-              _buildFieldLabel('Alamat Lengkap Outlet'),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  _buildFieldLabel('Alamat Lengkap Toko'),
+                  InkWell(
+                    onTap: _pickAddressOnly,
+                    borderRadius: BorderRadius.circular(6),
+                    child: const Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+                      child: Row(
+                        children: [
+                          Icon(Icons.location_searching_rounded, size: 12.5, color: AppColors.primary),
+                          SizedBox(width: 3.5),
+                          Text('Ambil Alamat di HP', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: AppColors.primary)),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              ),
               TextFormField(
                 controller: _addressController,
                 maxLines: 3,
                 decoration: _buildInputDecoration(
-                  hint: 'Alamat toko, jalan, no, kota untuk dicetak pada nota',
+                  hint: 'Alamat toko, jalan, kelurahan, kota untuk dicetak pada nota',
                   prefixIcon: Icons.location_on_outlined,
                 ),
               ),
@@ -173,7 +249,7 @@ class _StoreEditBottomSheetState extends ConsumerState<StoreEditBottomSheet> {
                   icon: _isSaving
                       ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
                       : const Icon(Icons.save_rounded, size: 18),
-                  label: Text(_isSaving ? 'Menyimpan...' : 'Simpan Perubahan Toko', style: const TextStyle(fontWeight: FontWeight.w700)),
+                  label: Text(_isSaving ? 'Menyimpan...' : 'Simpan Perubahan', style: const TextStyle(fontWeight: FontWeight.w700)),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppColors.primary,
                     foregroundColor: Colors.white,
@@ -209,4 +285,3 @@ class _StoreEditBottomSheetState extends ConsumerState<StoreEditBottomSheet> {
     );
   }
 }
-

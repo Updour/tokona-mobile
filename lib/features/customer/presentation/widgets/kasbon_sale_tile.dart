@@ -1,25 +1,59 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:tokona/core/theme/app_colors.dart';
 import 'package:tokona/core/utils/currency_formatter.dart';
 import 'package:tokona/features/customer/domain/models/customer_model.dart';
 import 'package:tokona/features/customer/presentation/widgets/pay_kasbon_bottom_sheet.dart';
 import 'package:tokona/features/pos/domain/models/sale_model.dart';
+import 'package:tokona/features/pos/presentation/widgets/reminder_message_dialog.dart';
+import 'package:tokona/features/settings/domain/models/app_preferences.dart';
+import 'package:tokona/features/settings/presentation/controllers/app_preferences_controller.dart';
 
-class KasbonSaleTile extends StatelessWidget {
+class KasbonSaleTile extends ConsumerWidget {
   final SaleModel sale;
   final CustomerModel? customer;
   final DateTime now;
+  final String? storeName;
 
   const KasbonSaleTile({
     super.key,
     required this.sale,
     required this.customer,
     required this.now,
+    this.storeName,
   });
 
+  void _sendWhatsAppReminder(BuildContext context, WidgetRef ref) {
+    final customerName = sale.customerName ?? customer?.name ?? 'Pelanggan';
+    final dateFormat = DateFormat('dd MMM yyyy', 'id_ID');
+    final createdStr = dateFormat.format(sale.createdAt);
+    final dueStr = sale.dueDate != null ? dateFormat.format(sale.dueDate!) : 'Belum ditentukan';
+    final nameStore = storeName ?? 'Toko';
+    final template = ref.read(appPreferencesProvider).waKasbonTemplate;
+
+    final message = AppPreferences.renderTemplate(template, {
+      'nama': customerName,
+      'toko': nameStore,
+      'no_nota': sale.invoiceNumber,
+      'tanggal': createdStr,
+      'jatuh_tempo': dueStr,
+      'total': CurrencyFormatter.format(sale.finalAmount),
+    });
+
+    ReminderMessageDialog.show(
+      context,
+      title: 'Kirim Tagihan Kasbon WA',
+      recipientName: customerName,
+      initialPhone: customer?.phone,
+      initialMessage: message,
+      category: 'kasbon',
+      referenceId: 'kasbon_${sale.id}',
+    );
+  }
+
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final dateFormat = DateFormat('dd MMM yyyy');
     final isOverdue = sale.dueDate != null && now.isAfter(sale.dueDate!);
     final daysDiff = sale.dueDate != null ? sale.dueDate!.difference(now).inDays : null;
@@ -83,24 +117,53 @@ class KasbonSaleTile extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(
-                CurrencyFormatter.format(sale.finalAmount),
-                style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w800, color: Color(0xFFB45309)),
-              ),
-              if (customer != null)
-                ElevatedButton.icon(
-                  onPressed: () {
-                    PayKasbonBottomSheet.show(context, customer: customer!);
-                  },
-                  icon: const Icon(Icons.payments_outlined, size: 14),
-                  label: const Text('Bayar Kasbon', style: TextStyle(fontSize: 11.5, fontWeight: FontWeight.w700)),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF0D9488),
-                    foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+              Expanded(
+                child: FittedBox(
+                  fit: BoxFit.scaleDown,
+                  alignment: Alignment.centerLeft,
+                  child: Text(
+                    CurrencyFormatter.format(sale.finalAmount),
+                    style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w800, color: Color(0xFFB45309)),
                   ),
                 ),
+              ),
+              const SizedBox(width: 8),
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  OutlinedButton.icon(
+                    onPressed: () => _sendWhatsAppReminder(context, ref),
+                    icon: const Icon(Icons.send_rounded, size: 12, color: Color(0xFF059669)),
+                    label: const Text('WA', style: TextStyle(fontSize: 10.5, fontWeight: FontWeight.w700, color: Color(0xFF059669))),
+                    style: OutlinedButton.styleFrom(
+                      side: const BorderSide(color: Color(0xFFA7F3D0)),
+                      backgroundColor: const Color(0xFFECFDF5),
+                      padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 4.5),
+                      minimumSize: Size.zero,
+                      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                    ),
+                  ),
+                  if (customer != null) ...[
+                    const SizedBox(width: 5),
+                    ElevatedButton.icon(
+                      onPressed: () {
+                        PayKasbonBottomSheet.show(context, customer: customer!);
+                      },
+                      icon: const Icon(Icons.payments_outlined, size: 12),
+                      label: const Text('Bayar', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700)),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFF0D9488),
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 5),
+                        minimumSize: Size.zero,
+                        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                      ),
+                    ),
+                  ],
+                ],
+              ),
             ],
           ),
         ],

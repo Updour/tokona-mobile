@@ -62,7 +62,7 @@ class _PurchaseSupplierFieldState extends ConsumerState<PurchaseSupplierField> {
         TextField(
           controller: widget.controller,
           decoration: InputDecoration(
-            labelText: widget.purchaseType == 'online' ? 'Nama Toko Online / Supplier' : 'Nama Distributor / Toko',
+            labelText: widget.purchaseType == 'online' ? 'Nama Toko Online' : 'Nama Distributor',
             hintText: widget.purchaseType == 'online' ? 'Contoh: Toko Murah Jaya' : 'Contoh: PT Wings Surya',
             prefixIcon: const Icon(Icons.business_outlined, size: 20),
             suffixIcon: IconButton(

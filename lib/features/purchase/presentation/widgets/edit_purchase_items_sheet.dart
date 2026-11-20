@@ -155,12 +155,12 @@ class _EditPurchaseItemsSheetState extends ConsumerState<EditPurchaseItemsSheet>
               children: [
                 TextField(
                   controller: _invoiceController,
-                  decoration: const InputDecoration(labelText: 'No. Faktur / Nota Toko', isDense: true),
+                  decoration: const InputDecoration(labelText: 'No. Faktur', isDense: true),
                 ),
                 const SizedBox(height: 8),
                 TextField(
                   controller: _supplierController,
-                  decoration: const InputDecoration(labelText: 'Nama Toko / Distributor', isDense: true),
+                  decoration: const InputDecoration(labelText: 'Nama Supplier', isDense: true),
                 ),
                 const SizedBox(height: 12),
                 const Text('Tambah Produk ke Faktur:', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700)),
@@ -183,7 +183,7 @@ class _EditPurchaseItemsSheetState extends ConsumerState<EditPurchaseItemsSheet>
                 const SizedBox(height: 10),
                 TextField(
                   controller: _notesController,
-                  decoration: const InputDecoration(labelText: 'Catatan Faktur (Opsional)', isDense: true),
+                  decoration: const InputDecoration(labelText: 'Catatan Faktur', isDense: true),
                 ),
                 const SizedBox(height: 14),
                 Container(

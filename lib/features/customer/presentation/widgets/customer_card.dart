@@ -178,12 +178,16 @@ class CustomerCard extends StatelessWidget {
                               children: [
                                 const Icon(Icons.payment_rounded, size: 12, color: AppColors.error),
                                 const SizedBox(width: 4),
-                                Text(
-                                  'Kasbon: ${CurrencyFormatter.format(customer.receivableBalance)} (Bayar)',
-                                  style: const TextStyle(
-                                    fontSize: 10.5,
-                                    fontWeight: FontWeight.w700,
-                                    color: AppColors.error,
+                                Flexible(
+                                  child: Text(
+                                    'Kasbon: ${CurrencyFormatter.format(customer.receivableBalance)} (Bayar)',
+                                    style: const TextStyle(
+                                      fontSize: 10.5,
+                                      fontWeight: FontWeight.w700,
+                                      color: AppColors.error,
+                                    ),
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
                                   ),
                                 ),
                               ],

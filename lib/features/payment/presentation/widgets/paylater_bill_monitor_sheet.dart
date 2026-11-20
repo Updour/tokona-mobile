@@ -4,7 +4,9 @@ import 'package:intl/intl.dart';
 import 'package:tokona/core/theme/app_colors.dart';
 import 'package:tokona/core/theme/app_typography.dart';
 import 'package:tokona/core/utils/currency_formatter.dart';
+import 'package:tokona/features/payment/presentation/controllers/paylater_settlement_controller.dart';
 import 'package:tokona/features/payment/presentation/widgets/paylater_bill_summary_card.dart';
+import 'package:tokona/features/payment/presentation/widgets/paylater_settlement_history_sheet.dart';
 import 'package:tokona/features/payment/presentation/widgets/payment_account_management_sheet.dart';
 import 'package:tokona/features/purchase/presentation/controllers/purchase_controller.dart';
 import 'package:tokona/features/purchase/presentation/widgets/purchase_detail_sheet.dart';
@@ -113,12 +115,25 @@ class PaylaterBillMonitorSheet extends ConsumerWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               const Text('Riwayat Pembelian Paylater', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w800)),
-              InkWell(
-                onTap: () {
-                  Navigator.of(context).pop();
-                  PaymentAccountManagementSheet.show(context);
-                },
-                child: const Text('Cek Saldo Kas Toko →', style: TextStyle(fontSize: 11.5, fontWeight: FontWeight.w700, color: AppColors.primary)),
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  InkWell(
+                    onTap: () {
+                      final records = ref.read(paylaterSettlementProvider).records;
+                      PaylaterSettlementHistorySheet.show(context, records);
+                    },
+                    child: const Text('Arsip Lunas', style: TextStyle(fontSize: 11.5, fontWeight: FontWeight.w700, color: Color(0xFF16A34A))),
+                  ),
+                  const Text(' • ', style: TextStyle(fontSize: 11, color: AppColors.textMuted)),
+                  InkWell(
+                    onTap: () {
+                      Navigator.of(context).pop();
+                      PaymentAccountManagementSheet.show(context);
+                    },
+                    child: const Text('Kas Toko →', style: TextStyle(fontSize: 11.5, fontWeight: FontWeight.w700, color: AppColors.primary)),
+                  ),
+                ],
               ),
             ],
           ),

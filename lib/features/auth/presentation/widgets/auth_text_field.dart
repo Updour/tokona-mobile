@@ -82,6 +82,7 @@ class AuthTextField extends StatelessWidget {
           inputFormatters: inputFormatters,
           validator: validator,
           onChanged: onChanged,
+          scrollPadding: const EdgeInsets.only(bottom: 120),
           style: AppTypography.bodyLarge,
           decoration: InputDecoration(
             hintText: hint,

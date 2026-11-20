@@ -182,8 +182,8 @@ class _AddSupplierBottomSheetState extends State<AddSupplierBottomSheet> {
               const SizedBox(height: 14),
               AuthTextField(
                 controller: _nameController,
-                label: _type == 'online' ? 'Nama Toko Online' : 'Nama Distributor / Toko',
-                hint: _type == 'online' ? 'Grosir Sembako Murah' : 'PT Indomarco / Toko Beras Jaya',
+                label: _type == 'online' ? 'Nama Toko Online' : 'Nama Supplier',
+                hint: _type == 'online' ? 'Grosir Sembako Murah' : 'UD. Mustakim ',
                 isRequired: true,
                 prefixIcon: Icons.storefront_outlined,
                 validator: (val) => val == null || val.trim().isEmpty ? 'Wajib diisi' : null,
@@ -191,14 +191,14 @@ class _AddSupplierBottomSheetState extends State<AddSupplierBottomSheet> {
               const SizedBox(height: 12),
               AuthTextField(
                 controller: _contactController,
-                label: _type == 'online' ? 'Nama Admin / Akun' : 'Nama Sales / Kontak',
+                label: _type == 'online' ? 'Nama Admin' : 'Nama Sales ',
                 hint: 'Budi (Sales Indofood)',
                 prefixIcon: Icons.person_outline_rounded,
               ),
               const SizedBox(height: 12),
               AuthTextField(
                 controller: _phoneController,
-                label: 'Nomor WhatsApp / HP',
+                label: 'Nomor Hanphone',
                 hint: '081234567890',
                 keyboardType: TextInputType.phone,
                 prefixIcon: Icons.phone_outlined,
@@ -213,8 +213,8 @@ class _AddSupplierBottomSheetState extends State<AddSupplierBottomSheet> {
               const SizedBox(height: 12),
               AuthTextField(
                 controller: _notesController,
-                label: 'Catatan Khusus (Opsi)',
-                hint: 'No. Rekening BCA / Ketentuan retur',
+                label: 'Catatan (Opsi)',
+                hint: 'No. Rekening BCA atau Ketentuan retur',
                 prefixIcon: Icons.notes_outlined,
               ),
               const SizedBox(height: 24),

@@ -14,6 +14,22 @@ class WhatsAppService {
     return clean;
   }
 
+  static String formatDisplay(String phone) {
+    final clean = sanitizePhoneNumber(phone);
+    if (clean.startsWith('62') && clean.length >= 9) {
+      final sub = clean.substring(2);
+      if (sub.length <= 3) return '+62 $sub';
+      if (sub.length <= 7) return '+62 ${sub.substring(0, 3)}-${sub.substring(3)}';
+      return '+62 ${sub.substring(0, 3)}-${sub.substring(3, 7)}-${sub.substring(7)}';
+    }
+    return phone;
+  }
+
+  static bool isValidWhatsAppNumber(String phone) {
+    final clean = sanitizePhoneNumber(phone);
+    return clean.startsWith('62') && clean.length >= 10 && clean.length <= 15;
+  }
+
   static Future<bool> sendReceipt({
     required String phone,
     required String message,

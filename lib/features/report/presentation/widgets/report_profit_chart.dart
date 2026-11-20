@@ -14,9 +14,7 @@ class ReportProfitChart extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (points.isEmpty) {
-      return const SizedBox.shrink();
-    }
+    if (points.isEmpty) return const SizedBox.shrink();
 
     final maxVal = points.fold<double>(
       1.0,
@@ -24,11 +22,23 @@ class ReportProfitChart extends StatelessWidget {
     );
 
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 13),
       decoration: BoxDecoration(
         color: AppColors.surface,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AppColors.border, width: 0.8),
+        border: Border.all(color: const Color(0xFFE2E8F0), width: 0.9),
+        boxShadow: [
+          BoxShadow(
+            color: const Color(0xFF0F172A).withValues(alpha: 0.04),
+            blurRadius: 18,
+            offset: const Offset(0, 6),
+          ),
+          BoxShadow(
+            color: const Color(0xFF0F172A).withValues(alpha: 0.02),
+            blurRadius: 6,
+            offset: const Offset(0, 2),
+          ),
+        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -36,19 +46,19 @@ class ReportProfitChart extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text('Grafik Tren Harian', style: AppTypography.labelMedium.copyWith(fontSize: 14)),
+              Text('Tren Omset & Laba', style: AppTypography.labelMedium.copyWith(fontSize: 13.5, fontWeight: FontWeight.w700)),
               Row(
                 children: [
-                  _buildLegendIndicator(AppColors.primary, 'Omset'),
-                  const SizedBox(width: 10),
+                  _buildLegendIndicator(const Color(0xFF0D9488), 'Omset'),
+                  const SizedBox(width: 8),
                   _buildLegendIndicator(const Color(0xFF10B981), 'Laba'),
                 ],
               ),
             ],
           ),
-          const SizedBox(height: 20),
+          const SizedBox(height: 14),
           SizedBox(
-            height: 140,
+            height: 130,
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.end,
               children: points.map((p) {
@@ -62,7 +72,7 @@ class ReportProfitChart extends StatelessWidget {
                   child: Tooltip(
                     message: '${p.dateString}\nOmset: ${CurrencyFormatter.format(p.revenue)}\nLaba: ${CurrencyFormatter.format(p.profit)}',
                     child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 4),
+                      padding: const EdgeInsets.symmetric(horizontal: 3),
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.end,
                         children: [
@@ -76,20 +86,20 @@ class ReportProfitChart extends StatelessWidget {
                                     heightFactor: revRatio,
                                     child: Container(
                                       decoration: BoxDecoration(
-                                        color: AppColors.primary,
-                                        borderRadius: const BorderRadius.vertical(top: Radius.circular(4)),
+                                        color: const Color(0xFF0D9488),
+                                        borderRadius: BorderRadius.circular(6),
                                       ),
                                     ),
                                   ),
                                 ),
-                                const SizedBox(width: 3),
+                                const SizedBox(width: 2.5),
                                 Flexible(
                                   child: FractionallySizedBox(
                                     heightFactor: profitRatio,
                                     child: Container(
                                       decoration: BoxDecoration(
                                         color: const Color(0xFF10B981),
-                                        borderRadius: const BorderRadius.vertical(top: Radius.circular(4)),
+                                        borderRadius: BorderRadius.circular(6),
                                       ),
                                     ),
                                   ),
@@ -97,10 +107,10 @@ class ReportProfitChart extends StatelessWidget {
                               ],
                             ),
                           ),
-                          const SizedBox(height: 6),
+                          const SizedBox(height: 5),
                           Text(
                             shortDate,
-                            style: const TextStyle(fontSize: 10, color: AppColors.textMuted),
+                            style: const TextStyle(fontSize: 9.5, color: Color(0xFF64748B), fontWeight: FontWeight.w500),
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                           ),
@@ -118,19 +128,27 @@ class ReportProfitChart extends StatelessWidget {
   }
 
   Widget _buildLegendIndicator(Color color, String label) {
-    return Row(
-      children: [
-        Container(
-          width: 8,
-          height: 8,
-          decoration: BoxDecoration(color: color, borderRadius: BorderRadius.circular(2)),
-        ),
-        const SizedBox(width: 4),
-        Text(
-          label,
-          style: const TextStyle(fontSize: 11, color: AppColors.textSecondary, fontWeight: FontWeight.w600),
-        ),
-      ],
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.1),
+        borderRadius: BorderRadius.circular(10),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            width: 6,
+            height: 6,
+            decoration: BoxDecoration(color: color, shape: BoxShape.circle),
+          ),
+          const SizedBox(width: 4),
+          Text(
+            label,
+            style: TextStyle(fontSize: 10.5, color: color, fontWeight: FontWeight.w700),
+          ),
+        ],
+      ),
     );
   }
 }

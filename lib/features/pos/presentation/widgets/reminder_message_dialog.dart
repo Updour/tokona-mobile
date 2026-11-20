@@ -1,15 +1,25 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:tokona/core/services/native_contact_service.dart';
 import 'package:tokona/core/services/whatsapp_service.dart';
 import 'package:tokona/core/theme/app_colors.dart';
 import 'package:tokona/core/theme/app_typography.dart';
 import 'package:tokona/core/widgets/app_toast.dart';
+import 'package:tokona/features/auth/presentation/controllers/auth_controller.dart';
+import 'package:tokona/features/pos/domain/models/wa_message_log.dart';
+import 'package:tokona/features/pos/presentation/controllers/wa_history_controller.dart';
+import 'package:tokona/features/pos/presentation/widgets/wa_dynamic_order_calc_card.dart';
+import 'package:tokona/features/settings/presentation/controllers/app_preferences_controller.dart';
 
-class ReminderMessageDialog extends StatefulWidget {
+class ReminderMessageDialog extends ConsumerStatefulWidget {
   final String title;
   final String recipientName;
   final String? initialPhone;
   final String initialMessage;
+  final bool showOrderCalculatorByDefault;
+  final String? category;
+  final String? referenceId;
 
   const ReminderMessageDialog({
     super.key,
@@ -17,6 +27,9 @@ class ReminderMessageDialog extends StatefulWidget {
     required this.recipientName,
     this.initialPhone,
     required this.initialMessage,
+    this.showOrderCalculatorByDefault = false,
+    this.category,
+    this.referenceId,
   });
 
   static Future<bool?> show(
@@ -25,6 +38,9 @@ class ReminderMessageDialog extends StatefulWidget {
     required String recipientName,
     String? initialPhone,
     required String initialMessage,
+    bool showOrderCalculatorByDefault = false,
+    String? category,
+    String? referenceId,
   }) {
     return showDialog<bool>(
       context: context,
@@ -33,17 +49,21 @@ class ReminderMessageDialog extends StatefulWidget {
         recipientName: recipientName,
         initialPhone: initialPhone,
         initialMessage: initialMessage,
+        showOrderCalculatorByDefault: showOrderCalculatorByDefault,
+        category: category,
+        referenceId: referenceId,
       ),
     );
   }
 
   @override
-  State<ReminderMessageDialog> createState() => _ReminderMessageDialogState();
+  ConsumerState<ReminderMessageDialog> createState() => _ReminderMessageDialogState();
 }
 
-class _ReminderMessageDialogState extends State<ReminderMessageDialog> {
+class _ReminderMessageDialogState extends ConsumerState<ReminderMessageDialog> {
   late final TextEditingController _phoneController;
   late final TextEditingController _messageController;
+  late bool _showOrderCalc;
   bool _isSending = false;
 
   @override
@@ -51,6 +71,15 @@ class _ReminderMessageDialogState extends State<ReminderMessageDialog> {
     super.initState();
     _phoneController = TextEditingController(text: widget.initialPhone ?? '');
     _messageController = TextEditingController(text: widget.initialMessage);
+    _showOrderCalc = widget.showOrderCalculatorByDefault;
+  }
+
+  Future<void> _pickContactPhone() async {
+    final picked = await NativeContactService.pickContact();
+    if (picked != null && mounted && picked.phone.isNotEmpty) {
+      setState(() => _phoneController.text = picked.phone);
+      AppToast.showSuccess(context, 'Nomor ${picked.name} dipilih');
+    }
   }
 
   @override
@@ -65,7 +94,7 @@ class _ReminderMessageDialogState extends State<ReminderMessageDialog> {
     final message = _messageController.text.trim();
 
     if (phone.isEmpty) {
-      AppToast.showError(context, 'Nomor WhatsApp wajib diisi');
+      AppToast.showError(context, 'Nomor Handphone wajib diisi');
       return;
     }
     if (message.isEmpty) {
@@ -78,6 +107,20 @@ class _ReminderMessageDialogState extends State<ReminderMessageDialog> {
 
     try {
       final success = await WhatsAppService.sendReceipt(phone: phone, message: message);
+      final now = DateTime.now();
+      final cat = widget.category ?? (widget.title.toLowerCase().contains('kasbon') || widget.title.toLowerCase().contains('tagihan') ? 'kasbon' : (_showOrderCalc ? 'order' : 'manual'));
+      ref.read(waHistoryProvider.notifier).recordLog(WaMessageLog(
+            id: 'wa_${now.millisecondsSinceEpoch}',
+            recipientName: widget.recipientName,
+            phone: phone,
+            category: cat,
+            message: message,
+            status: success ? 'sent' : 'failed',
+            errorReason: success ? null : 'Gagal membuka aplikasi WhatsApp',
+            referenceId: widget.referenceId,
+            createdAt: now,
+            sentAt: success ? now : null,
+          ));
       if (!mounted) return;
       if (success) {
         Navigator.of(context).pop(true);
@@ -110,10 +153,7 @@ class _ReminderMessageDialogState extends State<ReminderMessageDialog> {
                 children: [
                   Container(
                     padding: const EdgeInsets.all(8),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFF25D366).withValues(alpha: 0.15),
-                      borderRadius: BorderRadius.circular(10),
-                    ),
+                    decoration: BoxDecoration(color: const Color(0xFF25D366).withValues(alpha: 0.15), borderRadius: BorderRadius.circular(10)),
                     child: const Icon(Icons.chat_rounded, color: Color(0xFF059669), size: 20),
                   ),
                   const SizedBox(width: 10),
@@ -121,18 +161,8 @@ class _ReminderMessageDialogState extends State<ReminderMessageDialog> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(
-                          widget.title,
-                          style: AppTypography.headingSmall.copyWith(fontSize: 15, fontWeight: FontWeight.w800),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                        Text(
-                          'Kirim ke ${widget.recipientName}',
-                          style: AppTypography.bodySmall.copyWith(fontSize: 11, color: AppColors.textSecondary),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
+                        Text(widget.title, style: AppTypography.headingSmall.copyWith(fontSize: 15, fontWeight: FontWeight.w800), maxLines: 1, overflow: TextOverflow.ellipsis),
+                        Text('Kirim ke ${widget.recipientName}', style: AppTypography.bodySmall.copyWith(fontSize: 11, color: AppColors.textSecondary), maxLines: 1, overflow: TextOverflow.ellipsis),
                       ],
                     ),
                   ),
@@ -149,14 +179,62 @@ class _ReminderMessageDialogState extends State<ReminderMessageDialog> {
                 controller: _phoneController,
                 keyboardType: TextInputType.phone,
                 decoration: InputDecoration(
-                  labelText: 'Nomor WhatsApp',
+                  labelText: 'Nomor Handphone',
                   hintText: 'Contoh: 08123456789 atau 628123456789',
                   prefixIcon: const Icon(Icons.phone_rounded, size: 18, color: Color(0xFF059669)),
+                  suffixIcon: IconButton(
+                    onPressed: _pickContactPhone,
+                    tooltip: 'Ambil dari Kontak HP',
+                    icon: const Icon(Icons.contact_phone_rounded, size: 19, color: AppColors.primary),
+                  ),
                   border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                   contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
                 ),
               ),
-              const SizedBox(height: 12),
+              const SizedBox(height: 10),
+              Align(
+                alignment: Alignment.centerLeft,
+                child: InkWell(
+                  onTap: () => setState(() => _showOrderCalc = !_showOrderCalc),
+                  borderRadius: BorderRadius.circular(8),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                    decoration: BoxDecoration(
+                      color: _showOrderCalc ? const Color(0xFFDCFCE7) : AppColors.surfaceElevated,
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(color: _showOrderCalc ? const Color(0xFF22C55E) : AppColors.border),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          _showOrderCalc ? Icons.keyboard_arrow_up_rounded : Icons.calculate_rounded,
+                          size: 15,
+                          color: const Color(0xFF047857),
+                        ),
+                        const SizedBox(width: 5),
+                        Text(
+                          _showOrderCalc ? 'Tutup Kalkulator Beli' : '+ Total Beli (Qty × Harga)',
+                          style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: Color(0xFF047857)),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+              if (_showOrderCalc) ...[
+                const SizedBox(height: 10),
+                WaDynamicOrderCalcCard(
+                  recipientName: widget.recipientName,
+                  storeName: ref.watch(authProvider).currentStore?.name ?? 'Toko',
+                  template: ref.watch(appPreferencesProvider).waOrderTemplate,
+                  onApplyMessage: (msg) {
+                    setState(() => _messageController.text = msg);
+                    AppToast.showSuccess(context, 'Pesan WA diperbarui sesuai jumlah & total beli');
+                  },
+                ),
+              ],
+              const SizedBox(height: 10),
               TextField(
                 controller: _messageController,
                 maxLines: 7,
@@ -194,7 +272,7 @@ class _ReminderMessageDialogState extends State<ReminderMessageDialog> {
                             )
                           : const Icon(Icons.send_rounded, size: 17, color: Colors.white),
                       label: Text(
-                        _isSending ? 'Membuka WA...' : 'Kirim via WhatsApp',
+                        _isSending ? 'Membuka WhatsApp...' : 'Kirim via WhatsApp',
                         style: const TextStyle(fontWeight: FontWeight.w800, color: Colors.white, fontSize: 13),
                       ),
                       style: ElevatedButton.styleFrom(

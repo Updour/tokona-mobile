@@ -20,29 +20,38 @@ class NotificationItemTile extends StatelessWidget {
       color: Colors.transparent,
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(14),
         child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+          padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 8.5),
           decoration: BoxDecoration(
             color: isRead ? Colors.white : const Color(0xFFF8FAFC),
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(14),
             border: Border.all(
-              color: isRead ? const Color(0xFFF1F5F9) : item.accentColor.withValues(alpha: 0.28),
-              width: isRead ? 1 : 1.2,
+              color: isRead ? const Color(0xFFF1F5F9) : const Color(0xFFE2E8F0),
+              width: 0.9,
             ),
+            boxShadow: isRead
+                ? null
+                : [
+                    BoxShadow(
+                      color: const Color(0xFF0F172A).withValues(alpha: 0.02),
+                      blurRadius: 6,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
           ),
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               Container(
-                padding: const EdgeInsets.all(7),
+                padding: const EdgeInsets.all(6.5),
                 decoration: BoxDecoration(
                   color: isRead ? const Color(0xFFF1F5F9) : item.containerColor,
                   borderRadius: BorderRadius.circular(8),
                 ),
-                child: Icon(item.icon, color: isRead ? AppColors.textMuted : item.accentColor, size: 17),
+                child: Icon(item.icon, color: isRead ? const Color(0xFF94A3B8) : item.accentColor, size: 16),
               ),
-              const SizedBox(width: 10),
+              const SizedBox(width: 9),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -54,36 +63,36 @@ class NotificationItemTile extends StatelessWidget {
                           child: Text(
                             item.title,
                             style: TextStyle(
-                              fontWeight: isRead ? FontWeight.w600 : FontWeight.w800,
-                              fontSize: 12.5,
-                              color: isRead ? AppColors.textPrimary.withValues(alpha: 0.75) : AppColors.textPrimary,
+                              fontWeight: isRead ? FontWeight.w600 : FontWeight.w700,
+                              fontSize: 12,
+                              color: isRead ? const Color(0xFF64748B) : AppColors.textPrimary,
                             ),
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                           ),
                         ),
-                        const SizedBox(width: 6),
+                        const SizedBox(width: 5),
                         Container(
                           padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1),
                           decoration: BoxDecoration(
-                            color: item.accentColor.withValues(alpha: isRead ? 0.08 : 0.14),
+                            color: item.accentColor.withValues(alpha: isRead ? 0.08 : 0.12),
                             borderRadius: BorderRadius.circular(4),
                           ),
                           child: Text(
                             item.categoryLabel,
                             style: TextStyle(
                               fontSize: 8.5,
-                              fontWeight: FontWeight.w800,
-                              color: isRead ? AppColors.textSecondary : item.accentColor,
+                              fontWeight: FontWeight.w700,
+                              color: isRead ? const Color(0xFF94A3B8) : item.accentColor,
                             ),
                           ),
                         ),
                       ],
                     ),
-                    const SizedBox(height: 2),
+                    const SizedBox(height: 1.5),
                     Text(
                       item.body,
-                      style: TextStyle(fontSize: 11, color: isRead ? AppColors.textMuted : AppColors.textSecondary),
+                      style: TextStyle(fontSize: 10.5, color: isRead ? const Color(0xFF94A3B8) : AppColors.textSecondary),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -98,7 +107,7 @@ class NotificationItemTile extends StatelessWidget {
                   decoration: const BoxDecoration(color: Color(0xFF10B981), shape: BoxShape.circle),
                 )
               else
-                const Icon(Icons.chevron_right_rounded, size: 16, color: Color(0xFFCBD5E1)),
+                const Icon(Icons.chevron_right_rounded, size: 15, color: Color(0xFFCBD5E1)),
             ],
           ),
         ),

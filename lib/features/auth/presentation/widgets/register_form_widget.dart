@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:tokona/core/theme/app_colors.dart';
+import 'package:tokona/core/services/whatsapp_service.dart';
 import 'package:tokona/features/auth/domain/dtos/register_dto.dart';
 import 'package:tokona/features/auth/presentation/widgets/auth_text_field.dart';
 
@@ -43,41 +43,18 @@ class _RegisterFormWidgetState extends State<RegisterFormWidget> {
   void _submit() {
     if (_formKey.currentState?.validate() ?? false) {
       HapticFeedback.lightImpact();
+      final rawPhone = _phoneController.text.trim();
+      final sanitizedPhone = rawPhone.isNotEmpty ? WhatsAppService.sanitizePhoneNumber(rawPhone) : null;
+
       final dto = RegisterDto(
         storeName: _storeNameController.text.trim(),
         ownerFullName: _ownerNameController.text.trim(),
-        storePhone: _phoneController.text.trim().isEmpty ? null : _phoneController.text.trim(),
+        storePhone: sanitizedPhone,
         username: _usernameController.text.trim(),
         password: _passwordController.text,
       );
       widget.onSubmit(dto);
     }
-  }
-
-  Widget _buildSectionHeader(String number, String title) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 10, top: 4),
-      child: Row(
-        children: [
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-            decoration: BoxDecoration(
-              color: const Color(0xFF0D9488).withValues(alpha: 0.12),
-              borderRadius: BorderRadius.circular(6),
-            ),
-            child: Text(
-              number,
-              style: const TextStyle(fontSize: 10, fontWeight: FontWeight.w900, color: Color(0xFF0D9488)),
-            ),
-          ),
-          const SizedBox(width: 8),
-          Text(
-            title,
-            style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w800, color: Color(0xFF475569), letterSpacing: 0.3),
-          ),
-        ],
-      ),
-    );
   }
 
   @override
@@ -87,10 +64,30 @@ class _RegisterFormWidgetState extends State<RegisterFormWidget> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          _buildSectionHeader('LANGKAH 1', 'INFORMASI TOKO'),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
+            margin: const EdgeInsets.only(bottom: 14),
+            decoration: BoxDecoration(
+              color: const Color(0xFFF0FDFA),
+              borderRadius: BorderRadius.circular(10),
+              border: Border.all(color: const Color(0xFFCCFBF1)),
+            ),
+            child: const Row(
+              children: [
+                Icon(Icons.flash_on_rounded, size: 15, color: Color(0xFF0D9488)),
+                SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    'Pendaftaran Cepat (1 Langkah). Detail alamat toko dapat dilengkapi nanti di menu Profil.',
+                    style: TextStyle(fontSize: 11, color: Color(0xFF0F766E), fontWeight: FontWeight.w600, height: 1.3),
+                  ),
+                ),
+              ],
+            ),
+          ),
           AuthTextField(
             controller: _storeNameController,
-            label: 'Nama Toko / Usaha',
+            label: 'Nama Toko',
             hint: 'Contoh: Toko Berkah Mandiri',
             prefixIcon: Icons.store_rounded,
             validator: (v) => (v == null || v.trim().isEmpty) ? 'Nama toko wajib diisi' : null,
@@ -99,26 +96,31 @@ class _RegisterFormWidgetState extends State<RegisterFormWidget> {
           AuthTextField(
             controller: _ownerNameController,
             label: 'Nama Pemilik Toko',
-            hint: 'Contoh: Rohman Pratama',
+            hint: 'Contoh: Rohman',
             prefixIcon: Icons.badge_outlined,
             validator: (v) => (v == null || v.trim().isEmpty) ? 'Nama pemilik wajib diisi' : null,
           ),
           const SizedBox(height: 12),
           AuthTextField(
             controller: _phoneController,
-            label: 'Nomor WhatsApp / HP Toko (Opsional)',
-            hint: '081234567890',
-            prefixIcon: Icons.phone_outlined,
+            label: 'Nomor WhatsApp Aktif',
+            hint: '081234567890 (Format WhatsApp)',
+            prefixIcon: Icons.phone_android_rounded,
             keyboardType: TextInputType.phone,
+            validator: (v) {
+              if (v != null && v.trim().isNotEmpty) {
+                if (!WhatsAppService.isValidWhatsAppNumber(v.trim())) {
+                  return 'Format WA tidak valid (minimal 10 digit, cth: 08123456789)';
+                }
+              }
+              return null;
+            },
           ),
-          const SizedBox(height: 18),
-          const Divider(height: 1),
-          const SizedBox(height: 14),
-          _buildSectionHeader('LANGKAH 2', 'AKUN PENGELOLA (ADMIN)'),
+          const SizedBox(height: 12),
           AuthTextField(
             controller: _usernameController,
-            label: 'Nama Pengguna Admin',
-            hint: 'Contoh: admin / nama_anda',
+            label: 'Nama Pengguna (Username)',
+            hint: 'Contoh: owner / admin',
             prefixIcon: Icons.person_outline_rounded,
             validator: (v) {
               if (v == null || v.trim().isEmpty) return 'Nama pengguna wajib diisi';
@@ -142,7 +144,7 @@ class _RegisterFormWidgetState extends State<RegisterFormWidget> {
               return null;
             },
           ),
-          const SizedBox(height: 22),
+          const SizedBox(height: 20),
           AnimatedScale(
             scale: _isButtonPressed ? 0.97 : 1.0,
             duration: const Duration(milliseconds: 100),
@@ -197,16 +199,9 @@ class _RegisterFormWidgetState extends State<RegisterFormWidget> {
                               ),
                             ],
                           )
-                        : const Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Icon(Icons.rocket_launch_rounded, color: Colors.white, size: 17),
-                              SizedBox(width: 8),
-                              Text(
-                                'Buka Toko Sekarang',
-                                style: TextStyle(color: Colors.white, fontWeight: FontWeight.w800, fontSize: 14),
-                              ),
-                            ],
+                        : const Text(
+                            'Buka Toko Sekarang',
+                            style: TextStyle(color: Colors.white, fontWeight: FontWeight.w800, fontSize: 14),
                           ),
                   ),
                 ),

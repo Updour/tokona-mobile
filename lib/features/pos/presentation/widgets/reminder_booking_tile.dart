@@ -66,7 +66,7 @@ class ReminderBookingTile extends ConsumerWidget {
 
     if (context.mounted) {
       if (ok) {
-        AppToast.showSuccess(context, 'Pesan pengingat WA siap dikirim ke ${order.customerName}');
+        AppToast.showSuccess(context, 'Pesan pengingat siap dikirim ke ${order.customerName}');
       } else {
         AppToast.showError(context, order.waLogMessage ?? 'Gagal mengirim pesan WA');
       }
@@ -150,15 +150,23 @@ class ReminderBookingTile extends ConsumerWidget {
     final isTimeArrived = order.plannedDate != null && now.isAfter(order.plannedDate!);
 
     return Container(
-      padding: const EdgeInsets.all(14),
+      padding: const EdgeInsets.symmetric(horizontal: 13, vertical: 11),
       decoration: BoxDecoration(
         color: AppColors.surface,
-        borderRadius: BorderRadius.circular(18),
+        borderRadius: BorderRadius.circular(16),
         border: Border.all(
           color: order.isWaSent
               ? const Color(0xFFBBF7D0)
-              : (order.isWaFailed ? const Color(0xFFFECACA) : AppColors.border),
+              : (order.isWaFailed ? const Color(0xFFFECACA) : const Color(0xFFE2E8F0)),
+          width: 0.9,
         ),
+        boxShadow: [
+          BoxShadow(
+            color: const Color(0xFF0F172A).withValues(alpha: 0.03),
+            blurRadius: 10,
+            offset: const Offset(0, 3),
+          ),
+        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,

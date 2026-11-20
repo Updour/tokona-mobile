@@ -257,8 +257,8 @@ class _AddStoreCapitalBottomSheetState extends ConsumerState<AddStoreCapitalBott
               TextField(
                 controller: _sourceController,
                 decoration: InputDecoration(
-                  labelText: _isWithdrawal ? 'Penerima / Pemilik (Opsional)' : 'Sumber Dana (Opsional)',
-                  hintText: _isWithdrawal ? 'Nama Pemilik' : 'Tabungan Pribadi / Pinjaman Bank',
+                  labelText: _isWithdrawal ? 'Penerima (Opsional)' : 'Sumber Dana (Opsional)',
+                  hintText: _isWithdrawal ? 'Nama Pemilik' : 'Dana Pribadi / Pinjaman Bank',
                   prefixIcon: const Icon(Icons.source_outlined, size: 20),
                 ),
               ),
@@ -266,7 +266,7 @@ class _AddStoreCapitalBottomSheetState extends ConsumerState<AddStoreCapitalBott
               TextField(
                 controller: _notesController,
                 decoration: InputDecoration(
-                  labelText: 'Keterangan / Catatan (Opsional)',
+                  labelText: 'Catatan (Opsional)',
                   hintText: _isWithdrawal ? 'Keperluan pribadi' : 'Untuk tambahan stok barang',
                   prefixIcon: const Icon(Icons.notes_rounded, size: 20),
                 ),

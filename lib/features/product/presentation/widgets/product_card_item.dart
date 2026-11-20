@@ -1,14 +1,18 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:tokona/core/theme/app_colors.dart';
 import 'package:tokona/core/theme/app_typography.dart';
 import 'package:tokona/core/utils/currency_formatter.dart';
+import 'package:tokona/features/auth/presentation/controllers/auth_controller.dart';
 import 'package:tokona/features/product/domain/models/product_model.dart';
 import 'package:tokona/features/product/presentation/widgets/product_card_options_menu.dart';
 import 'package:tokona/features/product/presentation/widgets/product_device_tags_row.dart';
 import 'package:tokona/features/product/presentation/widgets/product_stock_badge.dart';
 import 'package:tokona/features/product/presentation/widgets/product_thumbnail_avatar.dart';
+import 'package:tokona/features/settings/domain/models/app_permission.dart';
+import 'package:tokona/features/settings/presentation/controllers/rbac_controller.dart';
 
-class ProductCardItem extends StatelessWidget {
+class ProductCardItem extends ConsumerWidget {
   final ProductModel product;
   final VoidCallback onDelete;
   final VoidCallback? onEdit;
@@ -31,14 +35,22 @@ class ProductCardItem extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final user = ref.watch(authProvider).currentUser;
+    final rbac = ref.watch(rbacProvider.notifier);
+    final canViewHpp = rbac.hasPermission(user, AppPermission.viewHppCost);
+    final canManage = rbac.hasPermission(user, AppPermission.manageProducts);
+    final canDelete = rbac.hasPermission(user, AppPermission.deleteProducts);
     return Container(
-      margin: const EdgeInsets.only(bottom: 14),
+      margin: const EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(
         color: AppColors.surface,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AppColors.border.withValues(alpha: 0.7)),
-        boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.04), blurRadius: 12, offset: const Offset(0, 3))],
+        border: Border.all(color: AppColors.border.withValues(alpha: 0.55), width: 0.6),
+        boxShadow: [
+          BoxShadow(color: const Color(0xFF0F172A).withValues(alpha: 0.04), blurRadius: 14, offset: const Offset(0, 4)),
+          BoxShadow(color: const Color(0xFF0F172A).withValues(alpha: 0.02), blurRadius: 5, offset: const Offset(0, 2)),
+        ],
       ),
       child: Material(
         color: Colors.transparent,
@@ -46,7 +58,7 @@ class ProductCardItem extends StatelessWidget {
           onTap: onTap,
           borderRadius: BorderRadius.circular(16),
           child: Padding(
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 13),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -104,11 +116,11 @@ class ProductCardItem extends StatelessWidget {
                     ProductStockBadge(product: product),
                     const SizedBox(width: 4),
                     ProductCardOptionsMenu(
-                      onAdjustStock: onAdjustStock,
+                      onAdjustStock: canManage ? onAdjustStock : null,
                       onStockCard: onStockCard,
-                      onRestock: onRestock,
-                      onEdit: onEdit,
-                      onDelete: onDelete,
+                      onRestock: canManage ? onRestock : null,
+                      onEdit: canManage ? onEdit : null,
+                      onDelete: canDelete ? onDelete : null,
                     ),
                   ],
                 ),
@@ -159,8 +171,12 @@ class ProductCardItem extends StatelessWidget {
                             ),
                             const SizedBox(height: 2),
                             Text(
-                              CurrencyFormatter.format(product.baseCostPrice),
-                              style: AppTypography.bodySmall.copyWith(fontWeight: FontWeight.w600, fontSize: 12),
+                              canViewHpp ? CurrencyFormatter.format(product.baseCostPrice) : '••••••',
+                              style: AppTypography.bodySmall.copyWith(
+                                fontWeight: FontWeight.w600,
+                                fontSize: 12,
+                                color: canViewHpp ? AppColors.textPrimary : AppColors.textMuted,
+                              ),
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                             ),
@@ -174,9 +190,9 @@ class ProductCardItem extends StatelessWidget {
                           Text('Margin', style: AppTypography.bodySmall.copyWith(fontSize: 11)),
                           const SizedBox(height: 2),
                           Text(
-                            '+${product.marginPercentage.toStringAsFixed(1)}%',
+                            canViewHpp ? '+${product.marginPercentage.toStringAsFixed(1)}%' : '••••',
                             style: AppTypography.bodySmall.copyWith(
-                              color: AppColors.success,
+                              color: canViewHpp ? AppColors.success : AppColors.textMuted,
                               fontWeight: FontWeight.w700,
                               fontSize: 12,
                             ),

@@ -9,6 +9,8 @@ import 'package:tokona/features/dashboard/presentation/widgets/notification_item
 import 'package:tokona/features/payment/presentation/widgets/paylater_bill_monitor_sheet.dart';
 import 'package:tokona/features/pos/presentation/widgets/scheduled_reminder_sheet.dart';
 import 'package:tokona/features/purchase/presentation/widgets/incoming_orders_sheet.dart';
+import 'package:tokona/features/settings/presentation/controllers/app_preferences_controller.dart';
+import 'package:tokona/features/settings/presentation/widgets/dynamic_settings_sheet.dart';
 
 class NotificationCenterSheet extends ConsumerStatefulWidget {
   final ValueChanged<int>? onNavigateTab;
@@ -20,7 +22,7 @@ class NotificationCenterSheet extends ConsumerStatefulWidget {
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      barrierColor: Colors.black.withValues(alpha: 0.5),
+      barrierColor: Colors.black.withValues(alpha: 0.4),
       builder: (_) => NotificationCenterSheet(onNavigateTab: onNavigateTab),
     );
   }
@@ -46,16 +48,14 @@ class _NotificationCenterSheetState extends ConsumerState<NotificationCenterShee
   Widget build(BuildContext context) {
     final notifications = ref.watch(notificationListProvider);
     final readIds = ref.watch(readNotificationIdsProvider);
+    final prefs = ref.watch(appPreferencesProvider);
     final unreadCount = notifications.where((n) => !readIds.contains(n.id)).length;
-
-    final now = DateTime.now();
-    final lastDayOfMonth = DateTime(now.year, now.month + 1, 0).day;
-    final isPaylaterWindowActive = (now.day >= (lastDayOfMonth - 2)) || (now.day == 1);
 
     final filteredList = notifications.where((n) {
       if (_selectedFilter == 'Kasbon') return n.targetPayload == 'kasbon';
       if (_selectedFilter == 'Paylater') return n.targetPayload == 'paylater';
       if (_selectedFilter == 'Stok') return n.targetPayload == 'stock';
+      if (_selectedFilter == 'Pengiriman') return n.targetPayload == 'incoming';
       if (_selectedFilter == 'Booking') return n.targetPayload == 'booking';
       return true;
     }).toList();
@@ -63,48 +63,48 @@ class _NotificationCenterSheetState extends ConsumerState<NotificationCenterShee
     return Container(
       decoration: const BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(22)),
         boxShadow: [
           BoxShadow(
-            color: Color(0x1A000000),
-            blurRadius: 24,
-            offset: Offset(0, -6),
+            color: Color(0x140F172A),
+            blurRadius: 20,
+            offset: Offset(0, -4),
           ),
         ],
       ),
-      padding: EdgeInsets.fromLTRB(20, 14, 20, MediaQuery.of(context).padding.bottom + 20),
+      padding: EdgeInsets.fromLTRB(16, 12, 16, MediaQuery.of(context).padding.bottom + 14),
       constraints: BoxConstraints(maxHeight: MediaQuery.of(context).size.height * 0.85),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Center(
             child: Container(
-              width: 44,
+              width: 38,
               height: 4,
-              decoration: BoxDecoration(color: const Color(0xFFCBD5E1), borderRadius: BorderRadius.circular(2)),
+              decoration: BoxDecoration(color: const Color(0xFFE2E8F0), borderRadius: BorderRadius.circular(2)),
             ),
           ),
-          const SizedBox(height: 14),
+          const SizedBox(height: 12),
           Row(
             children: [
               Container(
-                padding: const EdgeInsets.all(8),
+                padding: const EdgeInsets.all(7),
                 decoration: BoxDecoration(
-                  color: AppColors.primary.withValues(alpha: 0.1),
+                  color: const Color(0xFFF1F5F9),
                   borderRadius: BorderRadius.circular(10),
                 ),
-                child: const Icon(Icons.notifications_active_rounded, size: 20, color: AppColors.primary),
+                child: const Icon(Icons.notifications_active_rounded, size: 18, color: Color(0xFF0F172A)),
               ),
-              const SizedBox(width: 12),
+              const SizedBox(width: 10),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('Pusat Notifikasi Toko', style: AppTypography.headingSmall.copyWith(fontSize: 16)),
-                    const SizedBox(height: 2),
+                    Text('Notifikasi', style: AppTypography.headingSmall.copyWith(fontSize: 15, fontWeight: FontWeight.w800)),
+                    const SizedBox(height: 1),
                     Text(
-                      unreadCount > 0 ? '$unreadCount pesan belum dibaca' : 'Semua pesan sudah dibaca',
-                      style: const TextStyle(fontSize: 11.5, color: AppColors.textSecondary),
+                      unreadCount > 0 ? '$unreadCount pesan belum dibaca' : 'Semua sudah dibaca',
+                      style: const TextStyle(fontSize: 11, color: Color(0xFF64748B)),
                     ),
                   ],
                 ),
@@ -116,38 +116,56 @@ class _NotificationCenterSheetState extends ConsumerState<NotificationCenterShee
                   child: Container(
                     padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                     decoration: BoxDecoration(color: const Color(0xFFF0FDF4), borderRadius: BorderRadius.circular(8)),
-                    child: const Text('Tandai Dibaca', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: Color(0xFF16A34A))),
+                    child: const Text('Tandai Dibaca', style: TextStyle(fontSize: 10.5, fontWeight: FontWeight.w700, color: Color(0xFF15803D))),
                   ),
                 ),
               IconButton(
+                onPressed: () => DynamicSettingsSheet.show(context, initialTab: 0),
+                tooltip: 'Pengaturan',
+                icon: const Icon(Icons.tune_rounded, size: 18, color: Color(0xFF64748B)),
+                visualDensity: VisualDensity.compact,
+              ),
+              IconButton(
                 onPressed: () => Navigator.of(context).pop(),
-                icon: const Icon(Icons.close_rounded, size: 20, color: AppColors.textSecondary),
+                icon: const Icon(Icons.close_rounded, size: 19, color: Color(0xFF64748B)),
                 visualDensity: VisualDensity.compact,
               ),
             ],
           ),
-          const SizedBox(height: 12),
-          SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            child: Row(
-              children: [
-                _buildFilterChip('Semua', notifications.length),
-                const SizedBox(width: 6),
-                _buildFilterChip('Kasbon', notifications.where((n) => n.targetPayload == 'kasbon').length),
-                const SizedBox(width: 6),
-                _buildFilterChip(
-                  'Paylater',
-                  notifications.where((n) => n.targetPayload == 'paylater').length,
-                  isMuted: !isPaylaterWindowActive,
-                ),
-                const SizedBox(width: 6),
-                _buildFilterChip('Stok', notifications.where((n) => n.targetPayload == 'stock').length),
-                const SizedBox(width: 6),
-                _buildFilterChip('Booking', notifications.where((n) => n.targetPayload == 'booking').length),
-              ],
+          const SizedBox(height: 10),
+          Container(
+            padding: const EdgeInsets.all(3.5),
+            decoration: BoxDecoration(
+              color: const Color(0xFFF1F5F9),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              physics: const BouncingScrollPhysics(),
+              child: Row(
+                children: [
+                  _buildFilterTab('Semua', Icons.inbox_rounded, notifications.length),
+                  ...[
+                    ('Pengiriman', Icons.local_shipping_rounded, 'incoming'),
+                    ('Paylater', Icons.credit_card_rounded, 'paylater'),
+                    ('Kasbon', Icons.receipt_long_rounded, 'kasbon'),
+                    ('Stok', Icons.inventory_2_rounded, 'stock'),
+                    ('Booking', Icons.event_available_rounded, 'booking'),
+                  ].where((t) {
+                    if (!prefs.hideEmptyNotificationTabs) return true;
+                    return _selectedFilter == t.$1 || notifications.any((n) => n.targetPayload == t.$3);
+                  }).map(
+                    (t) => _buildFilterTab(
+                      t.$1,
+                      t.$2,
+                      notifications.where((n) => n.targetPayload == t.$3).length,
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
-          const SizedBox(height: 14),
+          const SizedBox(height: 10),
           if (filteredList.isEmpty)
             Expanded(
               child: Center(
@@ -155,14 +173,14 @@ class _NotificationCenterSheetState extends ConsumerState<NotificationCenterShee
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Container(
-                      padding: const EdgeInsets.all(16),
+                      padding: const EdgeInsets.all(14),
                       decoration: const BoxDecoration(color: Color(0xFFF0FDF4), shape: BoxShape.circle),
-                      child: const Icon(Icons.check_circle_outline_rounded, size: 40, color: Color(0xFF16A34A)),
+                      child: const Icon(Icons.check_circle_outline_rounded, size: 36, color: Color(0xFF16A34A)),
                     ),
-                    const SizedBox(height: 12),
-                    const Text('Semua Beres & Aman', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 14)),
-                    const SizedBox(height: 4),
-                    const Text('Tidak ada pemberitahuan penting saat ini.', style: TextStyle(fontSize: 11.5, color: AppColors.textMuted)),
+                    const SizedBox(height: 10),
+                    const Text('Semua Beres & Aman', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 13.5)),
+                    const SizedBox(height: 2),
+                    const Text('Tidak ada pemberitahuan penting saat ini.', style: TextStyle(fontSize: 11, color: Color(0xFF94A3B8))),
                   ],
                 ),
               ),
@@ -171,7 +189,7 @@ class _NotificationCenterSheetState extends ConsumerState<NotificationCenterShee
             Expanded(
               child: ListView.separated(
                 itemCount: filteredList.length,
-                separatorBuilder: (ctx, idx) => const SizedBox(height: 10),
+                separatorBuilder: (ctx, idx) => const SizedBox(height: 8),
                 itemBuilder: (ctx, i) => NotificationItemTile(
                   item: filteredList[i],
                   isRead: readIds.contains(filteredList[i].id),
@@ -184,70 +202,70 @@ class _NotificationCenterSheetState extends ConsumerState<NotificationCenterShee
     );
   }
 
-  Widget _buildFilterChip(String label, int count, {bool isMuted = false}) {
+  Widget _buildFilterTab(String label, IconData icon, int count) {
     final isSelected = _selectedFilter == label;
-    return InkWell(
-      onTap: () {
-        setState(() => _selectedFilter = label);
-        if (label == 'Paylater') {
-          // Tetap bisa diklik langsung untuk membuka riwayat tagihan Paylater
-          PaylaterBillMonitorSheet.show(context);
-        }
-      },
-      borderRadius: BorderRadius.circular(10),
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-        decoration: BoxDecoration(
-          color: isSelected
-              ? (isMuted ? const Color(0xFF64748B) : AppColors.primary)
-              : (isMuted ? const Color(0xFFF1F5F9) : AppColors.surfaceElevated),
-          borderRadius: BorderRadius.circular(10),
-          border: Border.all(
-            color: isSelected
-                ? (isMuted ? const Color(0xFF64748B) : AppColors.primary)
-                : (isMuted ? const Color(0xFFCBD5E1) : AppColors.border),
-          ),
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            if (isMuted) ...[
-              const Icon(Icons.credit_card_outlined, size: 12, color: Color(0xFF94A3B8)),
-              const SizedBox(width: 4),
-            ],
-            Text(
-              label,
-              style: TextStyle(
-                fontSize: 11.5,
-                fontWeight: isSelected ? FontWeight.w700 : FontWeight.w600,
-                color: isSelected
-                    ? Colors.white
-                    : (isMuted ? const Color(0xFF94A3B8) : AppColors.textPrimary),
-              ),
+    return Padding(
+      padding: const EdgeInsets.only(right: 3),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: () => setState(() => _selectedFilter = label),
+          borderRadius: BorderRadius.circular(9),
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 160),
+            curve: Curves.easeOutCubic,
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+            decoration: BoxDecoration(
+              color: isSelected ? Colors.white : Colors.transparent,
+              borderRadius: BorderRadius.circular(9),
+              boxShadow: isSelected
+                  ? [
+                      BoxShadow(
+                        color: const Color(0xFF0F172A).withValues(alpha: 0.04),
+                        blurRadius: 4,
+                        offset: const Offset(0, 1),
+                      ),
+                    ]
+                  : null,
             ),
-            if (count > 0) ...[
-              const SizedBox(width: 5),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1.5),
-                decoration: BoxDecoration(
-                  color: isSelected
-                      ? Colors.white.withValues(alpha: 0.28)
-                      : (isMuted ? const Color(0xFFE2E8F0) : (label == 'Paylater' ? const Color(0xFFFEF3C7) : const Color(0xFFF1F5F9))),
-                  borderRadius: BorderRadius.circular(8),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(
+                  icon,
+                  size: 13,
+                  color: isSelected ? AppColors.primary : const Color(0xFF64748B),
                 ),
-                child: Text(
-                  '$count',
+                const SizedBox(width: 4.5),
+                Text(
+                  label,
                   style: TextStyle(
-                    fontSize: 9.5,
-                    fontWeight: FontWeight.w800,
-                    color: isSelected
-                        ? Colors.white
-                        : (isMuted ? const Color(0xFF64748B) : (label == 'Paylater' ? const Color(0xFFB45309) : AppColors.textPrimary)),
+                    fontSize: 11,
+                    fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
+                    color: isSelected ? AppColors.textPrimary : const Color(0xFF64748B),
                   ),
                 ),
-              ),
-            ],
-          ],
+                if (count > 0) ...[
+                  const SizedBox(width: 4.5),
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1),
+                    decoration: BoxDecoration(
+                      color: isSelected ? AppColors.primary : const Color(0xFFE2E8F0),
+                      borderRadius: BorderRadius.circular(99),
+                    ),
+                    child: Text(
+                      '$count',
+                      style: TextStyle(
+                        fontSize: 9,
+                        fontWeight: FontWeight.w800,
+                        color: isSelected ? Colors.white : const Color(0xFF64748B),
+                      ),
+                    ),
+                  ),
+                ],
+              ],
+            ),
+          ),
         ),
       ),
     );

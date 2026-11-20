@@ -172,7 +172,7 @@ class ReportActivePoListSection extends ConsumerWidget {
         children: [
           const Icon(Icons.local_shipping_outlined, size: 36, color: AppColors.textMuted),
           const SizedBox(height: 8),
-          Text('Tidak Ada Pesanan PO / OTW', style: AppTypography.labelMedium),
+          Text('Tidak Ada Pesanan', style: AppTypography.labelMedium),
           const SizedBox(height: 4),
           Text(
             'Semua barang kulakan telah tiba dan masuk stok fisik gudang.',

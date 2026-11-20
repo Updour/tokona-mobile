@@ -20,7 +20,7 @@ class ProfileShopeeQuickBar extends ConsumerWidget {
       decoration: BoxDecoration(
         color: AppColors.surface,
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: AppColors.border),
+        border: Border.all(color: AppColors.border.withValues(alpha: 0.55), width: 0.6),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.03),

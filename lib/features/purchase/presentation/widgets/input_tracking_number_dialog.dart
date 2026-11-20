@@ -128,12 +128,26 @@ class _InputTrackingNumberDialogState extends State<InputTrackingNumberDialog> {
     final currentCourier = _courierController.text.trim().toLowerCase();
 
     return Dialog(
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      backgroundColor: AppColors.surface,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(22)),
+      elevation: 0,
+      backgroundColor: Colors.transparent,
       insetPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
-      child: SingleChildScrollView(
-        padding: const EdgeInsets.all(20),
-        child: Column(
+      child: Container(
+        padding: const EdgeInsets.fromLTRB(18, 16, 18, 14),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(22),
+          border: Border.all(color: const Color(0xFFE2E8F0), width: 0.9),
+          boxShadow: [
+            BoxShadow(
+              color: const Color(0xFF0F172A).withValues(alpha: 0.08),
+              blurRadius: 20,
+              offset: const Offset(0, 8),
+            ),
+          ],
+        ),
+        child: SingleChildScrollView(
+          child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -171,7 +185,7 @@ class _InputTrackingNumberDialogState extends State<InputTrackingNumberDialog> {
             TextField(
               controller: _courierController,
               decoration: InputDecoration(
-                labelText: 'Ekspedisi / Kurir (Bebas / Dinamis)',
+                labelText: 'Ekspedisi',
                 hintText: 'Misal: J&T Cargo, SPX, JNE, Indah Cargo...',
                 hintStyle: const TextStyle(fontSize: 12, color: AppColors.textMuted),
                 prefixIcon: const Icon(Icons.local_shipping_outlined, size: 20),
@@ -276,6 +290,7 @@ class _InputTrackingNumberDialogState extends State<InputTrackingNumberDialog> {
           ],
         ),
       ),
-    );
+    ),
+  );
   }
 }

@@ -4,12 +4,46 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 
+class SettlementRecord {
+  final String key;
+  final String? accountId;
+  final String? accountName;
+  final double amount;
+  final DateTime settledAt;
+
+  const SettlementRecord({
+    required this.key,
+    this.accountId,
+    this.accountName,
+    required this.amount,
+    required this.settledAt,
+  });
+
+  Map<String, dynamic> toMap() => {
+        'key': key,
+        'accountId': accountId,
+        'accountName': accountName,
+        'amount': amount,
+        'settledAt': settledAt.toIso8601String(),
+      };
+
+  factory SettlementRecord.fromMap(Map<String, dynamic> map) => SettlementRecord(
+        key: map['key'] as String? ?? '',
+        accountId: map['accountId'] as String?,
+        accountName: map['accountName'] as String?,
+        amount: (map['amount'] as num?)?.toDouble() ?? 0.0,
+        settledAt: DateTime.tryParse(map['settledAt'] as String? ?? '') ?? DateTime.now(),
+      );
+}
+
 class PaylaterSettlementState {
-  final Set<String> settledMonths; // format: 'YYYY-MM'
+  final Map<String, SettlementRecord> records; // key format: 'YYYY-MM'
 
-  const PaylaterSettlementState({this.settledMonths = const {}});
+  const PaylaterSettlementState({this.records = const {}});
 
-  bool isSettled(int year, int month) => settledMonths.contains(_key(year, month));
+  bool isSettled(int year, int month) => records.containsKey(_key(year, month));
+
+  SettlementRecord? getRecord(int year, int month) => records[_key(year, month)];
 
   static String _key(int year, int month) => '$year-${month.toString().padLeft(2, '0')}';
 }
@@ -29,30 +63,57 @@ class PaylaterSettlementNotifier extends StateNotifier<PaylaterSettlementState> 
       final file = await _getFile();
       if (await file.exists()) {
         final content = await file.readAsString();
-        final list = (jsonDecode(content) as List).map((e) => e.toString()).toSet();
-        state = PaylaterSettlementState(settledMonths: list);
+        final decoded = jsonDecode(content);
+        final Map<String, SettlementRecord> map = {};
+        if (decoded is List) {
+          for (final item in decoded) {
+            if (item is String) {
+              map[item] = SettlementRecord(key: item, amount: 0.0, settledAt: DateTime.now());
+            } else if (item is Map<String, dynamic>) {
+              final rec = SettlementRecord.fromMap(item);
+              if (rec.key.isNotEmpty) map[rec.key] = rec;
+            }
+          }
+        }
+        state = PaylaterSettlementState(records: map);
       }
     } catch (_) {}
   }
 
-  Future<void> markSettled(int year, int month) async {
+  Future<void> markSettled(
+    int year,
+    int month, {
+    String? accountId,
+    String? accountName,
+    double amount = 0.0,
+  }) async {
     final key = PaylaterSettlementState._key(year, month);
-    final updated = {...state.settledMonths, key};
-    state = PaylaterSettlementState(settledMonths: updated);
+    final record = SettlementRecord(
+      key: key,
+      accountId: accountId,
+      accountName: accountName,
+      amount: amount,
+      settledAt: DateTime.now(),
+    );
+    final updated = {...state.records, key: record};
+    state = PaylaterSettlementState(records: updated);
     _save();
   }
 
-  Future<void> unmarkSettled(int year, int month) async {
+  Future<SettlementRecord?> unmarkSettled(int year, int month) async {
     final key = PaylaterSettlementState._key(year, month);
-    final updated = state.settledMonths.where((k) => k != key).toSet();
-    state = PaylaterSettlementState(settledMonths: updated);
+    final existing = state.records[key];
+    final updated = Map<String, SettlementRecord>.from(state.records)..remove(key);
+    state = PaylaterSettlementState(records: updated);
     _save();
+    return existing;
   }
 
   Future<void> _save() async {
     try {
       final file = await _getFile();
-      await file.writeAsString(jsonEncode(state.settledMonths.toList()));
+      final list = state.records.values.map((r) => r.toMap()).toList();
+      await file.writeAsString(jsonEncode(list));
     } catch (_) {}
   }
 }

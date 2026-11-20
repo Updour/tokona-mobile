@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:tokona/core/database/app_database.dart';
 import 'package:tokona/features/auth/data/repositories/auth_repository.dart';
@@ -5,6 +6,8 @@ import 'package:tokona/features/auth/domain/dtos/login_dto.dart';
 import 'package:tokona/features/auth/domain/dtos/register_dto.dart';
 import 'package:tokona/features/auth/domain/models/auth_state.dart';
 import 'package:tokona/features/auth/domain/models/store_model.dart';
+import 'package:tokona/features/settings/data/services/audit_log_service.dart';
+import 'package:tokona/features/settings/domain/models/audit_log_model.dart';
 
 final appDatabaseProvider = Provider<AppDatabase>((ref) {
   final db = AppDatabase();
@@ -93,6 +96,15 @@ class AuthController extends StateNotifier<AuthState> {
         currentUser: result.user,
         successMessage: 'Berhasil masuk',
       );
+      AuditLogService.log(
+        storeId: result.store.id,
+        userId: result.user.id,
+        userName: result.user.fullName,
+        userRole: result.user.role.label,
+        actionType: AuditActionType.auth,
+        title: 'Sesi Kasir Dimulai (Login)',
+        description: '${result.user.fullName} (@${result.user.username}) berhasil masuk.',
+      );
       return true;
     } catch (e) {
       state = state.copyWith(
@@ -127,6 +139,65 @@ class AuthController extends StateNotifier<AuthState> {
       state = state.copyWith(
         isLoading: false,
         errorMessage: 'Gagal memperbarui profil toko: $e',
+      );
+      return false;
+    }
+  }
+
+  Future<bool> resetPassword({required String username, required String newPassword}) async {
+    state = state.copyWith(isLoading: true, clearError: true, clearSuccess: true);
+    try {
+      await _repository.resetPassword(username: username, newPassword: newPassword);
+      state = state.copyWith(
+        isLoading: false,
+        successMessage: 'Kata sandi berhasil diatur ulang. Silakan login kembali.',
+      );
+      AuditLogService.log(
+        storeId: state.currentStore?.id ?? 'default',
+        userId: username,
+        userName: username,
+        userRole: 'Pengguna',
+        actionType: AuditActionType.auth,
+        title: 'Atur Ulang Kata Sandi',
+        description: 'Kata sandi untuk pengguna @$username berhasil diubah.',
+      );
+      return true;
+    } catch (e) {
+      state = state.copyWith(
+        isLoading: false,
+        errorMessage: e.toString().replaceFirst('Exception: ', '').replaceFirst('StateError: ', '').replaceFirst('ArgumentError: ', ''),
+      );
+      return false;
+    }
+  }
+
+  Future<bool> importPairingJson(String rawJson) async {
+    state = state.copyWith(isLoading: true, clearError: true, clearSuccess: true);
+    try {
+      final map = jsonDecode(rawJson) as Map<String, dynamic>;
+      final result = await _repository.importPairingData(map);
+      state = state.copyWith(
+        isLoading: false,
+        isAuthenticated: true,
+        hasRegisteredStore: true,
+        currentStore: result.store,
+        currentUser: result.user,
+        successMessage: 'Perangkat berhasil terhubung dengan ${result.store.name}!',
+      );
+      AuditLogService.log(
+        storeId: result.store.id,
+        userId: result.user.id,
+        userName: result.user.fullName,
+        userRole: result.user.role.label,
+        actionType: AuditActionType.pairing,
+        title: 'Pairing HP Kasir Baru',
+        description: 'Perangkat kasir berhasil pairing offline dengan ${result.store.name}.',
+      );
+      return true;
+    } catch (e) {
+      state = state.copyWith(
+        isLoading: false,
+        errorMessage: 'Gagal menghubungkan perangkat: $e',
       );
       return false;
     }

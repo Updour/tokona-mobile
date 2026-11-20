@@ -121,13 +121,13 @@ class ProductDetailPackagingTile extends StatelessWidget {
           if (stockBase > 0) ...[
             const SizedBox(height: 8),
             _buildRow(
-              'Total Potensi Jual (${unit.unitName})',
+              'Potensi Jual (${unit.unitName})',
               CurrencyFormatter.format(totalStockRevenue),
               subtitle: '$cartonStr ${unit.unitName} × ${CurrencyFormatter.format(unit.sellingPrice)}',
             ),
             const SizedBox(height: 6),
             _buildRow(
-              'Total Potensi Laba (${unit.unitName})',
+              'Potensi Laba (${unit.unitName})',
               '+${CurrencyFormatter.format(totalStockProfit)}',
               subtitle: '$cartonStr ${unit.unitName} × ${CurrencyFormatter.format(unit.marginPerUnit)}',
               valueColor: AppColors.success,

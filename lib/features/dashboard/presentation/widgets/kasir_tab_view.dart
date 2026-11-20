@@ -74,7 +74,7 @@ class _KasirTabViewState extends ConsumerState<KasirTabView> {
         Column(
           children: [
             Padding(
-              padding: const EdgeInsets.fromLTRB(18, 14, 18, 8),
+              padding: const EdgeInsets.fromLTRB(10, 10, 10, 8),
               child: KasirHeaderBar(
                 products: allProducts,
                 count: filtered.length,
@@ -91,12 +91,12 @@ class _KasirTabViewState extends ConsumerState<KasirTabView> {
               child: filtered.isEmpty
                   ? _buildEmptyState()
                   : GridView.builder(
-                      padding: const EdgeInsets.fromLTRB(18, 8, 18, 90),
+                      padding: const EdgeInsets.fromLTRB(10, 8, 10, 90),
                       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                         crossAxisCount: 2,
-                        childAspectRatio: 0.68,
-                        crossAxisSpacing: 12,
-                        mainAxisSpacing: 12,
+                        childAspectRatio: 0.82,
+                        crossAxisSpacing: 10,
+                        mainAxisSpacing: 10,
                       ),
                       itemCount: filtered.length,
                       itemBuilder: (context, index) {
@@ -110,11 +110,22 @@ class _KasirTabViewState extends ConsumerState<KasirTabView> {
                           inCartQty: inCartQty,
                           onAddToCart: (p, unit) {
                             HapticFeedback.lightImpact();
-                            ref.read(cartProvider.notifier).addToCart(p, unit: unit);
+                            final ok = ref.read(cartProvider.notifier).addToCart(p, unit: unit);
+                            if (!ok) {
+                              final sisa = p.stockBase == p.stockBase.roundToDouble() ? p.stockBase.toInt().toString() : p.stockBase.toString();
+                              AppToast.showWarning(context, 'Stok ${p.name} sudah maksimal (sisa $sisa ${p.baseUnit})');
+                            }
                           },
                           onDecrement: (p, unit) {
                             HapticFeedback.lightImpact();
                             ref.read(cartProvider.notifier).decrementFromCart(p, unit: unit);
+                          },
+                          onSetQty: (p, unit, qty) {
+                            final ok = ref.read(cartProvider.notifier).setItemQuantity(p, unit: unit, qty: qty);
+                            if (!ok) {
+                              final sisa = p.stockBase == p.stockBase.roundToDouble() ? p.stockBase.toInt().toString() : p.stockBase.toString();
+                              AppToast.showWarning(context, 'Jumlah melebihi stok ${p.name} (maks $sisa ${p.baseUnit})');
+                            }
                           },
                         );
                       },
@@ -140,7 +151,7 @@ class _KasirTabViewState extends ConsumerState<KasirTabView> {
       height: 30,
       child: ListView.builder(
         scrollDirection: Axis.horizontal,
-        padding: const EdgeInsets.symmetric(horizontal: 18),
+        padding: const EdgeInsets.symmetric(horizontal: 10),
         itemCount: categories.length,
         itemBuilder: (context, index) {
           final cat = categories[index];

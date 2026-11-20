@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:tokona/core/services/native_contact_service.dart';
 import 'package:tokona/core/theme/app_colors.dart';
 import 'package:tokona/core/theme/app_typography.dart';
 import 'package:tokona/core/utils/currency_formatter.dart';
@@ -10,12 +11,16 @@ import 'package:tokona/features/customer/presentation/widgets/customer_type_sele
 
 class AddCustomerBottomSheet extends StatefulWidget {
   final CustomerModel? customerToEdit;
+  final String? initialName;
+  final String? initialPhone;
   final Future<CustomerModel?> Function(CreateCustomerDto dto)? onCreate;
   final Future<bool> Function(UpdateCustomerDto dto)? onUpdate;
 
   const AddCustomerBottomSheet({
     super.key,
     this.customerToEdit,
+    this.initialName,
+    this.initialPhone,
     this.onCreate,
     this.onUpdate,
   });
@@ -23,6 +28,8 @@ class AddCustomerBottomSheet extends StatefulWidget {
   static Future<CustomerModel?> show(
     BuildContext context, {
     CustomerModel? customerToEdit,
+    String? initialName,
+    String? initialPhone,
     Future<CustomerModel?> Function(CreateCustomerDto dto)? onCreate,
     Future<bool> Function(UpdateCustomerDto dto)? onUpdate,
   }) {
@@ -31,9 +38,7 @@ class AddCustomerBottomSheet extends StatefulWidget {
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
       builder: (_) => AddCustomerBottomSheet(
-        customerToEdit: customerToEdit,
-        onCreate: onCreate,
-        onUpdate: onUpdate,
+        customerToEdit: customerToEdit, initialName: initialName, initialPhone: initialPhone, onCreate: onCreate, onUpdate: onUpdate,
       ),
     );
   }
@@ -69,7 +74,20 @@ class _AddCustomerBottomSheetState extends State<AddCustomerBottomSheet> {
       if (c.receivableBalance > 0) {
         _receivableController.text = CurrencyFormatter.formatNumber(c.receivableBalance);
       }
+    } else {
+      if (widget.initialName != null) _nameController.text = widget.initialName!;
+      if (widget.initialPhone != null) _phoneController.text = widget.initialPhone!;
     }
+  }
+
+  Future<void> _importFromPhoneContacts() async {
+    final picked = await NativeContactService.pickContact();
+    if (picked == null || !mounted) return;
+    setState(() {
+      if (picked.name.isNotEmpty) _nameController.text = picked.name;
+      if (picked.phone.isNotEmpty) _phoneController.text = picked.phone;
+    });
+    AppToast.showSuccess(context, 'Kontak "${picked.name}" berhasil diimpor');
   }
 
   void _onFieldChanged() {
@@ -150,13 +168,10 @@ class _AddCustomerBottomSheetState extends State<AddCustomerBottomSheet> {
                 child: Container(
                   width: 44,
                   height: 4,
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFCBD5E1),
-                    borderRadius: BorderRadius.circular(2),
-                  ),
+                  decoration: BoxDecoration(color: const Color(0xFFCBD5E1), borderRadius: BorderRadius.circular(2)),
                 ),
               ),
-              const SizedBox(height: 14),
+              const SizedBox(height: 12),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -164,23 +179,12 @@ class _AddCustomerBottomSheetState extends State<AddCustomerBottomSheet> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(
-                          _isEdit ? 'Ubah Data Pelanggan' : 'Tambah Pelanggan Baru',
-                          style: AppTypography.headingSmall.copyWith(fontSize: 16),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
+                        Text(_isEdit ? 'Ubah Data Pelanggan' : 'Tambah Pelanggan Baru', style: AppTypography.headingSmall.copyWith(fontSize: 16), maxLines: 1, overflow: TextOverflow.ellipsis),
                         const SizedBox(height: 2),
-                        Text(
-                          'Data langganan warung, member, dan grosir',
-                          style: AppTypography.bodySmall.copyWith(fontSize: 11),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
+                        Text('Data langganan warung, member, dan grosir', style: AppTypography.bodySmall.copyWith(fontSize: 11), maxLines: 1, overflow: TextOverflow.ellipsis),
                       ],
                     ),
                   ),
-                  const SizedBox(width: 8),
                   IconButton(
                     onPressed: () => Navigator.of(context).pop(),
                     icon: const Icon(Icons.close_rounded, size: 22, color: AppColors.textMuted),
@@ -189,14 +193,26 @@ class _AddCustomerBottomSheetState extends State<AddCustomerBottomSheet> {
                   ),
                 ],
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: 12),
+              OutlinedButton.icon(
+                onPressed: _importFromPhoneContacts,
+                icon: const Icon(Icons.contact_phone_rounded, size: 17, color: AppColors.primary),
+                label: const Text('Import dari Kontak HP', style: TextStyle(fontSize: 12.5, fontWeight: FontWeight.w700, color: AppColors.primary)),
+                style: OutlinedButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(vertical: 10),
+                  side: BorderSide(color: AppColors.primary.withValues(alpha: 0.45)),
+                  backgroundColor: AppColors.primary.withValues(alpha: 0.05),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(11)),
+                ),
+              ),
+              const SizedBox(height: 12),
               Text('Kategori Pelanggan', style: AppTypography.labelMedium),
               const SizedBox(height: 8),
               CustomerTypeSelector(
                 selectedType: _customerType,
                 onTypeSelected: (type) => setState(() => _customerType = type),
               ),
-              const SizedBox(height: 14),
+              const SizedBox(height: 12),
               TextField(
                 controller: _nameController,
                 textCapitalization: TextCapitalization.words,
@@ -205,20 +221,22 @@ class _AddCustomerBottomSheetState extends State<AddCustomerBottomSheet> {
                   hintText: 'Contoh: Bu Siti, Toko Sejahtera',
                   prefixIcon: const Icon(Icons.person_rounded, size: 20),
                   helperText: _nameController.text.trim().isEmpty ? 'Nama wajib diisi' : null,
-                  helperStyle: TextStyle(
-                    fontSize: 11,
-                    color: _nameController.text.trim().isEmpty ? AppColors.error : AppColors.textMuted,
-                  ),
+                  helperStyle: TextStyle(fontSize: 11, color: _nameController.text.trim().isEmpty ? AppColors.error : AppColors.textMuted),
                 ),
               ),
               const SizedBox(height: 12),
               TextField(
                 controller: _phoneController,
                 keyboardType: TextInputType.phone,
-                decoration: const InputDecoration(
-                  labelText: 'Nomor WhatsApp / HP (Opsional)',
+                decoration: InputDecoration(
+                  labelText: 'Nomor Handphone (Opsional)',
                   hintText: '0812xxxxxxx',
-                  prefixIcon: Icon(Icons.phone_rounded, size: 20),
+                  prefixIcon: const Icon(Icons.phone_rounded, size: 20),
+                  suffixIcon: IconButton(
+                    onPressed: _importFromPhoneContacts,
+                    tooltip: 'Ambil dari Kontak HP',
+                    icon: const Icon(Icons.contacts_rounded, size: 19, color: AppColors.primary),
+                  ),
                 ),
               ),
               const SizedBox(height: 12),
@@ -267,15 +285,8 @@ class _AddCustomerBottomSheetState extends State<AddCustomerBottomSheet> {
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
                 ),
                 child: _isSubmitting
-                    ? const SizedBox(
-                        width: 20,
-                        height: 20,
-                        child: CircularProgressIndicator(strokeWidth: 2.2, color: Colors.white),
-                      )
-                    : Text(
-                        _isEdit ? 'Simpan Perubahan' : 'Daftarkan Pelanggan',
-                        style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 14),
-                      ),
+                    ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2.2, color: Colors.white))
+                    : Text(_isEdit ? 'Simpan Perubahan' : 'Daftarkan Pelanggan', style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 14)),
               ),
             ],
           ),

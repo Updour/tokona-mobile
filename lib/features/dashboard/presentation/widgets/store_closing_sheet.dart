@@ -12,6 +12,8 @@ import 'package:tokona/features/backup/data/services/supabase_backup_service.dar
 import 'package:tokona/features/backup/domain/models/cloud_backup_model.dart';
 import 'package:tokona/features/dashboard/presentation/widgets/store_closing_summary_card.dart';
 import 'package:tokona/features/pos/presentation/controllers/sale_history_controller.dart';
+import 'package:tokona/features/settings/data/services/audit_log_service.dart';
+import 'package:tokona/features/settings/domain/models/audit_log_model.dart';
 
 class StoreClosingSheet extends ConsumerStatefulWidget {
   const StoreClosingSheet({super.key});
@@ -55,8 +57,19 @@ class _StoreClosingSheetState extends ConsumerState<StoreClosingSheet> {
       AppToast.showSuccess(
         context,
         _autoBackupEnabled
-            ? 'Tutup Toko Selesai! Cadangan berhasil diunggah ke Supabase Cloud.'
+            ? 'Tutup Toko Selesai! Cadangan berhasil diunggah ke Cloud.'
             : 'Tutup Toko Selesai!',
+      );
+
+      final auth = ref.read(authProvider);
+      AuditLogService.log(
+        storeId: storeId,
+        userId: auth.currentUser?.id ?? 'kasir',
+        userName: auth.currentUser?.fullName ?? 'Kasir Utama',
+        userRole: auth.currentUser?.role.label ?? 'Kasir',
+        actionType: AuditActionType.shift,
+        title: 'Tutup Shift / Tutup Kasir Toko',
+        description: 'Kasir menyelesaikan rekap closing shift. Backup cloud: ${_autoBackupEnabled ? "Aktif" : "Lokal"}.',
       );
     } catch (e) {
       if (!mounted) return;
@@ -75,7 +88,7 @@ class _StoreClosingSheetState extends ConsumerState<StoreClosingSheet> {
         '💵 *Uang Tunai Kasir*: ${CurrencyFormatter.format(cashPaid)}\n'
         '💳 *Non-Tunai / Lainnya*: ${CurrencyFormatter.format(nonCash)}\n'
         '📈 *Estimasi Laba Kotor*: ${CurrencyFormatter.format(totalProfit)}\n\n'
-        '☁️ *Cadangan Cloud*: ${_backupResult != null ? "Sukses tersimpan di Supabase (${_backupResult!.formattedSize})" : "Offline"}\n'
+        '☁️ *Cadangan Cloud*: ${_backupResult != null ? "Sukses tersimpan di cloud (${_backupResult!.formattedSize})" : "Offline"}\n'
         '✅ Toko berhasil ditutup dengan aman.';
 
     WhatsAppService.sendReceipt(phone: '', message: msg);

@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -19,17 +20,19 @@ import 'package:tokona/features/dashboard/presentation/widgets/beranda_quick_sho
 import 'package:tokona/features/dashboard/presentation/widgets/beranda_swipeable_cards.dart';
 import 'package:tokona/features/dashboard/presentation/widgets/beranda_top_products_card.dart';
 import 'package:tokona/features/dashboard/presentation/widgets/daily_sales_chart_card.dart';
+import 'package:tokona/features/dashboard/presentation/widgets/store_profile_incomplete_banner.dart';
 import 'package:tokona/features/payment/presentation/controllers/payment_account_controller.dart';
 import 'package:tokona/features/payment/presentation/widgets/paylater_bill_monitor_sheet.dart';
-import 'package:tokona/features/payment/presentation/widgets/payment_account_management_sheet.dart';
 import 'package:tokona/features/pos/presentation/controllers/sale_history_controller.dart';
 import 'package:tokona/features/pos/presentation/widgets/scheduled_reminder_sheet.dart';
 import 'package:tokona/features/product/presentation/controllers/product_controller.dart';
 import 'package:tokona/features/purchase/presentation/controllers/active_orders_controller.dart';
+import 'package:tokona/features/purchase/presentation/controllers/purchase_controller.dart';
 import 'package:tokona/features/purchase/presentation/widgets/incoming_orders_sheet.dart';
 import 'package:tokona/features/report/presentation/controllers/report_controller.dart';
+import 'package:tokona/features/settings/data/services/audit_log_service.dart';
 
-class BerandaTabView extends ConsumerWidget {
+class BerandaTabView extends ConsumerStatefulWidget {
   final StoreModel? store;
   final UserModel? user;
   final ValueChanged<int>? onNavigateTab;
@@ -42,7 +45,38 @@ class BerandaTabView extends ConsumerWidget {
   });
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<BerandaTabView> createState() => _BerandaTabViewState();
+}
+
+class _BerandaTabViewState extends ConsumerState<BerandaTabView> {
+  Timer? _pollingTimer;
+
+  @override
+  void initState() {
+    super.initState();
+    // Auto-sync polling setiap 30 detik untuk menarik omset kasir & audit log terbaru dari Cloud
+    _pollingTimer = Timer.periodic(const Duration(seconds: 30), (_) {
+      if (!mounted) return;
+      final store = widget.store;
+      if (store != null) {
+        ref.read(saleHistoryControllerProvider.notifier).loadSales(store.id);
+        ref.read(reportControllerProvider.notifier).loadReport(store.id);
+        AuditLogService.syncCloudLogs(store.id);
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _pollingTimer?.cancel();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final store = widget.store;
+    final user = widget.user;
+    final onNavigateTab = widget.onNavigateTab;
     ref.listen<List<AppNotificationItem>>(notificationListProvider, (prev, next) {
       if (next.isNotEmpty && (prev == null || prev.isEmpty || next.first.id != prev.first.id)) {
         final readIds = ref.read(readNotificationIdsProvider);
@@ -83,6 +117,9 @@ class BerandaTabView extends ConsumerWidget {
     if (store != null) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         ref.read(activeOrdersProvider.notifier).loadOrders(store!.id);
+        if (ref.read(purchaseControllerProvider).purchases.isEmpty) {
+          ref.read(purchaseControllerProvider.notifier).loadPurchases(store!.id);
+        }
         ref.read(scheduledBackupProvider.notifier).checkAndTriggerScheduled(storeId: store!.id, storeName: store!.name);
       });
     }
@@ -98,13 +135,14 @@ class BerandaTabView extends ConsumerWidget {
             ref.read(paymentAccountListProvider.notifier).loadAccounts(store!.id),
             ref.read(saleHistoryControllerProvider.notifier).loadSales(store!.id),
             ref.read(activeOrdersProvider.notifier).loadOrders(store!.id),
+            ref.read(purchaseControllerProvider.notifier).loadPurchases(store!.id),
             ref.read(customerListProvider.notifier).loadCustomers(store!.id),
           ]);
         }
       },
       child: ListView(
         physics: const AlwaysScrollableScrollPhysics(parent: BouncingScrollPhysics()),
-        padding: const EdgeInsets.fromLTRB(16, 12, 16, 36),
+        padding: const EdgeInsets.fromLTRB(10, 10, 10, 40),
         children: [
           BerandaHeaderBar(
             store: store,
@@ -112,6 +150,7 @@ class BerandaTabView extends ConsumerWidget {
             onNavigateTab: onNavigateTab,
           ),
           const SizedBox(height: 14),
+          const StoreProfileIncompleteBanner(),
           BerandaSwipeableCards(onNavigateTab: onNavigateTab),
           const SizedBox(height: 14),
           BerandaQuickShortcuts(onNavigateTab: onNavigateTab),

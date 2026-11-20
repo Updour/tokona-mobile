@@ -7,8 +7,11 @@ import 'package:tokona/core/theme/app_colors.dart';
 import 'package:tokona/features/auth/presentation/controllers/auth_controller.dart';
 import 'package:tokona/features/customer/presentation/controllers/customer_controller.dart';
 import 'package:tokona/features/customer/presentation/widgets/kasbon_due_monitor_sheet.dart';
+import 'package:tokona/features/dashboard/presentation/widgets/beranda_filter_menu_sheet.dart';
 import 'package:tokona/features/dashboard/presentation/widgets/swipeable_card_item.dart';
+import 'package:tokona/features/payment/presentation/controllers/paylater_settlement_controller.dart';
 import 'package:tokona/features/payment/presentation/controllers/payment_account_controller.dart';
+import 'package:tokona/features/payment/presentation/widgets/paylater_bill_monitor_sheet.dart';
 import 'package:tokona/features/payment/presentation/widgets/payment_account_management_sheet.dart';
 import 'package:tokona/features/pos/presentation/controllers/sale_history_controller.dart';
 import 'package:tokona/features/product/presentation/controllers/product_controller.dart';
@@ -28,7 +31,7 @@ class BerandaSwipeableCards extends ConsumerStatefulWidget {
 }
 
 class _BerandaSwipeableCardsState extends ConsumerState<BerandaSwipeableCards> {
-  final PageController _pageController = PageController(viewportFraction: 0.94);
+  final PageController _pageController = PageController(viewportFraction: 0.98);
   int _currentPage = 0;
 
   @override
@@ -38,71 +41,7 @@ class _BerandaSwipeableCardsState extends ConsumerState<BerandaSwipeableCards> {
   }
 
   void _showFilterMenu(BuildContext context, ReportFilterType currentFilter) {
-    HapticFeedback.lightImpact();
-    final store = ref.read(authProvider).currentStore;
-    if (store == null) return;
-
-    showModalBottomSheet(
-      context: context,
-      backgroundColor: Colors.transparent,
-      builder: (ctx) {
-        const filters = [
-          ReportFilterType.today,
-          ReportFilterType.yesterday,
-          ReportFilterType.last7Days,
-          ReportFilterType.thisMonth,
-          ReportFilterType.thisYear,
-        ];
-        return Container(
-          padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 16),
-          decoration: const BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  const Text('Pilih Rentang Waktu Omzet', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-                  IconButton(
-                    icon: const Icon(Icons.close_rounded, size: 20),
-                    onPressed: () => Navigator.pop(ctx),
-                    padding: EdgeInsets.zero,
-                    constraints: const BoxConstraints(),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 12),
-              ...filters.map((f) {
-                final isSelected = f == currentFilter;
-                return ListTile(
-                  dense: true,
-                  contentPadding: const EdgeInsets.symmetric(horizontal: 8),
-                  leading: Icon(
-                    isSelected ? Icons.check_circle_rounded : Icons.radio_button_unchecked_rounded,
-                    color: isSelected ? const Color(0xFF0D9488) : AppColors.textMuted,
-                  ),
-                  title: Text(
-                    f.label,
-                    style: TextStyle(
-                      fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-                      color: isSelected ? const Color(0xFF0D9488) : AppColors.textPrimary,
-                    ),
-                  ),
-                  onTap: () {
-                    Navigator.pop(ctx);
-                    ref.read(reportControllerProvider.notifier).changeFilter(store.id, f);
-                  },
-                );
-              }),
-            ],
-          ),
-        );
-      },
-    );
+    BerandaFilterMenuSheet.show(context, ref, currentFilter);
   }
 
   @override
@@ -115,12 +54,24 @@ class _BerandaSwipeableCardsState extends ConsumerState<BerandaSwipeableCards> {
     final productState = ref.watch(productListProvider);
     final activeOrders = ref.watch(activeOrdersProvider);
     final customerState = ref.watch(customerListProvider);
+    final settlementState = ref.watch(paylaterSettlementProvider);
 
     final currency = NumberFormat.currency(locale: 'id_ID', symbol: 'Rp ', decimalDigits: 0);
     final kasbonSales = saleState.sales.where((s) => s.isKasbon && !s.isVoided).toList();
     final salesKasbonAmount = kasbonSales.fold(0.0, (acc, s) => acc + s.finalAmount);
     final customersKasbonAmount = customerState.customers.fold<double>(0.0, (acc, c) => acc + c.receivableBalance);
     final totalKasbonAmount = salesKasbonAmount > 0 ? salesKasbonAmount : customersKasbonAmount;
+
+    // SPayLater data calculation
+    final now = DateTime.now();
+    final lastDayOfMonth = DateTime(now.year, now.month + 1, 0).day;
+    final isPaylaterWindow = (now.day >= (lastDayOfMonth - 2)) || (now.day == 1);
+    final isSettled = settlementState.isSettled(now.year, now.month);
+    final paylaterPurchases = purchaseState.purchases.where((p) => p.isPaylater && !p.isCancelled).toList();
+    final totalPaylaterBill = paylaterPurchases.fold<double>(0.0, (acc, p) => acc + p.grandTotal);
+    final paylaterTrend = paylaterPurchases.length >= 2
+        ? paylaterPurchases.take(7).map((p) => p.grandTotal).toList().reversed.toList()
+        : [0.0, 0.0];
 
     final txCount = reportState.summary.transactionCount;
     final avgBasket = txCount > 0 ? reportState.summary.totalRevenue / txCount : 0.0;
@@ -203,6 +154,26 @@ class _BerandaSwipeableCardsState extends ConsumerState<BerandaSwipeableCards> {
                 onTap: () => KasbonDueMonitorSheet.show(context),
               ),
               SwipeableCardItem(
+                gradient: isSettled
+                    ? const [Color(0xFF059669), Color(0xFF047857), Color(0xFF064E3B)]
+                    : (isPaylaterWindow
+                        ? const [Color(0xFFDC2626), Color(0xFFB91C1C), Color(0xFF7F1D1D)]
+                        : const [Color(0xFFD97706), Color(0xFFB45309), Color(0xFF78350F)]),
+                sparklineData: paylaterTrend,
+                icon: Icons.credit_card_rounded,
+                badgeText: isSettled
+                    ? 'LUNAS'
+                    : (isPaylaterWindow ? 'TGL 01 JATUH TEMPO' : 'SPAYLATER AKTIF'),
+                badgeBg: Colors.white.withValues(alpha: 0.2),
+                title: 'Tagihan SPayLater',
+                mainValue: currency.format(totalPaylaterBill),
+                footerLeftLabel: 'Nota',
+                footerLeftValue: '${paylaterPurchases.length} Kulakan',
+                footerRightLabel: '',
+                footerRightValue: 'Rincian & Bayar',
+                onTap: () => PaylaterBillMonitorSheet.show(context),
+              ),
+              SwipeableCardItem(
                 gradient: const [Color(0xFF1E293B), Color(0xFF0F172A), Color(0xFF020617)],
                 sparklineData: balanceTrend,
                 icon: Icons.account_balance_wallet_rounded,
@@ -224,7 +195,7 @@ class _BerandaSwipeableCardsState extends ConsumerState<BerandaSwipeableCards> {
                 icon: Icons.inventory_2_rounded,
                 badgeText: alerts.hasUrgentStock ? '${alerts.totalUrgentStock} PERLU RESTOK' : 'STOK OPTIMAL',
                 badgeBg: Colors.white.withValues(alpha: 0.2),
-                title: 'Katalog Barang & Gudang',
+                title: 'Katalog Barang',
                 mainValue: '${productState.products.length} Barang Terdaftar',
                 footerLeftLabel: 'Menipis',
                 footerLeftValue: '${alerts.lowStockCount} Item',
@@ -254,7 +225,7 @@ class _BerandaSwipeableCardsState extends ConsumerState<BerandaSwipeableCards> {
         const SizedBox(height: 10),
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
-          children: List.generate(5, (index) {
+          children: List.generate(6, (index) {
             final isActive = _currentPage == index;
             return AnimatedContainer(
               duration: const Duration(milliseconds: 250),

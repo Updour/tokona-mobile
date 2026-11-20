@@ -13,6 +13,7 @@ import 'package:tokona/features/pos/presentation/controllers/sale_history_contro
 import 'package:tokona/features/product/presentation/controllers/product_controller.dart';
 import 'package:tokona/features/purchase/presentation/controllers/active_orders_controller.dart';
 import 'package:tokona/features/purchase/presentation/controllers/purchase_controller.dart';
+import 'package:tokona/features/settings/presentation/controllers/app_preferences_controller.dart';
 
 final notificationListProvider = Provider<List<AppNotificationItem>>((ref) {
   final sales = ref.watch(saleHistoryControllerProvider).sales;
@@ -21,6 +22,7 @@ final notificationListProvider = Provider<List<AppNotificationItem>>((ref) {
   final activeOrders = ref.watch(activeOrdersProvider);
   final purchaseState = ref.watch(purchaseControllerProvider);
   final settlementState = ref.watch(paylaterSettlementProvider);
+  final prefs = ref.watch(appPreferencesProvider);
   final now = DateTime.now();
   final todayDate = DateTime(now.year, now.month, now.day);
 
@@ -44,7 +46,7 @@ final notificationListProvider = Provider<List<AppNotificationItem>>((ref) {
       ));
     } else {
       final daysRemaining = dueDay.difference(todayDate).inDays;
-      if (daysRemaining <= 3) {
+      if (daysRemaining <= prefs.kasbonRemindDaysBefore) {
         final whenText = daysRemaining == 0 ? 'hari ini' : 'dalam $daysRemaining hari';
         items.add(AppNotificationItem(
           id: 'kasbon_due_${s.id}',
@@ -102,8 +104,8 @@ final notificationListProvider = Provider<List<AppNotificationItem>>((ref) {
             createdAt: planTime,
             targetPayload: 'booking',
           ));
-        } else if (diffMinutes >= 0 && diffMinutes <= 45) {
-          // 45 menit sebelum jadwal
+        } else if (diffMinutes >= 0 && diffMinutes <= prefs.bookingRemindMinutesBefore) {
+          // Pengingat sebelum jadwal sesuai pengaturan dinamis
           items.add(AppNotificationItem(
             id: 'booking_soon_${h.id}',
             title: '🔔 Pengingat $diffMinutes Menit Lagi (Jam $timeStr): ${h.customerName}',
@@ -127,7 +129,7 @@ final notificationListProvider = Provider<List<AppNotificationItem>>((ref) {
     }
   }
 
-  // 4. Pesanan Kulakan Masuk / Berjalan
+  // 4. Pesanan Kulakan Masuk / Berjalan & Status Paket Tiba
   for (final ord in activeOrders) {
     items.add(AppNotificationItem(
       id: 'active_order_${ord.id}',
@@ -139,42 +141,64 @@ final notificationListProvider = Provider<List<AppNotificationItem>>((ref) {
     ));
   }
 
-  // 5. Pengingat Tagihan Paylater (SPayLater)
-  // Menghitung transaksi aktif yang menggunakan Paylater
+  // Notifikasi untuk pembelian yang baru diterima via J&T Cargo / resi pengiriman
+  final recentCutoff = now.subtract(Duration(days: prefs.deliveryHistoryDays));
+  for (final pur in purchaseState.purchases.take(15)) {
+    final hasTracking = pur.trackingNumber != null && pur.trackingNumber!.trim().isNotEmpty;
+    final isJtNote = pur.notes?.contains('J&T Cargo') ?? false;
+    final eventTime = pur.updatedAt ?? pur.createdAt;
+    if (pur.isReceived && (isJtNote || ((pur.isAutoReceived || hasTracking) && eventTime.isAfter(recentCutoff)))) {
+      items.add(AppNotificationItem(
+        id: 'jt_delivered_${pur.id}',
+        title: '📦 Paket Tiba: ${pur.supplierName ?? pur.invoiceNumber}',
+        body: isJtNote
+            ? 'Paket J&T Cargo terkonfirmasi diterima kurir. Stok barang telah masuk ke toko.'
+            : 'Pesanan (${pur.trackingNumber ?? pur.invoiceNumber}) telah diterima & stok masuk ke toko.',
+        type: AppNotificationType.bookingReady,
+        createdAt: eventTime,
+        targetPayload: 'incoming',
+      ));
+    }
+  }
+
+  // 5. Pengingat Tagihan Paylater (Dinamis sesuai pengaturan toko)
   final paylaterPurchases = purchaseState.purchases.where((p) => p.isPaylater && !p.isCancelled).toList();
   final currentDay = now.day;
-  final lastDayOfMonth = DateTime(now.year, now.month + 1, 0).day;
-  final isPaylaterBillingWindow = (currentDay >= (lastDayOfMonth - 2)) || (currentDay == 1);
+  final isPaylaterBillingWindow = prefs.isPaylaterWindowActive(now);
   final isCurrentBillingSettled = settlementState.isSettled(now.year, now.month);
 
-  // Jika ada transaksi paylater, notifikasi selalu ada di daftar riwayat/pusat notifikasi
   if (paylaterPurchases.isNotEmpty && !isCurrentBillingSettled) {
     final totalBill = paylaterPurchases.fold<double>(0.0, (acc, p) => acc + p.grandTotal);
     final formattedNominal = CurrencyFormatter.format(totalBill);
+    final plName = prefs.paylaterName;
+    final dueDay = prefs.paylaterDueDay;
 
     items.add(AppNotificationItem(
       id: 'paylater_bill_${now.year}_${now.month}',
-      title: isPaylaterBillingWindow
-          ? '💳 Tagihan SPayLater: $formattedNominal'
-          : '💳 Tagihan SPayLater: $formattedNominal',
+      title: '💳 Tagihan $plName: $formattedNominal',
       body: isPaylaterBillingWindow
-          ? 'Jatuh tempo tgl 1. Siapkan dana $formattedNominal.'
-          : 'Total tagihan belanja $formattedNominal (Jatuh tempo tgl 1).',
+          ? 'Jatuh tempo tgl $dueDay. Siapkan dana $formattedNominal.'
+          : 'Total tagihan belanja $formattedNominal (Jatuh tempo tgl $dueDay).',
       type: AppNotificationType.paylaterBill,
       createdAt: now,
       targetPayload: 'paylater',
     ));
 
-    // Push notifikasi ke status bar Android hanya saat masuk jendela jatuh tempo tgl 29 - 01
-    if (isPaylaterBillingWindow) {
+    if (isPaylaterBillingWindow && prefs.pushPaylaterEnabled) {
       final notifId = now.year * 10000 + now.month * 100 + currentDay;
-      LocalPushNotificationService.instance.showPaylaterNotification(
-        id: notifId,
-        title: '💳 Tagihan SPayLater: $formattedNominal',
-        body: 'Jatuh tempo tgl 1. Segera lunasi $formattedNominal.',
-        payload: 'paylater',
-      );
+      if (now.hour >= prefs.paylaterRemindHour) {
+        LocalPushNotificationService.instance.showPaylaterNotification(
+          id: notifId,
+          title: '💳 Tagihan $plName: $formattedNominal',
+          body: 'Jatuh tempo tgl $dueDay. Segera lunasi $formattedNominal.',
+          payload: 'paylater',
+        );
+      }
     }
+  } else if (isCurrentBillingSettled) {
+    // Jika sudah lunas, bersihkan notifikasi status bar hari ini jika ada
+    final notifId = now.year * 10000 + now.month * 100 + currentDay;
+    LocalPushNotificationService.instance.cancel(notifId);
   }
 
   // Sort: High priority first

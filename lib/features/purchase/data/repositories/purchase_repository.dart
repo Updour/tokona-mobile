@@ -55,8 +55,7 @@ class PurchaseRepository {
         purchaseType: dto.purchaseType, platform: dto.platform, deviceTag: dto.deviceTag,
         paymentAccount: dto.paymentAccount, serviceFee: dto.serviceFee, shippingFee: dto.shippingFee,
         status: dto.status, poDays: dto.poDays,
-        estimatedArrival: dto.estimatedArrival,
-        estimatedArrivalEnd: dto.estimatedArrivalEnd,
+        estimatedArrival: dto.estimatedArrival, estimatedArrivalEnd: dto.estimatedArrivalEnd,
         refundStatus: 'none', totalAmount: dto.itemsSubtotal,
         notes: dto.notes?.trim().isEmpty == true ? null : dto.notes?.trim(),
         imagePath: dto.imagePath, trackingNumber: dto.trackingNumber,
@@ -108,20 +107,15 @@ class PurchaseRepository {
       final items = await purchaseItemDao.getByPurchaseId(txn, purchaseId);
       for (final item in items) {
         await _updateProductStockAndHpp(
-          txn: txn,
-          productId: item.productId,
-          addedQtyBase: item.totalBaseQuantity,
-          incomingBaseCost: item.baseUnitCost,
-          now: now,
-          deviceTag: purchase.deviceTag,
+          txn: txn, productId: item.productId, addedQtyBase: item.totalBaseQuantity,
+          incomingBaseCost: item.baseUnitCost, now: now, deviceTag: purchase.deviceTag,
         );
       }
       final updatedNotes = autoNote != null
           ? (purchase.notes != null && purchase.notes!.isNotEmpty ? '${purchase.notes}\n$autoNote' : autoNote)
           : purchase.notes;
       await purchaseDao.updateStatus(
-        txn, purchaseId,
-        status: 'received', isAutoReceived: isAutoReceived,
+        txn, purchaseId, status: 'received', isAutoReceived: isAutoReceived,
         notes: updatedNotes, updatedAt: now,
       );
     });
@@ -133,12 +127,16 @@ class PurchaseRepository {
     final now = DateTime.now();
     int count = 0;
     for (final order in activeOrders) {
-      final deadline = order.estimatedArrivalEnd ?? order.estimatedArrival;
-      if (deadline != null && now.isAfter(deadline)) {
-        final dateStr = '${deadline.day}/${deadline.month}/${deadline.year}';
-        final autoNote = 'pesanan di terima otomatis by sistem (melewati batas estimasi $dateStr)';
-        await confirmReceived(order.id, isAutoReceived: true, autoNote: autoNote);
-        count++;
+      final rawDeadline = order.estimatedArrivalEnd ?? order.estimatedArrival;
+      if (rawDeadline != null) {
+        // Batas maksimal adalah akhir hari tanggal estimasi (23:59:59)
+        final endOfDay = DateTime(rawDeadline.year, rawDeadline.month, rawDeadline.day, 23, 59, 59, 999);
+        if (now.isAfter(endOfDay)) {
+          final dateStr = '${rawDeadline.day}/${rawDeadline.month}/${rawDeadline.year}';
+          final autoNote = 'pesanan di terima otomatis by sistem (melewati batas estimasi $dateStr)';
+          await confirmReceived(order.id, isAutoReceived: true, autoNote: autoNote);
+          count++;
+        }
       }
     }
     return count;
