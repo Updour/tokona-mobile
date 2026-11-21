@@ -52,7 +52,7 @@ void main() {
 
   group('DTO Validation', () {
     test('RegisterDto validates required fields and length', () {
-      const invalidDto = RegisterDto(
+      final invalidDto = RegisterDto(
         storeName: '',
         ownerFullName: '',
         username: 'ab',
@@ -60,7 +60,7 @@ void main() {
       );
       expect(invalidDto.validate(), isNotNull);
 
-      const validDto = RegisterDto(
+      final validDto = RegisterDto(
         storeName: 'Toko Makmur',
         ownerFullName: 'Budi Santoso',
         username: 'budi_owner',

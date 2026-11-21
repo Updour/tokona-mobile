@@ -46,7 +46,29 @@ class ThermalPrinterHeaderTab extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ListView(
+      padding: const EdgeInsets.fromLTRB(16, 16, 16, 28),
       children: [
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+          decoration: BoxDecoration(
+            color: const Color(0xFFF8FAFC),
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: const Color(0xFFE2E8F0)),
+          ),
+          child: const Row(
+            children: [
+              Icon(Icons.storefront_rounded, color: AppColors.primary, size: 20),
+              SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  'Sesuaikan nama toko, slogan sembako, dan alamat yang tercetak di bagian atas nota struk kasir.',
+                  style: TextStyle(fontSize: 11, color: Color(0xFF475569), height: 1.3),
+                ),
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 16),
         TextField(
           controller: titleController,
           decoration: const InputDecoration(
@@ -56,7 +78,7 @@ class ThermalPrinterHeaderTab extends StatelessWidget {
           ),
           onChanged: (_) => onChanged(),
         ),
-        const SizedBox(height: 10),
+        const SizedBox(height: 14),
         TextField(
           controller: subtitleController,
           decoration: const InputDecoration(
@@ -66,7 +88,7 @@ class ThermalPrinterHeaderTab extends StatelessWidget {
           ),
           onChanged: (_) => onChanged(),
         ),
-        const SizedBox(height: 10),
+        const SizedBox(height: 14),
         Row(
           children: [
             Checkbox(
@@ -87,7 +109,7 @@ class ThermalPrinterHeaderTab extends StatelessWidget {
             ),
             onChanged: (_) => onChanged(),
           ),
-          const SizedBox(height: 10),
+          const SizedBox(height: 14),
         ],
         Row(
           children: [
@@ -109,7 +131,7 @@ class ThermalPrinterHeaderTab extends StatelessWidget {
             ),
             onChanged: (_) => onChanged(),
           ),
-          const SizedBox(height: 10),
+          const SizedBox(height: 14),
         ],
         TextField(
           controller: customHeaderController,
@@ -120,12 +142,12 @@ class ThermalPrinterHeaderTab extends StatelessWidget {
           ),
           onChanged: (_) => onChanged(),
         ),
-        const SizedBox(height: 12),
+        const SizedBox(height: 16),
         const Text('Elemen Metadata Struk', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: AppColors.textPrimary)),
-        const SizedBox(height: 4),
+        const SizedBox(height: 6),
         Wrap(
           spacing: 8,
-          runSpacing: 4,
+          runSpacing: 6,
           children: [
             FilterChip(
               label: const Text('No. Nota'),

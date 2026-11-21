@@ -48,18 +48,28 @@ class PosReceiptDialog extends ConsumerWidget {
 
   String? get _effectivePhone => (customerPhone != null && customerPhone!.trim().isNotEmpty)
       ? customerPhone!.trim()
-      : (sale.customerPhone != null && sale.customerPhone!.trim().isNotEmpty
-          ? sale.customerPhone!.trim()
-          : null);
+      : (sale.customerPhone != null && sale.customerPhone!.trim().isNotEmpty ? sale.customerPhone!.trim() : null);
 
   String _getThermalReceiptText(AppPreferences prefs) => ReceiptThermalFormatter.formatThermalReceipt(
-        sale: sale, storeName: storeName, storeAddress: storeAddress,
-        storePhone: storePhone, cashierName: cashierName, customerPhone: _effectivePhone, prefs: prefs,
+        sale: sale,
+        storeName: storeName,
+        storeAddress: storeAddress,
+        storePhone: storePhone,
+        cashierName: cashierName,
+        customerPhone: _effectivePhone,
+        prefs: prefs,
       );
 
   String _getWhatsAppReceiptText(AppPreferences prefs) => ReceiptTextFormatter.formatReceipt(
-        sale: sale, storeName: storeName, cashierName: cashierName, customerName: sale.customerName,
-        customerPhone: _effectivePhone, storeAddress: storeAddress, storePhone: storePhone, prefs: prefs, forWhatsApp: true,
+        sale: sale,
+        storeName: storeName,
+        cashierName: cashierName,
+        customerName: sale.customerName,
+        customerPhone: _effectivePhone,
+        storeAddress: storeAddress,
+        storePhone: storePhone,
+        prefs: prefs,
+        forWhatsApp: true,
       );
 
   void _copyReceiptText(BuildContext context, AppPreferences prefs) {
@@ -71,7 +81,6 @@ class PosReceiptDialog extends ConsumerWidget {
   Future<void> _handleSendWhatsApp(BuildContext context, AppPreferences prefs) async {
     final receiptText = _getWhatsAppReceiptText(prefs);
     final phone = _effectivePhone;
-
     if (phone != null && phone.isNotEmpty) {
       HapticFeedback.lightImpact();
       AppToast.showInfo(context, 'Membuka WhatsApp ke $phone...');

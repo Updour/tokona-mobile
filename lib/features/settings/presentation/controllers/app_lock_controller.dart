@@ -5,14 +5,10 @@ import 'package:tokona/features/settings/domain/models/app_lock_config.dart';
 class AppLockState {
   final AppLockConfig config;
   final bool isUnlocked;
-  final bool hasBiometricsHardware;
-  final bool isAuthenticating;
 
   const AppLockState({
     this.config = const AppLockConfig(),
     this.isUnlocked = false,
-    this.hasBiometricsHardware = false,
-    this.isAuthenticating = false,
   });
 
   bool get isLocked => config.isEnabled && config.hasPin && !isUnlocked;
@@ -20,14 +16,10 @@ class AppLockState {
   AppLockState copyWith({
     AppLockConfig? config,
     bool? isUnlocked,
-    bool? hasBiometricsHardware,
-    bool? isAuthenticating,
   }) {
     return AppLockState(
       config: config ?? this.config,
       isUnlocked: isUnlocked ?? this.isUnlocked,
-      hasBiometricsHardware: hasBiometricsHardware ?? this.hasBiometricsHardware,
-      isAuthenticating: isAuthenticating ?? this.isAuthenticating,
     );
   }
 }
@@ -43,11 +35,9 @@ class AppLockController extends StateNotifier<AppLockState> {
 
   Future<void> init() async {
     final conf = await AppLockService.loadConfig();
-    final canBio = await AppLockService.canUseBiometrics();
     state = state.copyWith(
       config: conf,
       isUnlocked: !conf.isEnabled || !conf.hasPin,
-      hasBiometricsHardware: canBio,
     );
   }
 
@@ -59,42 +49,27 @@ class AppLockController extends StateNotifier<AppLockState> {
     return valid;
   }
 
-  Future<bool> unlockWithBiometrics() async {
-    state = state.copyWith(isAuthenticating: true);
-    final success = await AppLockService.authenticateWithBiometrics();
-    if (success && !state.config.useBiometrics) {
-      final updated = state.config.copyWith(useBiometrics: true);
-      await AppLockService.saveConfig(updated);
-      state = state.copyWith(config: updated);
-    }
-    state = state.copyWith(
-      isAuthenticating: false,
-      isUnlocked: success ? true : state.isUnlocked,
-    );
-    return success;
-  }
-
-  Future<void> setPin(String newPin, {bool useBiometrics = false}) async {
+  Future<void> setPin(String newPin) async {
     final hashed = AppLockService.hashPin(newPin);
     final updated = state.config.copyWith(
       isEnabled: true,
       pinHash: hashed,
-      useBiometrics: useBiometrics,
+      useBiometrics: false,
     );
     await AppLockService.saveConfig(updated);
     state = state.copyWith(config: updated, isUnlocked: true);
-  }
-
-  Future<void> toggleBiometrics(bool enabled) async {
-    final updated = state.config.copyWith(useBiometrics: enabled);
-    await AppLockService.saveConfig(updated);
-    state = state.copyWith(config: updated);
   }
 
   Future<void> disableLock() async {
     final updated = const AppLockConfig();
     await AppLockService.saveConfig(updated);
     state = state.copyWith(config: updated, isUnlocked: true);
+  }
+
+  Future<void> updateTimeout(int minutes) async {
+    final updated = state.config.copyWith(timeoutMinutes: minutes);
+    await AppLockService.saveConfig(updated);
+    state = state.copyWith(config: updated);
   }
 
   void lockApp() {

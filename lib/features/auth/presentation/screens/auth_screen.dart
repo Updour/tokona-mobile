@@ -6,6 +6,7 @@ import 'package:tokona/core/widgets/app_loading_overlay.dart';
 import 'package:tokona/core/widgets/app_toast.dart';
 import 'package:tokona/features/auth/presentation/controllers/auth_controller.dart';
 import 'package:tokona/features/auth/presentation/widgets/auth_header_widget.dart';
+import 'package:tokona/features/auth/presentation/widgets/cashier_scan_invite_banner.dart';
 import 'package:tokona/features/auth/presentation/widgets/login_form_widget.dart';
 import 'package:tokona/features/auth/presentation/widgets/offline_pairing_sheet.dart';
 import 'package:tokona/features/auth/presentation/widgets/register_form_widget.dart';
@@ -124,6 +125,7 @@ class _AuthScreenState extends ConsumerState<AuthScreen> with SingleTickerProvid
                                   padding: const EdgeInsets.fromLTRB(22, 20, 22, 22),
                                   child: Column(
                                     children: [
+                                      const CashierScanInviteBanner(),
                                       _buildModeSelector(isRegisterMode),
                                       const SizedBox(height: 20),
                                       AnimatedCrossFade(
@@ -143,9 +145,7 @@ class _AuthScreenState extends ConsumerState<AuthScreen> with SingleTickerProvid
                                             setState(() => _isRegisterModeOverride = false);
                                           },
                                         ),
-                                        crossFadeState: isRegisterMode
-                                            ? CrossFadeState.showSecond
-                                            : CrossFadeState.showFirst,
+                                        crossFadeState: isRegisterMode ? CrossFadeState.showSecond : CrossFadeState.showFirst,
                                         duration: const Duration(milliseconds: 260),
                                       ),
                                     ],

@@ -25,7 +25,6 @@ class _RegisterFormWidgetState extends State<RegisterFormWidget> {
   final _storeNameController = TextEditingController();
   final _ownerNameController = TextEditingController();
   final _phoneController = TextEditingController();
-  final _usernameController = TextEditingController();
   final _passwordController = TextEditingController();
   bool _obscurePassword = true;
   bool _isButtonPressed = false;
@@ -35,7 +34,6 @@ class _RegisterFormWidgetState extends State<RegisterFormWidget> {
     _storeNameController.dispose();
     _ownerNameController.dispose();
     _phoneController.dispose();
-    _usernameController.dispose();
     _passwordController.dispose();
     super.dispose();
   }
@@ -43,14 +41,14 @@ class _RegisterFormWidgetState extends State<RegisterFormWidget> {
   void _submit() {
     if (_formKey.currentState?.validate() ?? false) {
       HapticFeedback.lightImpact();
+      final rawOwner = _ownerNameController.text.trim();
       final rawPhone = _phoneController.text.trim();
       final sanitizedPhone = rawPhone.isNotEmpty ? WhatsAppService.sanitizePhoneNumber(rawPhone) : null;
 
       final dto = RegisterDto(
         storeName: _storeNameController.text.trim(),
-        ownerFullName: _ownerNameController.text.trim(),
+        ownerFullName: rawOwner,
         storePhone: sanitizedPhone,
-        username: _usernameController.text.trim(),
         password: _passwordController.text,
       );
       widget.onSubmit(dto);
@@ -78,7 +76,7 @@ class _RegisterFormWidgetState extends State<RegisterFormWidget> {
                 SizedBox(width: 8),
                 Expanded(
                   child: Text(
-                    'Pendaftaran Cepat (1 Langkah). Detail alamat toko dapat dilengkapi nanti di menu Profil.',
+                    'Pendaftaran Cepat (1 Langkah). Nama pemilik otomatis menjadi akun login Anda.',
                     style: TextStyle(fontSize: 11, color: Color(0xFF0F766E), fontWeight: FontWeight.w600, height: 1.3),
                   ),
                 ),
@@ -96,15 +94,15 @@ class _RegisterFormWidgetState extends State<RegisterFormWidget> {
           AuthTextField(
             controller: _ownerNameController,
             label: 'Nama Pemilik Toko',
-            hint: 'Contoh: Rohman',
+            hint: 'Contoh: Rohman (otomatis jadi akun login)',
             prefixIcon: Icons.badge_outlined,
             validator: (v) => (v == null || v.trim().isEmpty) ? 'Nama pemilik wajib diisi' : null,
           ),
           const SizedBox(height: 12),
           AuthTextField(
             controller: _phoneController,
-            label: 'Nomor WhatsApp Aktif',
-            hint: '081234567890 (Format WhatsApp)',
+            label: 'Nomor WhatsApp Toko',
+            hint: '081234567890 (Aktif)',
             prefixIcon: Icons.phone_android_rounded,
             keyboardType: TextInputType.phone,
             validator: (v) {
@@ -113,18 +111,6 @@ class _RegisterFormWidgetState extends State<RegisterFormWidget> {
                   return 'Format WA tidak valid (minimal 10 digit, cth: 08123456789)';
                 }
               }
-              return null;
-            },
-          ),
-          const SizedBox(height: 12),
-          AuthTextField(
-            controller: _usernameController,
-            label: 'Nama Pengguna (Username)',
-            hint: 'Contoh: owner / admin',
-            prefixIcon: Icons.person_outline_rounded,
-            validator: (v) {
-              if (v == null || v.trim().isEmpty) return 'Nama pengguna wajib diisi';
-              if (v.trim().length < 3) return 'Minimal 3 karakter';
               return null;
             },
           ),
@@ -224,8 +210,12 @@ class _RegisterFormWidgetState extends State<RegisterFormWidget> {
                   tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                 ),
                 child: const Text(
-                  'Masuk Sekarang',
-                  style: TextStyle(fontSize: 12.5, fontWeight: FontWeight.w800, color: Color(0xFF0D9488)),
+                  'Masuk di Sini',
+                  style: TextStyle(
+                    fontSize: 12.5,
+                    fontWeight: FontWeight.w800,
+                    color: Color(0xFF0D9488),
+                  ),
                 ),
               ),
             ],

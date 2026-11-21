@@ -63,12 +63,12 @@ class _AddStaffDialogState extends ConsumerState<AddStaffDialog> {
         userName: activeUser?.fullName ?? 'Owner',
         userRole: activeUser?.role.label ?? 'Owner',
         actionType: AuditActionType.rbac,
-        title: 'Daftar Karyawan Baru',
+        title: 'Daftar Pengguna Baru',
         description: 'Mendaftarkan ${_selectedRole == UserRole.cashier ? "Kasir" : "Admin"}: ${_nameController.text.trim()} (@${_usernameController.text.trim()})',
       );
 
       if (!mounted) return;
-      AppToast.showSuccess(context, 'Karyawan "${_nameController.text}" berhasil didaftarkan');
+      AppToast.showSuccess(context, 'Pengguna "${_nameController.text}" berhasil didaftarkan');
       widget.onStaffAdded();
       Navigator.pop(context);
     } catch (e) {
@@ -120,7 +120,7 @@ class _AddStaffDialogState extends ConsumerState<AddStaffDialog> {
                 const SizedBox(height: 16),
                 TextFormField(
                   controller: _nameController,
-                  decoration: _inputDecoration('Nama Lengkap Karyawan', Icons.badge_outlined),
+                  decoration: _inputDecoration('Nama Lengkap', Icons.badge_outlined),
                   validator: (v) => (v == null || v.trim().isEmpty) ? 'Nama lengkap wajib diisi' : null,
                 ),
                 const SizedBox(height: 12),

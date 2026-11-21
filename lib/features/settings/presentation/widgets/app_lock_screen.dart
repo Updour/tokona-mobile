@@ -16,24 +16,6 @@ class _AppLockScreenState extends ConsumerState<AppLockScreen> {
   String _inputPin = '';
   String? _errorMessage;
 
-  @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _tryBiometrics();
-    });
-  }
-
-  Future<void> _tryBiometrics({bool userTriggered = false}) async {
-    if (userTriggered) HapticFeedback.lightImpact();
-    final success = await ref.read(appLockProvider.notifier).unlockWithBiometrics();
-    if (!success && userTriggered && mounted) {
-      setState(() {
-        _errorMessage = 'Gagal verifikasi biometrik. Masukkan 6-digit PIN';
-      });
-    }
-  }
-
   void _onKeyPress(String val) {
     if (_inputPin.length >= 6) return;
     HapticFeedback.selectionClick();
@@ -56,6 +38,15 @@ class _AppLockScreenState extends ConsumerState<AppLockScreen> {
     });
   }
 
+  void _onClear() {
+    if (_inputPin.isEmpty) return;
+    HapticFeedback.selectionClick();
+    setState(() {
+      _inputPin = '';
+      _errorMessage = null;
+    });
+  }
+
   void _validatePin() {
     final valid = ref.read(appLockProvider.notifier).unlockWithPin(_inputPin);
     if (!valid) {
@@ -70,7 +61,6 @@ class _AppLockScreenState extends ConsumerState<AppLockScreen> {
   @override
   Widget build(BuildContext context) {
     final storeName = ref.watch(authProvider).currentStore?.name ?? 'Tokona POS';
-    final lockState = ref.watch(appLockProvider);
 
     return Scaffold(
       backgroundColor: const Color(0xFFF8FAFC),
@@ -133,7 +123,7 @@ class _AppLockScreenState extends ConsumerState<AppLockScreen> {
                 ),
               ],
               const Spacer(flex: 3),
-              _buildKeypad(lockState),
+              _buildKeypad(),
               const Spacer(flex: 2),
             ],
           ),
@@ -142,7 +132,7 @@ class _AppLockScreenState extends ConsumerState<AppLockScreen> {
     );
   }
 
-  Widget _buildKeypad(AppLockState lockState) {
+  Widget _buildKeypad() {
     return Column(
       children: [
         _buildKeypadRow(['1', '2', '3']),
@@ -154,21 +144,10 @@ class _AppLockScreenState extends ConsumerState<AppLockScreen> {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
-            InkWell(
-              onTap: () => _tryBiometrics(userTriggered: true),
-              borderRadius: BorderRadius.circular(35),
-              child: Container(
-                width: 68,
-                height: 68,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: AppColors.primaryContainer.withValues(alpha: 0.55),
-                  border: Border.all(color: AppColors.primary.withValues(alpha: 0.35)),
-                ),
-                child: const Center(
-                  child: Icon(Icons.fingerprint_rounded, color: AppColors.primaryDark, size: 28),
-                ),
-              ),
+            _buildActionKey(
+              icon: Icons.clear_all_rounded,
+              color: const Color(0xFF64748B),
+              onTap: _onClear,
             ),
             _buildNumberKey('0'),
             _buildActionKey(
@@ -190,39 +169,57 @@ class _AppLockScreenState extends ConsumerState<AppLockScreen> {
   }
 
   Widget _buildNumberKey(String number) {
-    return InkWell(
-      onTap: () => _onKeyPress(number),
-      borderRadius: BorderRadius.circular(35),
-      child: Container(
-        width: 68,
-        height: 68,
-        decoration: BoxDecoration(
-          shape: BoxShape.circle,
-          color: Colors.white,
-          border: Border.all(color: const Color(0xFFE2E8F0)),
-          boxShadow: [
-            BoxShadow(color: Colors.black.withValues(alpha: 0.03), blurRadius: 6, offset: const Offset(0, 2)),
-          ],
-        ),
-        child: Center(
-          child: Text(
-            number,
-            style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w800, color: AppColors.textPrimary),
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: () => _onKeyPress(number),
+        borderRadius: BorderRadius.circular(35),
+        child: Container(
+          width: 68,
+          height: 68,
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            color: Colors.white,
+            border: Border.all(color: const Color(0xFFE2E8F0)),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.04),
+                blurRadius: 4,
+                offset: const Offset(0, 2),
+              ),
+            ],
+          ),
+          child: Center(
+            child: Text(
+              number,
+              style: const TextStyle(
+                fontSize: 24,
+                fontWeight: FontWeight.w700,
+                color: AppColors.textPrimary,
+              ),
+            ),
           ),
         ),
       ),
     );
   }
 
-  Widget _buildActionKey({required IconData icon, required Color color, VoidCallback? onTap}) {
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(35),
-      child: SizedBox(
-        width: 68,
-        height: 68,
-        child: Center(
-          child: Icon(icon, color: color, size: 26),
+  Widget _buildActionKey({
+    required IconData icon,
+    required Color color,
+    required VoidCallback onTap,
+  }) {
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(35),
+        child: SizedBox(
+          width: 68,
+          height: 68,
+          child: Center(
+            child: Icon(icon, color: color, size: 24),
+          ),
         ),
       ),
     );

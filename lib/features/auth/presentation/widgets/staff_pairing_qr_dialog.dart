@@ -1,6 +1,9 @@
 import 'dart:convert';
+import 'dart:io';
+import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:tokona/core/theme/app_colors.dart';
@@ -40,6 +43,45 @@ class StaffPairingQrDialog extends StatelessWidget {
       'salt': staff.salt,
       'role': staff.role.key,
     });
+  }
+
+  Future<void> _downloadQrCode(BuildContext context, String payload) async {
+    try {
+      HapticFeedback.lightImpact();
+      final painter = QrPainter(
+        data: payload,
+        version: QrVersions.auto,
+        gapless: true,
+        color: const Color(0xFF0F172A),
+        emptyColor: Colors.white,
+      );
+      final byteData = await painter.toImageData(600, format: ui.ImageByteFormat.png);
+      if (byteData == null) throw Exception('Gagal membuat gambar QR');
+
+      final bytes = byteData.buffer.asUint8List();
+
+      Directory? targetDir;
+      if (Platform.isAndroid) {
+        final downloadDir = Directory('/storage/emulated/0/Download');
+        if (downloadDir.existsSync()) {
+          targetDir = downloadDir;
+        }
+      }
+      targetDir ??= await getExternalStorageDirectory() ?? await getApplicationDocumentsDirectory();
+
+      final safeUsername = staff.username.replaceAll(RegExp(r'[^a-zA-Z0-9_-]'), '_');
+      final fileName = 'QR_Tokona_${safeUsername}.png';
+      final file = File('${targetDir.path}/$fileName');
+      await file.writeAsBytes(bytes);
+
+      if (context.mounted) {
+        AppToast.showSuccess(context, 'Barcode berhasil didownload: $fileName');
+      }
+    } catch (e) {
+      if (context.mounted) {
+        AppToast.showError(context, 'Gagal mengunduh barcode: $e');
+      }
+    }
   }
 
   Future<void> _shareToWhatsApp(BuildContext context) async {
@@ -136,7 +178,22 @@ $payload
                 ],
               ),
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 14),
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton.icon(
+                onPressed: () => _downloadQrCode(context, payload),
+                icon: const Icon(Icons.download_rounded, size: 17, color: Colors.white),
+                label: const Text('Download Barcode / Gambar QR', style: TextStyle(fontSize: 12.5, fontWeight: FontWeight.w800, color: Colors.white)),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.primary,
+                  padding: const EdgeInsets.symmetric(vertical: 11),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                  elevation: 0,
+                ),
+              ),
+            ),
+            const SizedBox(height: 8),
             Row(
               children: [
                 Expanded(
@@ -145,27 +202,27 @@ $payload
                       Clipboard.setData(ClipboardData(text: payload));
                       AppToast.showSuccess(context, 'Data pairing disalin ke clipboard');
                     },
-                    icon: const Icon(Icons.copy_rounded, size: 16),
+                    icon: const Icon(Icons.copy_rounded, size: 15),
                     label: const Text('Salin Data', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700)),
                     style: OutlinedButton.styleFrom(
                       foregroundColor: AppColors.textPrimary,
                       side: const BorderSide(color: Color(0xFFCBD5E1)),
-                      padding: const EdgeInsets.symmetric(vertical: 10),
+                      padding: const EdgeInsets.symmetric(vertical: 9),
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                     ),
                   ),
                 ),
                 const SizedBox(width: 8),
                 Expanded(
-                  child: ElevatedButton.icon(
+                  child: OutlinedButton.icon(
                     onPressed: () => _shareToWhatsApp(context),
-                    icon: const Icon(Icons.share_rounded, size: 16, color: Colors.white),
-                    label: const Text('Kirim WA', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: Colors.white)),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF25D366),
-                      padding: const EdgeInsets.symmetric(vertical: 10),
+                    icon: const Icon(Icons.share_rounded, size: 15, color: Color(0xFF16A34A)),
+                    label: const Text('Kirim WA', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: Color(0xFF16A34A))),
+                    style: OutlinedButton.styleFrom(
+                      side: const BorderSide(color: Color(0xFF86EFAC)),
+                      backgroundColor: const Color(0xFFF0FDF4),
+                      padding: const EdgeInsets.symmetric(vertical: 9),
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                      elevation: 0,
                     ),
                   ),
                 ),

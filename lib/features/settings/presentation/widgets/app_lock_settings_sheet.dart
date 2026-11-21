@@ -42,8 +42,7 @@ class _AppLockSettingsSheetState extends ConsumerState<AppLockSettingsSheet> {
       return;
     }
 
-    final hasBio = ref.read(appLockProvider).hasBiometricsHardware;
-    await ref.read(appLockProvider.notifier).setPin(pin1, useBiometrics: hasBio);
+    await ref.read(appLockProvider.notifier).setPin(pin1);
     if (mounted) {
       AppToast.showSuccess(context, 'PIN pengunci aplikasi berhasil disimpan');
     }
@@ -115,15 +114,15 @@ class _AppLockSettingsSheetState extends ConsumerState<AppLockSettingsSheet> {
               Container(
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(color: const Color(0xFFCCFBF1), borderRadius: BorderRadius.circular(10)),
-                child: const Icon(Icons.fingerprint_rounded, color: AppColors.primary, size: 22),
+                child: const Icon(Icons.lock_rounded, color: AppColors.primary, size: 22),
               ),
               const SizedBox(width: 12),
               const Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('Kunci Aplikasi & Biometrik', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
-                    Text('Amankan akses kasir dengan PIN & Sidik Jari', style: TextStyle(fontSize: 11, color: AppColors.textSecondary)),
+                    Text('Kunci Aplikasi (PIN 6 Digit)', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
+                    Text('Amankan akses kasir dengan 6 digit nomor PIN', style: TextStyle(fontSize: 11, color: AppColors.textSecondary)),
                   ],
                 ),
               ),
@@ -142,8 +141,8 @@ class _AppLockSettingsSheetState extends ConsumerState<AppLockSettingsSheet> {
                 SwitchListTile(
                   value: isEnabled,
                   activeThumbColor: AppColors.primary,
-                  title: const Text('Kunci Aplikasi Tokona', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700)),
-                  subtitle: const Text('Minta PIN / Sidik Jari saat aplikasi dibuka', style: TextStyle(fontSize: 11, color: AppColors.textSecondary)),
+                  title: const Text('Aktifkan Kunci PIN', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700)),
+                  subtitle: const Text('Minta 6-digit PIN saat aplikasi dibuka', style: TextStyle(fontSize: 11, color: AppColors.textSecondary)),
                   onChanged: (val) async {
                     if (val) {
                       await _promptSetPin();
@@ -154,19 +153,6 @@ class _AppLockSettingsSheetState extends ConsumerState<AppLockSettingsSheet> {
                   },
                 ),
                 if (isEnabled) ...[
-                  const Divider(height: 1, indent: 16, endIndent: 16),
-                  SwitchListTile(
-                    value: lockState.config.useBiometrics,
-                    activeThumbColor: AppColors.primary,
-                    title: const Text('Gunakan Sidik Jari', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700)),
-                    subtitle: Text(
-                      lockState.hasBiometricsHardware ? 'Buka kunci cepat dengan sensor biometrik' : 'Sensor biometrik tidak tersedia di perangkat ini',
-                      style: const TextStyle(fontSize: 11, color: AppColors.textSecondary),
-                    ),
-                    onChanged: lockState.hasBiometricsHardware
-                        ? (val) => ref.read(appLockProvider.notifier).toggleBiometrics(val)
-                        : null,
-                  ),
                   const Divider(height: 1, indent: 16, endIndent: 16),
                   ListTile(
                     leading: const Icon(Icons.pin_rounded, color: AppColors.primary, size: 20),

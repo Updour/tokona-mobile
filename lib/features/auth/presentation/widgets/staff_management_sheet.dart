@@ -7,6 +7,7 @@ import 'package:tokona/features/auth/domain/models/user_model.dart';
 import 'package:tokona/features/auth/presentation/controllers/auth_controller.dart';
 import 'package:tokona/features/auth/presentation/widgets/add_staff_dialog.dart';
 import 'package:tokona/features/auth/presentation/widgets/staff_pairing_qr_dialog.dart';
+import 'package:tokona/features/auth/presentation/widgets/store_invitation_qr_dialog.dart';
 import 'package:tokona/features/settings/data/services/audit_log_service.dart';
 import 'package:tokona/features/settings/domain/models/audit_log_model.dart';
 
@@ -54,7 +55,7 @@ class _StaffManagementSheetState extends ConsumerState<StaffManagementSheet> {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Hapus Karyawan?'),
+        title: const Text('Hapus Pengguna?'),
         content: Text('Yakin ingin menghapus akses untuk ${user.fullName} (@${user.username})?'),
         actions: [
           TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Batal')),
@@ -76,12 +77,12 @@ class _StaffManagementSheetState extends ConsumerState<StaffManagementSheet> {
             userName: activeUser?.fullName ?? 'Owner',
             userRole: activeUser?.role.label ?? 'Owner',
             actionType: AuditActionType.rbac,
-            title: 'Hapus Akses Karyawan',
+            title: 'Hapus Akses Pengguna',
             description: 'Mencabut akses ${user.role.label}: ${user.fullName} (@${user.username})',
           );
         }
         if (mounted) {
-          AppToast.showSuccess(context, 'Karyawan berhasil dihapus');
+          AppToast.showSuccess(context, 'Pengguna berhasil dihapus');
           _loadUsers();
         }
       } catch (e) {
@@ -120,7 +121,7 @@ class _StaffManagementSheetState extends ConsumerState<StaffManagementSheet> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('Manajemen Karyawan', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
+                    Text('Manajemen Pengguna', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
                     Text('Daftar kasir, admin & pairing offline', style: TextStyle(fontSize: 11, color: AppColors.textSecondary)),
                   ],
                 ),
@@ -129,16 +130,36 @@ class _StaffManagementSheetState extends ConsumerState<StaffManagementSheet> {
             ],
           ),
           const SizedBox(height: 14),
-          ElevatedButton.icon(
-            onPressed: store == null ? null : () => AddStaffDialog.show(context, storeId: store.id, onStaffAdded: _loadUsers),
-            icon: const Icon(Icons.person_add_rounded, size: 16, color: Colors.white),
-            label: const Text('+ Daftarkan Karyawan Baru', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 12.5, color: Colors.white)),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.primary,
-              padding: const EdgeInsets.symmetric(vertical: 10),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(11)),
-              elevation: 0,
-            ),
+          Row(
+            children: [
+              Expanded(
+                child: ElevatedButton.icon(
+                  onPressed: store == null ? null : () => AddStaffDialog.show(context, storeId: store.id, onStaffAdded: _loadUsers),
+                  icon: const Icon(Icons.person_add_rounded, size: 15, color: Colors.white),
+                  label: const Text('+ Staf Manual', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 12, color: Colors.white)),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.primary,
+                    padding: const EdgeInsets.symmetric(vertical: 10),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(11)),
+                    elevation: 0,
+                  ),
+                ),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: OutlinedButton.icon(
+                  onPressed: store == null ? null : () => StoreInvitationQrDialog.show(context, store: store),
+                  icon: const Icon(Icons.qr_code_rounded, size: 16, color: AppColors.primary),
+                  label: const Text('QR Undangan', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 12, color: AppColors.primary)),
+                  style: OutlinedButton.styleFrom(
+                    side: const BorderSide(color: AppColors.primary, width: 1.2),
+                    backgroundColor: const Color(0xFFF0FDFA),
+                    padding: const EdgeInsets.symmetric(vertical: 10),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(11)),
+                  ),
+                ),
+              ),
+            ],
           ),
           const SizedBox(height: 12),
           Expanded(

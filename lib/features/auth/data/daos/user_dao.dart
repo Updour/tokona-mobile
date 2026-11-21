@@ -18,14 +18,44 @@ class UserDao {
 
   Future<UserModel?> findByUsername(String username) async {
     final db = _getDatabase();
-    final results = await db.query(
+    final clean = username.trim();
+    if (clean.isEmpty) return null;
+
+    // 1. Cari berdasarkan username langsung (case-insensitive)
+    var results = await db.query(
       DatabaseTables.users,
       where: 'LOWER(${DatabaseTables.columnUserUsername}) = LOWER(?)',
-      whereArgs: [username.trim()],
+      whereArgs: [clean],
       limit: 1,
     );
-    if (results.isEmpty) return null;
-    return UserModel.fromMap(results.first);
+    if (results.isNotEmpty) return UserModel.fromMap(results.first);
+
+    // 2. Cari berdasarkan nama lengkap pemilik (full_name)
+    results = await db.query(
+      DatabaseTables.users,
+      where: 'LOWER(${DatabaseTables.columnUserFullName}) = LOWER(?)',
+      whereArgs: [clean],
+      limit: 1,
+    );
+    if (results.isNotEmpty) return UserModel.fromMap(results.first);
+
+    // 3. Cari berdasarkan nomor telepon toko (WhatsApp)
+    final digitsOnly = clean.replaceAll(RegExp(r'[^0-9]'), '');
+    final altPhone = digitsOnly.startsWith('0')
+        ? '62${digitsOnly.substring(1)}'
+        : (digitsOnly.startsWith('62') ? '0${digitsOnly.substring(2)}' : digitsOnly);
+
+    final storeResults = await db.rawQuery('''
+      SELECT u.* FROM ${DatabaseTables.users} u
+      INNER JOIN ${DatabaseTables.stores} s ON u.${DatabaseTables.columnUserStoreId} = s.${DatabaseTables.columnId}
+      WHERE s.${DatabaseTables.columnStorePhone} = ? OR s.${DatabaseTables.columnStorePhone} = ? OR s.${DatabaseTables.columnStorePhone} = ?
+      ORDER BY CASE WHEN u.${DatabaseTables.columnUserRole} = 'owner' THEN 0 ELSE 1 END
+      LIMIT 1
+    ''', [clean, digitsOnly, altPhone]);
+
+    if (storeResults.isNotEmpty) return UserModel.fromMap(storeResults.first);
+
+    return null;
   }
 
   Future<UserModel?> findById(String id) async {

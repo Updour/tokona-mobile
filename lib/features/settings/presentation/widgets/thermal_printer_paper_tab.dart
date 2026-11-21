@@ -84,6 +84,7 @@ class ThermalPrinterPaperTab extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ListView(
+      padding: const EdgeInsets.fromLTRB(16, 16, 16, 28),
       children: [
         const Text(
           'Ukuran Kertas Thermal',

@@ -53,7 +53,7 @@ class ProfileStaffManagementCard extends ConsumerWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Karyawan & Pairing Kasir',
+                      'Pengguna & Pairing Kasir',
                       style: TextStyle(fontSize: 14.5, fontWeight: FontWeight.w800, color: AppColors.textPrimary),
                     ),
                     SizedBox(height: 1),

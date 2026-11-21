@@ -203,6 +203,35 @@ class AuthController extends StateNotifier<AuthState> {
     }
   }
 
+  Future<bool> registerCashierFromInvite({
+    required Map<String, dynamic> storeData,
+    required String fullName,
+    required String username,
+    required String pin,
+  }) async {
+    state = state.copyWith(isLoading: true, clearError: true, clearSuccess: true);
+    try {
+      final result = await _repository.registerCashierFromInvite(
+        storeData: storeData, fullName: fullName, username: username, password: pin,
+      );
+      state = state.copyWith(
+        isLoading: false, isAuthenticated: true, hasRegisteredStore: true,
+        currentStore: result.store, currentUser: result.user,
+        successMessage: 'Akun kasir ${result.user.fullName} berhasil dibuat & terhubung!',
+      );
+      AuditLogService.log(
+        storeId: result.store.id, userId: result.user.id,
+        userName: result.user.fullName, userRole: result.user.role.label,
+        actionType: AuditActionType.pairing, title: 'Kasir Mandiri Terdaftar',
+        description: 'Kasir ${result.user.fullName} (@${result.user.username}) terdaftar via scan QR Toko.',
+      );
+      return true;
+    } catch (e) {
+      state = state.copyWith(isLoading: false, errorMessage: 'Gagal membuat akun kasir: $e');
+      return false;
+    }
+  }
+
   void clearMessages() {
     state = state.copyWith(clearError: true, clearSuccess: true);
   }

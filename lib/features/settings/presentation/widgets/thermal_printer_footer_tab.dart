@@ -22,7 +22,29 @@ class ThermalPrinterFooterTab extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ListView(
+      padding: const EdgeInsets.fromLTRB(16, 16, 16, 28),
       children: [
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+          decoration: BoxDecoration(
+            color: const Color(0xFFF8FAFC),
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: const Color(0xFFE2E8F0)),
+          ),
+          child: const Row(
+            children: [
+              Icon(Icons.favorite_rounded, color: Color(0xFFE11D48), size: 18),
+              SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  'Atur pesan penutup, ucapan terima kasih, dan kebijakan garansi di bagian bawah struk.',
+                  style: TextStyle(fontSize: 11, color: Color(0xFF475569), height: 1.3),
+                ),
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 16),
         TextField(
           controller: footerController,
           decoration: const InputDecoration(
@@ -32,7 +54,7 @@ class ThermalPrinterFooterTab extends StatelessWidget {
           ),
           onChanged: (_) => onChanged(),
         ),
-        const SizedBox(height: 12),
+        const SizedBox(height: 14),
         TextField(
           controller: policyController,
           decoration: const InputDecoration(
@@ -43,7 +65,7 @@ class ThermalPrinterFooterTab extends StatelessWidget {
           maxLines: 2,
           onChanged: (_) => onChanged(),
         ),
-        const SizedBox(height: 12),
+        const SizedBox(height: 14),
         TextField(
           controller: socialController,
           decoration: const InputDecoration(
@@ -53,7 +75,7 @@ class ThermalPrinterFooterTab extends StatelessWidget {
           ),
           onChanged: (_) => onChanged(),
         ),
-        const SizedBox(height: 12),
+        const SizedBox(height: 14),
         SwitchListTile(
           contentPadding: EdgeInsets.zero,
           value: monospaceWhatsApp,

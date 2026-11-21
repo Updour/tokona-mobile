@@ -127,7 +127,7 @@ class ProfileSettingsSheet extends ConsumerWidget {
                   _buildSettingTile(
                     icon: Icons.group_rounded,
                     color: const Color(0xFF4F46E5),
-                    title: 'Manajemen Karyawan & Kasir',
+                    title: 'Manajemen Pengguna',
                     subtitle: 'Daftar staf, akun kasir & pairing offline QR',
                     trailing: Container(
                       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
@@ -156,10 +156,10 @@ class ProfileSettingsSheet extends ConsumerWidget {
                   ),
                 ],
                 _buildSettingTile(
-                  icon: Icons.fingerprint_rounded,
+                  icon: Icons.lock_outline_rounded,
                   color: const Color(0xFF0F766E),
-                  title: 'Kunci Aplikasi & Biometrik',
-                  subtitle: 'Amankan kasir dengan PIN 6 digit & Sidik Jari',
+                  title: 'Kunci Aplikasi (PIN 6 Digit)',
+                  subtitle: 'Amankan akses kasir dengan 6 digit nomor PIN',
                   trailing: Container(
                     padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                     decoration: BoxDecoration(color: const Color(0xFFCCFBF1), borderRadius: BorderRadius.circular(8)),
@@ -173,7 +173,7 @@ class ProfileSettingsSheet extends ConsumerWidget {
                 _buildSettingTile(
                   icon: Icons.cloud_sync_rounded,
                   color: AppColors.primary,
-                  title: 'Sinkronisasi Cloud & Interval',
+                  title: 'Sinkronisasi Data',
                   subtitle: 'Atur jeda polling (15 dtk s/d 1 jam) & auto-sync',
                   trailing: Container(
                     padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),

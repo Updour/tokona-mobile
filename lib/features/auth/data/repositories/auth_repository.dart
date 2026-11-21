@@ -257,4 +257,36 @@ class AuthRepository {
 
     return (store: store, user: user);
   }
+
+  Future<({StoreModel store, UserModel user})> registerCashierFromInvite({
+    required Map<String, dynamic> storeData,
+    required String fullName,
+    required String username,
+    required String password,
+  }) async {
+    await initialize();
+    final store = StoreModel(
+      id: storeData['store_id'] as String, name: (storeData['store_name'] as String?) ?? 'Tokona Store',
+      address: storeData['store_address'] as String?, phone: storeData['store_phone'] as String?,
+      createdAt: DateTime.now(), updatedAt: DateTime.now(),
+    );
+
+    final salt = PasswordHasher.generateSalt();
+    final hash = PasswordHasher.hashPassword(password, salt);
+
+    final user = UserModel(
+      id: IdGenerator.generateId(prefix: 'USR'), storeId: store.id,
+      username: username.trim().toLowerCase(), fullName: fullName.trim(),
+      passwordHash: hash, salt: salt, role: UserRole.cashier,
+      isActive: true, createdAt: DateTime.now(), updatedAt: DateTime.now(),
+    );
+
+    await _db!.transaction((txn) async {
+      await _storeDao.insertStore(store, txn: txn);
+      await _userDao.insertUser(user, txn: txn);
+      await _sessionDao.setActiveUserId(user.id, txn: txn);
+    });
+
+    return (store: store, user: user);
+  }
 }

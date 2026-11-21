@@ -44,186 +44,207 @@ class SyncDetailBottomSheet extends ConsumerWidget {
         : 30;
 
     return Container(
+      constraints: BoxConstraints(maxHeight: MediaQuery.of(context).size.height * 0.88),
       decoration: const BoxDecoration(
         color: AppColors.surface,
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
-      padding: const EdgeInsets.fromLTRB(18, 12, 18, 28),
       child: Column(
         mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Center(
-            child: Container(
-              width: 36,
-              height: 4,
-              decoration: BoxDecoration(
-                color: const Color(0xFFCBD5E1),
-                borderRadius: BorderRadius.circular(2),
-              ),
-            ),
-          ),
-          const SizedBox(height: 14),
-          Row(
-            children: [
-              Container(
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: AppColors.primaryContainer,
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: const Icon(Icons.cloud_sync_rounded, color: AppColors.primaryDark, size: 22),
-              ),
-              const SizedBox(width: 10),
-              const Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Sinkronisasi Cloud & Multi-Device',
-                      style: TextStyle(fontSize: 15, fontWeight: FontWeight.w800, color: AppColors.textPrimary),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(18, 12, 18, 4),
+            child: Column(
+              children: [
+                Center(
+                  child: Container(
+                    width: 36,
+                    height: 4,
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFCBD5E1),
+                      borderRadius: BorderRadius.circular(2),
                     ),
-                    Text(
-                      'Atur jeda waktu penarikan transaksi kasir & audit log',
-                      style: TextStyle(fontSize: 11, color: AppColors.textSecondary),
+                  ),
+                ),
+                const SizedBox(height: 12),
+                Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: AppColors.primaryContainer,
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: const Icon(Icons.cloud_sync_rounded, color: AppColors.primaryDark, size: 22),
+                    ),
+                    const SizedBox(width: 10),
+                    const Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Sinkronisasi Data',
+                            style: TextStyle(fontSize: 15, fontWeight: FontWeight.w800, color: AppColors.textPrimary),
+                          ),
+                          Text(
+                            'Atur jeda waktu penarikan data & audit log',
+                            style: TextStyle(fontSize: 11, color: AppColors.textSecondary),
+                          ),
+                        ],
+                      ),
+                    ),
+                    IconButton(
+                      onPressed: () => Navigator.pop(context),
+                      icon: const Icon(Icons.close_rounded, size: 20, color: AppColors.textMuted),
                     ),
                   ],
                 ),
-              ),
-              IconButton(
-                onPressed: () => Navigator.pop(context),
-                icon: const Icon(Icons.close_rounded, size: 20, color: AppColors.textMuted),
-              ),
-            ],
-          ),
-          const SizedBox(height: 16),
-          Container(
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              color: const Color(0xFFF8FAFC),
-              borderRadius: BorderRadius.circular(14),
-              border: Border.all(color: const Color(0xFFE2E8F0).withValues(alpha: 0.7), width: 0.6),
-            ),
-            child: Column(
-              children: [
-                _buildInfoRow('Perangkat Ini', roleName, isHighlight: true),
-                const Divider(height: 14, color: Color(0xFFE2E8F0)),
-                _buildInfoRow('Terakhir Sinkron', lastSyncText),
-                const Divider(height: 14, color: Color(0xFFE2E8F0)),
-                _buildInfoRow(
-                  'Data Belum Terunggah',
-                  syncState.pendingCount > 0 ? '${syncState.pendingCount} data pending' : 'Semua data sinkron',
-                  valueColor: syncState.pendingCount > 0 ? const Color(0xFFD97706) : const Color(0xFF16A34A),
-                ),
-                if (syncState.lastErrorMessage != null) ...[
-                  const Divider(height: 14, color: Color(0xFFE2E8F0)),
-                  _buildInfoRow('Catatan', syncState.lastErrorMessage!, valueColor: AppColors.error),
-                ],
               ],
             ),
           ),
-          const SizedBox(height: 14),
-          SwitchListTile(
-            contentPadding: EdgeInsets.zero,
-            dense: true,
-            title: const Text(
-              'Auto-Sync di Latar Belakang',
-              style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: AppColors.textPrimary),
-            ),
-            subtitle: Text(
-              'Otomatis sinkron setiap ${_formatInterval(syncState.autoSyncIntervalSeconds)} ke cloud',
-              style: const TextStyle(fontSize: 11, color: AppColors.textSecondary),
-            ),
-            value: syncState.isAutoSyncEnabled,
-            activeTrackColor: AppColors.primary,
-            onChanged: (val) => ref.read(syncControllerProvider.notifier).toggleAutoSync(val),
-          ),
-          const Divider(height: 18),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              const Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+          const Divider(height: 1),
+          Flexible(
+            child: SingleChildScrollView(
+              physics: const BouncingScrollPhysics(),
+              padding: const EdgeInsets.fromLTRB(18, 14, 18, 24),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  Text(
-                    'Pilihan Interval Polling',
-                    style: TextStyle(fontSize: 12.5, fontWeight: FontWeight.w700, color: AppColors.textPrimary),
+                  Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFF8FAFC),
+                      borderRadius: BorderRadius.circular(14),
+                      border: Border.all(color: const Color(0xFFE2E8F0).withValues(alpha: 0.7), width: 0.6),
+                    ),
+                    child: Column(
+                      children: [
+                        _buildInfoRow('Perangkat Ini', roleName, isHighlight: true),
+                        const Divider(height: 14, color: Color(0xFFE2E8F0)),
+                        _buildInfoRow('Terakhir Sinkron', lastSyncText),
+                        const Divider(height: 14, color: Color(0xFFE2E8F0)),
+                        _buildInfoRow(
+                          'Data Belum Terunggah',
+                          syncState.pendingCount > 0 ? '${syncState.pendingCount} data pending' : 'Semua data sinkron',
+                          valueColor: syncState.pendingCount > 0 ? const Color(0xFFD97706) : const Color(0xFF16A34A),
+                        ),
+                        if (syncState.lastErrorMessage != null) ...[
+                          const Divider(height: 14, color: Color(0xFFE2E8F0)),
+                          _buildInfoRow('Catatan', syncState.lastErrorMessage!, valueColor: AppColors.error),
+                        ],
+                      ],
+                    ),
                   ),
-                  Text(
-                    'Bisa diatur bebas (15 dtk s/d 1 jam)',
-                    style: TextStyle(fontSize: 10.5, color: AppColors.textSecondary),
+                  const SizedBox(height: 12),
+                  SwitchListTile(
+                    contentPadding: EdgeInsets.zero,
+                    dense: true,
+                    title: const Text(
+                      'Auto-Sync di Latar Belakang',
+                      style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: AppColors.textPrimary),
+                    ),
+                    subtitle: Text(
+                      'Otomatis sinkron setiap ${_formatInterval(syncState.autoSyncIntervalSeconds)} ke cloud',
+                      style: const TextStyle(fontSize: 11, color: AppColors.textSecondary),
+                    ),
+                    value: syncState.isAutoSyncEnabled,
+                    activeTrackColor: AppColors.primary,
+                    onChanged: (val) => ref.read(syncControllerProvider.notifier).toggleAutoSync(val),
                   ),
-                ],
-              ),
-              DropdownButtonHideUnderline(
-                child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 2),
-                  decoration: BoxDecoration(
-                    color: AppColors.primaryContainer.withValues(alpha: 0.55),
-                    borderRadius: BorderRadius.circular(10),
-                    border: Border.all(color: AppColors.primary.withValues(alpha: 0.3)),
-                  ),
-                  child: DropdownButton<int>(
-                    value: selectedInterval,
-                    icon: const Icon(Icons.arrow_drop_down_rounded, color: AppColors.primaryDark),
-                    style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 12, color: AppColors.primaryDark),
-                    onChanged: (val) {
-                      if (val != null) {
-                        HapticFeedback.selectionClick();
-                        ref.read(syncControllerProvider.notifier).setInterval(val);
-                      }
-                    },
-                    items: const [
-                      DropdownMenuItem(value: 15, child: Text('15 Detik (Realtime)')),
-                      DropdownMenuItem(value: 30, child: Text('30 Detik (Standar)')),
-                      DropdownMenuItem(value: 60, child: Text('1 Menit')),
-                      DropdownMenuItem(value: 300, child: Text('5 Menit')),
-                      DropdownMenuItem(value: 900, child: Text('15 Menit')),
-                      DropdownMenuItem(value: 1800, child: Text('30 Menit')),
-                      DropdownMenuItem(value: 3600, child: Text('1 Jam (Hemat Baterai)')),
+                  const Divider(height: 16),
+                  Row(
+                    children: [
+                      const Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Interval Polling',
+                              style: TextStyle(fontSize: 12.5, fontWeight: FontWeight.w700, color: AppColors.textPrimary),
+                            ),
+                            Text(
+                              'Jeda waktu auto-sync',
+                              style: TextStyle(fontSize: 10.5, color: AppColors.textSecondary),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      DropdownButtonHideUnderline(
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                          decoration: BoxDecoration(
+                            color: AppColors.primaryContainer.withValues(alpha: 0.55),
+                            borderRadius: BorderRadius.circular(10),
+                            border: Border.all(color: AppColors.primary.withValues(alpha: 0.3)),
+                          ),
+                          child: DropdownButton<int>(
+                            value: selectedInterval,
+                            isDense: true,
+                            icon: const Icon(Icons.arrow_drop_down_rounded, color: AppColors.primaryDark),
+                            style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 11.5, color: AppColors.primaryDark),
+                            onChanged: (val) {
+                              if (val != null) {
+                                HapticFeedback.selectionClick();
+                                ref.read(syncControllerProvider.notifier).setInterval(val);
+                              }
+                            },
+                            items: const [
+                              DropdownMenuItem(value: 15, child: Text('15 Detik (Cepat)')),
+                              DropdownMenuItem(value: 30, child: Text('30 Detik (Standar)')),
+                              DropdownMenuItem(value: 60, child: Text('1 Menit')),
+                              DropdownMenuItem(value: 300, child: Text('5 Menit')),
+                              DropdownMenuItem(value: 900, child: Text('15 Menit')),
+                              DropdownMenuItem(value: 1800, child: Text('30 Menit')),
+                              DropdownMenuItem(value: 3600, child: Text('1 Jam (Hemat)')),
+                            ],
+                          ),
+                        ),
+                      ),
                     ],
                   ),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 18),
-          SizedBox(
-            width: double.infinity,
-            height: 46,
-            child: ElevatedButton.icon(
-              onPressed: syncState.isSyncing
-                  ? null
-                  : () async {
-                      final res = await ref.read(syncControllerProvider.notifier).triggerSync(isManual: true);
-                      if (context.mounted && res != null) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text(
-                              'Sinkron selesai: ${res.uploadedCount} diunggah, ${res.downloadedCount} diunduh.',
-                            ),
-                            backgroundColor: AppColors.primary,
-                            duration: const Duration(seconds: 2),
-                          ),
-                        );
-                      }
-                    },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.primary,
-                foregroundColor: Colors.white,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                elevation: 0,
-              ),
-              icon: syncState.isSyncing
-                  ? const SizedBox(
-                      width: 18,
-                      height: 18,
-                      child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
-                    )
-                  : const Icon(Icons.sync_rounded, size: 20),
-              label: Text(
-                syncState.isSyncing ? 'Sedang Menyinkronkan...' : 'Sinkronkan Sekarang',
-                style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 13),
+                  const SizedBox(height: 18),
+                  SizedBox(
+                    width: double.infinity,
+                    height: 46,
+                    child: ElevatedButton.icon(
+                      onPressed: syncState.isSyncing
+                          ? null
+                          : () async {
+                              final res = await ref.read(syncControllerProvider.notifier).triggerSync(isManual: true);
+                              if (context.mounted && res != null) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content: Text(
+                                      'Sinkron selesai: ${res.uploadedCount} diunggah, ${res.downloadedCount} diunduh.',
+                                    ),
+                                    backgroundColor: AppColors.primary,
+                                    duration: const Duration(seconds: 2),
+                                  ),
+                                );
+                              }
+                            },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.primary,
+                        foregroundColor: Colors.white,
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                        elevation: 0,
+                      ),
+                      icon: syncState.isSyncing
+                          ? const SizedBox(
+                              width: 18,
+                              height: 18,
+                              child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                            )
+                          : const Icon(Icons.sync_rounded, size: 20),
+                      label: Text(
+                        syncState.isSyncing ? 'Sedang Menyinkronkan...' : 'Sinkronkan Sekarang',
+                        style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 13),
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ),
           ),

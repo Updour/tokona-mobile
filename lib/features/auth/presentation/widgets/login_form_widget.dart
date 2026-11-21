@@ -55,12 +55,12 @@ class _LoginFormWidgetState extends State<LoginFormWidget> {
         children: [
           AuthTextField(
             controller: _usernameController,
-            label: 'Nama Pengguna',
-            hint: 'Contoh: kasir / admin',
+            label: 'Nama Pemilik / Username / No. WA',
+            hint: 'Contoh: Rohman atau 081234567890',
             prefixIcon: Icons.person_outline_rounded,
             validator: (value) {
               if (value == null || value.trim().isEmpty) {
-                return 'Nama pengguna wajib diisi';
+                return 'Nama pengguna / nomor WA wajib diisi';
               }
               return null;
             },

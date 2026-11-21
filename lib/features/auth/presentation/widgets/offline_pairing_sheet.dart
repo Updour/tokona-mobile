@@ -5,6 +5,7 @@ import 'package:tokona/core/theme/app_colors.dart';
 import 'package:tokona/core/widgets/app_toast.dart';
 import 'package:tokona/core/widgets/camera_barcode_scanner.dart';
 import 'package:tokona/features/auth/presentation/controllers/auth_controller.dart';
+import 'package:tokona/features/auth/presentation/widgets/cashier_self_register_sheet.dart';
 
 class OfflinePairingSheet extends ConsumerStatefulWidget {
   const OfflinePairingSheet({super.key});
@@ -42,6 +43,13 @@ class _OfflinePairingSheetState extends ConsumerState<OfflinePairingSheet> {
     setState(() => _isLoading = true);
     try {
       final json = jsonDecode(trimmed) as Map<String, dynamic>;
+      if (json['type'] == 'tokona_store_invite') {
+        if (!mounted) return;
+        setState(() => _isLoading = false);
+        Navigator.pop(context);
+        CashierSelfRegisterSheet.show(context, storeData: json);
+        return;
+      }
       if (json['type'] != 'tokona_pairing' || json['store_id'] == null) {
         throw const FormatException('Format kode QR pairing tidak valid');
       }
@@ -127,7 +135,7 @@ class _OfflinePairingSheetState extends ConsumerState<OfflinePairingSheet> {
                   SizedBox(width: 8),
                   Expanded(
                     child: Text(
-                      'HP Kasir dapat dihubungkan ke toko 100% offline. Buka menu "Manajemen Karyawan" di HP Pemilik Toko, lalu scan QR yang ditampilkan.',
+                      'HP Kasir dapat dihubungkan ke toko 100% offline. Buka menu "Manajemen Pengguna" di HP Pemilik Toko, lalu scan QR yang ditampilkan.',
                       style: TextStyle(fontSize: 11.5, color: Color(0xFF0F766E), height: 1.35),
                     ),
                   ),

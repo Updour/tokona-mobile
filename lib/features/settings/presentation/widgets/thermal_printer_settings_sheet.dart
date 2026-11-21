@@ -11,6 +11,7 @@ import 'package:tokona/features/settings/presentation/widgets/thermal_printer_fo
 import 'package:tokona/features/settings/presentation/widgets/thermal_printer_header_tab.dart';
 import 'package:tokona/features/settings/presentation/widgets/thermal_printer_paper_tab.dart';
 import 'package:tokona/features/settings/presentation/widgets/thermal_printer_preview_tab.dart';
+import 'package:tokona/features/settings/presentation/widgets/thermal_printer_segmented_nav.dart';
 import 'package:tokona/features/settings/presentation/widgets/thermal_printer_test_dialog.dart';
 
 class ThermalPrinterSettingsSheet extends ConsumerStatefulWidget {
@@ -30,6 +31,7 @@ class ThermalPrinterSettingsSheet extends ConsumerStatefulWidget {
 class _ThermalPrinterSettingsSheetState extends ConsumerState<ThermalPrinterSettingsSheet>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
+  late ScrollController _navScrollController;
 
   late int _paperWidth;
   late int _columnWidth;
@@ -57,9 +59,13 @@ class _ThermalPrinterSettingsSheetState extends ConsumerState<ThermalPrinterSett
   @override
   void initState() {
     super.initState();
+    _navScrollController = ScrollController();
     _tabController = TabController(length: 4, vsync: this);
     _tabController.addListener(() {
-      if (mounted) setState(() {});
+      if (mounted) {
+        setState(() {});
+        _scrollToActiveTab();
+      }
     });
 
     final prefs = ref.read(appPreferencesProvider);
@@ -93,6 +99,7 @@ class _ThermalPrinterSettingsSheetState extends ConsumerState<ThermalPrinterSett
   @override
   void dispose() {
     _tabController.dispose();
+    _navScrollController.dispose();
     _titleController.dispose();
     _subtitleController.dispose();
     _addressController.dispose();
@@ -152,6 +159,16 @@ class _ThermalPrinterSettingsSheetState extends ConsumerState<ThermalPrinterSett
     );
   }
 
+  void _scrollToActiveTab() {
+    if (!_navScrollController.hasClients) return;
+    final targetOffset = (_tabController.index * 96.0) - 24;
+    _navScrollController.animateTo(
+      targetOffset.clamp(0.0, _navScrollController.position.maxScrollExtent),
+      duration: const Duration(milliseconds: 280),
+      curve: Curves.easeOutCubic,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final store = ref.watch(authProvider).currentStore;
@@ -199,23 +216,7 @@ class _ThermalPrinterSettingsSheetState extends ConsumerState<ThermalPrinterSett
             ],
           ),
           const SizedBox(height: 10),
-          Container(
-            height: 38,
-            decoration: BoxDecoration(color: const Color(0xFFF1F5F9), borderRadius: BorderRadius.circular(10)),
-            child: TabBar(
-              controller: _tabController,
-              indicator: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(8),
-                boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.05), blurRadius: 4, offset: const Offset(0, 1))],
-              ),
-              labelColor: AppColors.primary,
-              unselectedLabelColor: AppColors.textSecondary,
-              labelStyle: const TextStyle(fontSize: 11, fontWeight: FontWeight.w800),
-              unselectedLabelStyle: const TextStyle(fontSize: 11, fontWeight: FontWeight.w600),
-              tabs: const [Tab(text: 'Kertas'), Tab(text: 'Header'), Tab(text: 'Footer'), Tab(text: 'Preview')],
-            ),
-          ),
+          ThermalPrinterSegmentedNav(tabController: _tabController, navScrollController: _navScrollController),
           const SizedBox(height: 12),
           Expanded(
             child: TabBarView(
