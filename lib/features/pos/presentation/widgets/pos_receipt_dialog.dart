@@ -1,15 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:intl/intl.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:tokona/core/services/whatsapp_service.dart';
 import 'package:tokona/core/theme/app_colors.dart';
-import 'package:tokona/core/theme/app_typography.dart';
 import 'package:tokona/core/widgets/app_toast.dart';
 import 'package:tokona/features/pos/domain/models/sale_model.dart';
 import 'package:tokona/features/pos/presentation/utils/receipt_text_formatter.dart';
+import 'package:tokona/features/pos/presentation/utils/receipt_thermal_formatter.dart';
+import 'package:tokona/features/pos/presentation/widgets/pos_receipt_paper_card.dart';
+import 'package:tokona/features/pos/presentation/widgets/pos_thermal_print_dialog.dart';
 import 'package:tokona/features/pos/presentation/widgets/whatsapp_phone_input_dialog.dart';
+import 'package:tokona/features/settings/domain/models/app_preferences.dart';
+import 'package:tokona/features/settings/presentation/controllers/app_preferences_controller.dart';
+import 'package:tokona/features/settings/presentation/widgets/thermal_printer_settings_sheet.dart';
 
-class PosReceiptDialog extends StatelessWidget {
+class PosReceiptDialog extends ConsumerWidget {
   final SaleModel sale;
   final String storeName;
   final String? cashierName;
@@ -29,23 +34,14 @@ class PosReceiptDialog extends StatelessWidget {
 
   static Future<void> show(
     BuildContext context, {
-    required SaleModel sale,
-    String storeName = 'Tokona Store',
-    String? cashierName,
-    String? customerPhone,
-    String? storeAddress,
-    String? storePhone,
+    required SaleModel sale, required String storeName,
+    String? cashierName, String? customerPhone, String? storeAddress, String? storePhone,
   }) {
-    return showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (_) => PosReceiptDialog(
-        sale: sale,
-        storeName: storeName,
-        cashierName: cashierName,
-        customerPhone: customerPhone,
-        storeAddress: storeAddress,
-        storePhone: storePhone,
+    return showDialog<void>(
+      context: context, barrierDismissible: false,
+      builder: (context) => PosReceiptDialog(
+        sale: sale, storeName: storeName, cashierName: cashierName,
+        customerPhone: customerPhone, storeAddress: storeAddress, storePhone: storePhone,
       ),
     );
   }
@@ -56,238 +52,236 @@ class PosReceiptDialog extends StatelessWidget {
           ? sale.customerPhone!.trim()
           : null);
 
-  String _getFormattedReceipt() {
-    return ReceiptTextFormatter.formatReceipt(
-      sale: sale,
-      storeName: storeName,
-      cashierName: cashierName,
-      customerName: sale.customerName,
-      customerPhone: _effectivePhone,
-      storeAddress: storeAddress,
-      storePhone: storePhone,
-    );
-  }
+  String _getThermalReceiptText(AppPreferences prefs) => ReceiptThermalFormatter.formatThermalReceipt(
+        sale: sale, storeName: storeName, storeAddress: storeAddress,
+        storePhone: storePhone, cashierName: cashierName, customerPhone: _effectivePhone, prefs: prefs,
+      );
 
-  void _copyReceiptText(BuildContext context) {
-    Clipboard.setData(ClipboardData(text: _getFormattedReceipt()));
+  String _getWhatsAppReceiptText(AppPreferences prefs) => ReceiptTextFormatter.formatReceipt(
+        sale: sale, storeName: storeName, cashierName: cashierName, customerName: sale.customerName,
+        customerPhone: _effectivePhone, storeAddress: storeAddress, storePhone: storePhone, prefs: prefs, forWhatsApp: true,
+      );
+
+  void _copyReceiptText(BuildContext context, AppPreferences prefs) {
+    Clipboard.setData(ClipboardData(text: _getThermalReceiptText(prefs)));
     HapticFeedback.lightImpact();
-    AppToast.showSuccess(context, 'Struk nota berhasil disalin ke clipboard');
+    AppToast.showSuccess(context, 'Teks struk berhasil disalin ke clipboard');
   }
 
-  Future<void> _handleSendWhatsApp(BuildContext context) async {
-    final receiptText = _getFormattedReceipt();
+  Future<void> _handleSendWhatsApp(BuildContext context, AppPreferences prefs) async {
+    final receiptText = _getWhatsAppReceiptText(prefs);
     final phone = _effectivePhone;
 
     if (phone != null && phone.isNotEmpty) {
       HapticFeedback.lightImpact();
       AppToast.showInfo(context, 'Membuka WhatsApp ke $phone...');
-      final launched = await WhatsAppService.sendReceipt(
-        phone: phone,
-        message: receiptText,
-      );
+      final launched = await WhatsAppService.sendReceipt(phone: phone, message: receiptText);
       if (!launched && context.mounted) {
         AppToast.showWarning(context, 'Tidak dapat membuka WhatsApp. Teks nota telah disalin.');
         Clipboard.setData(ClipboardData(text: receiptText));
       }
       return;
     }
-
     WhatsAppPhoneInputDialog.show(context, receiptText: receiptText);
   }
 
-  void _handlePrintThermal(BuildContext context) {
+  void _handlePrintThermal(BuildContext context, AppPreferences prefs) {
     HapticFeedback.lightImpact();
-    AppToast.showSuccess(context, 'Mencetak struk ke printer thermal Bluetooth (ESC/POS)...');
+    final bytes = ReceiptThermalFormatter.generateEscPosBytes(
+      sale: sale, storeName: storeName, storeAddress: storeAddress,
+      storePhone: storePhone, cashierName: cashierName, customerPhone: _effectivePhone, prefs: prefs,
+    );
+    PosThermalPrintDialog.show(context, prefs: prefs, byteCount: bytes.length);
   }
 
   @override
-  Widget build(BuildContext context) {
-    final currency = NumberFormat.currency(locale: 'id_ID', symbol: 'Rp ', decimalDigits: 0);
-    final dateFormat = DateFormat('dd MMM yyyy, HH:mm');
+  Widget build(BuildContext context, WidgetRef ref) {
+    final prefs = ref.watch(appPreferencesProvider);
+    final thermalText = _getThermalReceiptText(prefs);
+    final mediaQuery = MediaQuery.of(context);
 
     return Dialog(
       backgroundColor: Colors.transparent,
-      insetPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
-      child: Container(
-        padding: const EdgeInsets.all(20),
-        decoration: BoxDecoration(
-          color: AppColors.surface,
-          borderRadius: BorderRadius.circular(20),
+      insetPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
+      child: ConstrainedBox(
+        constraints: BoxConstraints(
+          maxWidth: 420,
+          maxHeight: mediaQuery.size.height * 0.90,
         ),
-        child: SingleChildScrollView(
+        child: Container(
+          decoration: BoxDecoration(
+            color: AppColors.surface,
+            borderRadius: BorderRadius.circular(20),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.15),
+                blurRadius: 16,
+                offset: const Offset(0, 6),
+              ),
+            ],
+          ),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Container(
-                width: 48,
-                height: 48,
-                decoration: BoxDecoration(
-                  color: AppColors.success.withValues(alpha: 0.12),
-                  shape: BoxShape.circle,
-                ),
-                child: const Icon(Icons.check_rounded, color: AppColors.success, size: 28),
-              ),
-              const SizedBox(height: 10),
-              Text('Transaksi Berhasil!', style: AppTypography.headingSmall.copyWith(fontSize: 18)),
-              const SizedBox(height: 2),
-              Text(storeName, style: AppTypography.bodySmall),
-              const SizedBox(height: 4),
-              Text(sale.invoiceNumber, style: AppTypography.labelMedium.copyWith(color: AppColors.primary)),
-              Text(dateFormat.format(sale.createdAt), style: AppTypography.bodySmall.copyWith(fontSize: 11)),
-              if (sale.customerName != null && sale.customerName!.trim().isNotEmpty) ...[
-                const SizedBox(height: 6),
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                  decoration: BoxDecoration(
-                    color: AppColors.primaryContainer.withValues(alpha: 0.5),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      const Icon(Icons.person_rounded, size: 14, color: AppColors.primaryDark),
-                      const SizedBox(width: 4),
-                      Text(
-                        sale.customerName!.trim(),
-                        style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: AppColors.primaryDark),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 14, 12, 10),
+                child: Row(
+                  children: [
+                    Container(
+                      width: 36,
+                      height: 36,
+                      decoration: BoxDecoration(
+                        color: AppColors.success.withValues(alpha: 0.12),
+                        shape: BoxShape.circle,
                       ),
-                      if (_effectivePhone != null && _effectivePhone!.isNotEmpty) ...[
-                        Text(
-                          ' (${_effectivePhone!})',
-                          style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: AppColors.primaryDark),
+                      child: const Icon(Icons.check_rounded, color: AppColors.success, size: 22),
+                    ),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Text(
+                            'Transaksi Berhasil!',
+                            style: TextStyle(fontSize: 16, fontWeight: FontWeight.w800, color: AppColors.textPrimary),
+                          ),
+                          Text(
+                            'Nota: ${sale.invoiceNumber}',
+                            style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.primary),
+                          ),
+                        ],
+                      ),
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.tune_rounded, color: AppColors.textSecondary, size: 20),
+                      tooltip: 'Atur Struk & Printer',
+                      onPressed: () => ThermalPrinterSettingsSheet.show(context),
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.close_rounded, color: AppColors.textSecondary, size: 20),
+                      tooltip: 'Tutup',
+                      onPressed: () => Navigator.of(context).pop(),
+                    ),
+                  ],
+                ),
+              ),
+              const Divider(height: 1),
+              Expanded(
+                child: SingleChildScrollView(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  child: Column(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                        margin: const EdgeInsets.only(bottom: 10),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFF1F5F9),
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(color: const Color(0xFFE2E8F0)),
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            const Icon(Icons.print_outlined, size: 14, color: Color(0xFF0F766E)),
+                            const SizedBox(width: 6),
+                            Text(
+                              'Format: Kertas ${prefs.printerPaperWidth}mm • ${prefs.printerColumnWidth} Kolom • ESC/POS',
+                              style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: Color(0xFF0F766E)),
+                            ),
+                          ],
+                        ),
+                      ),
+                      PosReceiptPaperCard(thermalText: thermalText),
+                    ],
+                  ),
+                ),
+              ),
+              const Divider(height: 1),
+              Padding(
+                padding: const EdgeInsets.all(14),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton.icon(
+                        onPressed: () => _handlePrintThermal(context, prefs),
+                        icon: const Icon(Icons.print_rounded, size: 17),
+                        label: Text(
+                          'Cetak Thermal (${prefs.printerPaperWidth}mm ESC/POS)',
+                          style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 13),
+                        ),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(0xFF0F766E),
+                          foregroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(vertical: 12),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: OutlinedButton.icon(
+                            onPressed: () => _copyReceiptText(context, prefs),
+                            icon: const Icon(Icons.copy_rounded, size: 14),
+                            label: const Text('Salin', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700)),
+                            style: OutlinedButton.styleFrom(
+                              padding: const EdgeInsets.symmetric(vertical: 10),
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: ElevatedButton.icon(
+                            onPressed: () => _handleSendWhatsApp(context, prefs),
+                            icon: const Icon(Icons.send_rounded, size: 14),
+                            label: const Text('Kirim WA', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700)),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: const Color(0xFF15803D),
+                              foregroundColor: Colors.white,
+                              padding: const EdgeInsets.symmetric(vertical: 10),
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        IconButton.filledTonal(
+                          onPressed: () => ThermalPrinterSettingsSheet.show(context),
+                          icon: const Icon(Icons.settings_outlined, size: 18),
+                          tooltip: 'Atur Header/Footer & Kertas',
+                          style: IconButton.styleFrom(
+                            backgroundColor: const Color(0xFFF1F5F9),
+                            foregroundColor: const Color(0xFF334155),
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                          ),
                         ),
                       ],
-                    ],
-                  ),
-                ),
-              ],
-              const Divider(height: 20),
-              ...sale.items.map((item) {
-                return Padding(
-                  padding: const EdgeInsets.only(bottom: 6),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Expanded(
-                        child: Text(
-                          '${item.quantity.toStringAsFixed(0)}x ${item.unitName} ${item.productName ?? 'Produk'}',
-                          style: AppTypography.bodySmall.copyWith(fontSize: 12),
-                          overflow: TextOverflow.ellipsis,
+                    ),
+                    const SizedBox(height: 8),
+                    SizedBox(
+                      width: double.infinity,
+                      height: 42,
+                      child: ElevatedButton(
+                        onPressed: () => Navigator.of(context).pop(),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppColors.primary,
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                        ),
+                        child: const Text(
+                          'TRANSAKSI BARU',
+                          style: TextStyle(color: Colors.white, fontWeight: FontWeight.w700, fontSize: 13),
                         ),
                       ),
-                      Text(
-                        currency.format(item.subtotal),
-                        style: AppTypography.bodySmall.copyWith(
-                          fontSize: 12,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ],
-                  ),
-                );
-              }),
-              const Divider(height: 18),
-              _buildRow('Total Belanja', currency.format(sale.totalAmount)),
-              if (sale.discountAmount > 0)
-                _buildRow('Diskon', '-${currency.format(sale.discountAmount)}', isAccent: true),
-              _buildRow('Total Akhir', currency.format(sale.finalAmount), isBold: true),
-              _buildRow('Tunai Diterima', currency.format(sale.cashPaid)),
-              if (sale.paymentMethod.toUpperCase() != 'KASBON')
-                _buildRow('Kembalian', currency.format(sale.changeAmount), isBold: true, isHighlight: true)
-              else
-                _buildRow('Status', 'KASBON', isBold: true, isAccent: true),
-              const SizedBox(height: 18),
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton.icon(
-                  onPressed: () => _handlePrintThermal(context),
-                  icon: const Icon(Icons.print_rounded, size: 17),
-                  label: const Text('Cetak Struk Thermal (ESC/POS)', style: TextStyle(fontWeight: FontWeight.w800, fontSize: 13)),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF0F766E),
-                    foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(vertical: 12),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 8),
-              Row(
-                children: [
-                  Expanded(
-                    child: OutlinedButton.icon(
-                      onPressed: () => _copyReceiptText(context),
-                      icon: const Icon(Icons.copy_rounded, size: 15),
-                      label: const Text('Salin', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700)),
-                      style: OutlinedButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(vertical: 10),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                      ),
                     ),
-                  ),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: ElevatedButton.icon(
-                      onPressed: () => _handleSendWhatsApp(context),
-                      icon: const Icon(Icons.send_rounded, size: 15),
-                      label: const Text('Kirim WA', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700)),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF15803D),
-                        foregroundColor: Colors.white,
-                        padding: const EdgeInsets.symmetric(vertical: 10),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 10),
-              SizedBox(
-                width: double.infinity,
-                height: 46,
-                child: ElevatedButton(
-                  onPressed: () => Navigator.of(context).pop(),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.primary,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                  ),
-                  child: const Text(
-                    'TRANSAKSI BARU',
-                    style: TextStyle(color: Colors.white, fontWeight: FontWeight.w700),
-                  ),
+                  ],
                 ),
               ),
             ],
           ),
         ),
-      ),
-    );
-  }
-
-  Widget _buildRow(String label, String value, {bool isBold = false, bool isAccent = false, bool isHighlight = false}) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 2),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(
-            label,
-            style: AppTypography.bodySmall.copyWith(
-              fontWeight: isBold ? FontWeight.w700 : FontWeight.w400,
-              fontSize: isBold ? 13 : 12,
-            ),
-          ),
-          Text(
-            value,
-            style: AppTypography.bodySmall.copyWith(
-              fontWeight: isBold ? FontWeight.w800 : FontWeight.w500,
-              fontSize: isBold ? 14 : 12,
-              color: isHighlight
-                  ? const Color(0xFF047857)
-                  : (isAccent ? AppColors.warning : AppColors.textPrimary),
-            ),
-          ),
-        ],
       ),
     );
   }

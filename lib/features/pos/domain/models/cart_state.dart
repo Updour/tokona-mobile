@@ -5,11 +5,13 @@ class CartState {
   final List<CartItemModel> items;
   final double discountAmount;
   final String? customerName;
+  final String? customerPhone;
 
   const CartState({
     this.items = const [],
     this.discountAmount = 0.0,
     this.customerName,
+    this.customerPhone,
   });
 
   int get totalItemCount => items.length;
@@ -25,12 +27,14 @@ class CartState {
     List<CartItemModel>? items,
     double? discountAmount,
     String? customerName,
+    String? customerPhone,
     bool clearCustomer = false,
   }) {
     return CartState(
       items: items ?? this.items,
       discountAmount: discountAmount ?? this.discountAmount,
       customerName: clearCustomer ? null : (customerName ?? this.customerName),
+      customerPhone: clearCustomer ? null : (customerPhone ?? this.customerPhone),
     );
   }
 }

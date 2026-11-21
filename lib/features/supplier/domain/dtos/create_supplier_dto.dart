@@ -26,7 +26,7 @@ class CreateSupplierDto {
       return 'Nama supplier minimal 2 karakter';
     }
     if (type == 'online' && (platform == null || platform!.trim().isEmpty)) {
-      return 'Platform marketplace wajib dipilih untuk supplier online';
+      return 'Platform marketplace wajib dipilih';
     }
     return null;
   }

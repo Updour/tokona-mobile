@@ -57,13 +57,20 @@ class ReportExportService {
 
     // Riwayat Transaksi Kasir
     buffer.writeln('"--- DETAIL TRANSAKSI PENJUALAN KASIR ---"');
-    buffer.writeln('"No","No. Nota","Tanggal","Pelanggan","Metode","Diskon","Total Bayar","Status"');
+    buffer.writeln('"No","No. Nota","Tanggal","Pelanggan","No. Kontak","Metode","Diskon","Total Bayar","Status"');
     int no = 1;
     for (final s in sales) {
       final dateStr = dateFormat.format(s.createdAt);
-      final cust = (s.customerName ?? 'Pelanggan Umum').replaceAll('"', '""');
+      final cust = (s.customerName != null && s.customerName!.trim().isNotEmpty
+              ? s.customerName!.trim()
+              : 'Pelanggan Umum')
+          .replaceAll('"', '""');
+      final phone = (s.customerPhone != null && s.customerPhone!.trim().isNotEmpty
+              ? s.customerPhone!.trim()
+              : '-')
+          .replaceAll('"', '""');
       final status = s.isVoided ? 'DIBATALKAN / VOID' : (s.isKasbon ? 'KASBON' : 'LUNAS');
-      buffer.writeln('"$no","${s.invoiceNumber}","$dateStr","$cust","${s.paymentMethod}","${currency.format(s.discountAmount)}","${currency.format(s.finalAmount)}","$status"');
+      buffer.writeln('"$no","${s.invoiceNumber}","$dateStr","$cust","$phone","${s.paymentMethod}","${currency.format(s.discountAmount)}","${currency.format(s.finalAmount)}","$status"');
       no++;
     }
 

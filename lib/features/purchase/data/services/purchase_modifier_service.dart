@@ -32,6 +32,8 @@ class PurchaseModifierService {
     String? notes,
     double? serviceFee,
     double? shippingFee,
+    int? installmentMonths,
+    double? monthlyInstallment,
     required List<CreatePurchaseItemDto> newItems,
   }) async {
     final db = await appDatabase.database;
@@ -118,6 +120,8 @@ class PurchaseModifierService {
         totalAmount: newItemsSubtotal,
         serviceFee: effServiceFee,
         shippingFee: effShippingFee,
+        installmentMonths: installmentMonths,
+        monthlyInstallment: monthlyInstallment,
       );
     });
   }

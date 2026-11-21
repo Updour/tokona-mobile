@@ -59,7 +59,7 @@ class ProductDeviceSelector extends ConsumerWidget {
                     Icon(Icons.add_rounded, size: 14, color: AppColors.primary),
                     SizedBox(width: 2),
                     Text(
-                      'Tambah HP',
+                      'Tambah',
                       style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: AppColors.primary),
                     ),
                   ],

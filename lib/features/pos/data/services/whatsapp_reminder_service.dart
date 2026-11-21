@@ -6,17 +6,83 @@ import 'package:tokona/features/pos/domain/models/wa_message_log.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:tokona/features/pos/presentation/controllers/held_cart_controller.dart';
 import 'package:tokona/features/pos/presentation/controllers/wa_history_controller.dart';
+import 'package:tokona/features/pos/presentation/utils/receipt_thermal_formatter.dart';
 import 'package:tokona/features/settings/domain/models/app_preferences.dart';
 import 'package:tokona/features/settings/presentation/controllers/app_preferences_controller.dart';
 
 class WhatsAppReminderService {
   WhatsAppReminderService._();
 
+  /// Format struk jadwal pengambilan pesanan bergaya cetak struk fisik resmi (monospaced)
+  static String formatReceiptBooking({
+    required HeldCartModel order,
+    required String storeName,
+    int width = 32,
+  }) {
+    final customer = order.customerName?.trim().isNotEmpty == true ? order.customerName!.trim() : 'Pelanggan';
+    final customerPhone = order.customerPhone?.trim().isNotEmpty == true ? order.customerPhone!.trim() : null;
+    final dateStr = order.plannedDate != null
+        ? DateFormat('dd/MM/yyyy HH:mm', 'id_ID').format(order.plannedDate!)
+        : 'Hari ini';
+
+    final col = width.clamp(28, 48);
+    final divider = '-' * col;
+    final doubleDivider = '=' * col;
+    final currency = NumberFormat.currency(locale: 'id_ID', symbol: 'Rp ', decimalDigits: 0);
+
+    final b = StringBuffer();
+    b.writeln(ReceiptThermalFormatter.centerMultiLine('JADWAL AMBIL PESANAN', col));
+    b.writeln(ReceiptThermalFormatter.centerMultiLine(storeName.toUpperCase().trim(), col));
+    b.writeln(doubleDivider);
+
+    final shortId = order.id.length > 12 ? order.id.substring(order.id.length - 8).toUpperCase() : order.id.toUpperCase();
+    b.writeln(ReceiptThermalFormatter.twoColumn('Order: #$shortId', dateStr, col));
+    b.writeln('Layanan  : ${order.deliveryMethodLabel}');
+    final phoneSuffix = customerPhone != null ? ' ($customerPhone)' : '';
+    b.writeln('Plg      : $customer$phoneSuffix');
+    b.writeln(divider);
+
+    int idx = 1;
+    for (final it in order.items) {
+      final name = '$idx. ${it.product.name}';
+      for (final line in ReceiptThermalFormatter.wrapText(name, col)) {
+        b.writeln(line);
+      }
+      final qtyStr = it.quantity == it.quantity.roundToDouble()
+          ? it.quantity.toInt().toString()
+          : it.quantity.toStringAsFixed(1);
+      final qtyPrice = '   $qtyStr ${it.unitName} x ${currency.format(it.unitPrice)}';
+      final sub = currency.format(it.subtotal);
+      b.writeln(ReceiptThermalFormatter.twoColumn(qtyPrice, sub, col));
+      idx++;
+    }
+
+    b.writeln(divider);
+    b.writeln(ReceiptThermalFormatter.twoColumn('TOTAL', CurrencyFormatter.format(order.finalAmount), col));
+    b.writeln(ReceiptThermalFormatter.twoColumn('STATUS', 'SIAP DIAMBIL', col));
+    b.writeln(doubleDivider);
+    b.writeln(ReceiptThermalFormatter.centerMultiLine('Harap simpan struk saat pengambilan', col));
+
+    final msg = StringBuffer();
+    msg.writeln('Halo Kak *$customer*! 👋');
+    msg.writeln('Berikut rincian jadwal pengambilan pesanan Anda di *$storeName*:');
+    msg.writeln('```');
+    msg.writeln(b.toString().trim());
+    msg.writeln('```');
+    msg.writeln('📍 Pesanan Anda sudah siap di toko. Ditunggu kedatangannya ya Kak. Terima kasih! 🙏');
+    return msg.toString();
+  }
+
   static String formatMessage({
     required HeldCartModel order,
     required String storeName,
     String? template,
+    bool useReceiptStyle = true,
   }) {
+    if (useReceiptStyle) {
+      return formatReceiptBooking(order: order, storeName: storeName);
+    }
+
     final customer = order.customerName?.trim().isNotEmpty == true ? order.customerName!.trim() : 'Pelanggan';
     final dateStr = order.plannedDate != null
         ? DateFormat('EEEE, d MMM yyyy, jam HH:mm', 'id_ID').format(order.plannedDate!)
@@ -61,8 +127,10 @@ class WhatsAppReminderService {
     }
 
     final cleanPhone = WhatsAppService.sanitizePhoneNumber(rawPhone);
-    final template = ref.read(appPreferencesProvider).waBookingTemplate;
-    final message = formatMessage(order: order, storeName: storeName, template: template);
+    final prefs = ref.read(appPreferencesProvider);
+    final message = prefs.printerMonospaceWhatsApp
+        ? formatReceiptBooking(order: order, storeName: storeName, width: prefs.printerColumnWidth)
+        : formatMessage(order: order, storeName: storeName, template: prefs.waBookingTemplate, useReceiptStyle: false);
 
     try {
       final success = await WhatsAppService.sendReceipt(

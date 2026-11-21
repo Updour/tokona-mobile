@@ -11,9 +11,12 @@ import 'package:tokona/features/auth/presentation/controllers/auth_controller.da
 import 'package:tokona/features/backup/data/services/supabase_backup_service.dart';
 import 'package:tokona/features/backup/domain/models/cloud_backup_model.dart';
 import 'package:tokona/features/dashboard/presentation/widgets/store_closing_summary_card.dart';
+import 'package:tokona/features/payment/presentation/widgets/paylater_piggy_bank_card.dart';
 import 'package:tokona/features/pos/presentation/controllers/sale_history_controller.dart';
+import 'package:tokona/features/purchase/presentation/controllers/purchase_controller.dart';
 import 'package:tokona/features/settings/data/services/audit_log_service.dart';
 import 'package:tokona/features/settings/domain/models/audit_log_model.dart';
+import 'package:tokona/features/settings/presentation/controllers/app_preferences_controller.dart';
 
 class StoreClosingSheet extends ConsumerStatefulWidget {
   const StoreClosingSheet({super.key});
@@ -123,6 +126,15 @@ class _StoreClosingSheetState extends ConsumerState<StoreClosingSheet> {
     }
 
     final dateFormatted = DateFormat('EEEE, d MMMM yyyy', 'id_ID').format(now);
+    final purchases = ref.watch(purchaseControllerProvider).purchases;
+    final prefs = ref.watch(appPreferencesProvider);
+    final paylaterPurchases = purchases.where((p) => p.isPaylater && !p.isCancelled).toList();
+    final paylaterBillThisCycle = paylaterPurchases.fold<double>(0.0, (acc, p) {
+      if (p.isInstallment) {
+        return p.isInstallmentCompleted ? acc : acc + p.currentMonthlyBill;
+      }
+      return acc + p.grandTotal;
+    });
 
     return Container(
       decoration: const BoxDecoration(
@@ -182,6 +194,8 @@ class _StoreClosingSheetState extends ConsumerState<StoreClosingSheet> {
                     nonCash: nonCash,
                     profit: totalProfit,
                   ),
+                  if (paylaterBillThisCycle > 0)
+                    PaylaterPiggyBankCard(totalBill: paylaterBillThisCycle, dueDay: prefs.paylaterDueDay),
                   const SizedBox(height: 12),
                   StoreClosingCloudCard(
                     enabled: _autoBackupEnabled,
@@ -232,7 +246,7 @@ class _StoreClosingSheetState extends ConsumerState<StoreClosingSheet> {
                   ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
                   : const Icon(Icons.cloud_upload_rounded, color: Colors.white, size: 18),
               label: Text(
-                _isLoading ? 'Mencadangkan ke Supabase...' : (_autoBackupEnabled ? 'Tutup Toko & Backup Cloud' : 'Tutup Toko Saja'),
+                _isLoading ? 'Mencadangkan ke cloud...' : (_autoBackupEnabled ? 'Tutup Toko & Backup Cloud' : 'Tutup Toko Saja'),
                 style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 13.5, color: Colors.white),
               ),
               style: ElevatedButton.styleFrom(

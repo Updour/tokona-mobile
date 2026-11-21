@@ -96,7 +96,7 @@ class ProductPhotoPickerSheet extends StatelessWidget {
           ),
           const SizedBox(height: 18),
           _buildOptionCard(
-            title: 'Pilih dari Galeri HP',
+            title: 'Pilih dari Galeri',
             subtitle: 'Ambil foto produk yang sudah tersimpan di galeri',
             icon: Icons.photo_library_rounded,
             iconColor: const Color(0xFF2563EB),

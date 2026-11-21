@@ -19,6 +19,8 @@ class CreatePurchaseDto {
   final String? notes;
   final String? imagePath;
   final String? trackingNumber;
+  final int installmentMonths;
+  final double monthlyInstallment;
   final List<CreatePurchaseItemDto> items;
 
   const CreatePurchaseDto({
@@ -40,6 +42,8 @@ class CreatePurchaseDto {
     this.notes,
     this.imagePath,
     this.trackingNumber,
+    this.installmentMonths = 1,
+    this.monthlyInstallment = 0.0,
     required this.items,
   });
 

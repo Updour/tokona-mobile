@@ -15,6 +15,7 @@ import 'package:tokona/features/purchase/presentation/widgets/purchase_channel_s
 import 'package:tokona/features/purchase/presentation/widgets/purchase_device_chips.dart';
 import 'package:tokona/features/purchase/presentation/widgets/purchase_estimate_range_card.dart';
 import 'package:tokona/features/purchase/presentation/widgets/purchase_fee_inputs.dart';
+import 'package:tokona/features/purchase/presentation/widgets/purchase_installment_card.dart';
 import 'package:tokona/features/purchase/presentation/widgets/purchase_item_list_section.dart';
 import 'package:tokona/features/purchase/presentation/widgets/purchase_payment_account_chips.dart';
 import 'package:tokona/features/purchase/presentation/widgets/purchase_product_selector.dart';
@@ -31,11 +32,8 @@ class AddPurchaseBottomSheet extends ConsumerStatefulWidget {
 
   static Future<void> show(BuildContext context) {
     return showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      useSafeArea: true,
-      backgroundColor: Colors.transparent,
-      builder: (_) => const AddPurchaseBottomSheet(),
+      context: context, isScrollControlled: true, useSafeArea: true,
+      backgroundColor: Colors.transparent, builder: (_) => const AddPurchaseBottomSheet(),
     );
   }
 
@@ -45,18 +43,14 @@ class AddPurchaseBottomSheet extends ConsumerStatefulWidget {
 
 class _AddPurchaseBottomSheetState extends ConsumerState<AddPurchaseBottomSheet> {
   final _supplierController = TextEditingController(), _invoiceController = TextEditingController();
-  final _notesController = TextEditingController(), _serviceFeeController = TextEditingController(), _shippingFeeController = TextEditingController();
+  final _notesController = TextEditingController(), _serviceFeeController = TextEditingController();
+  final _shippingFeeController = TextEditingController(), _installmentController = TextEditingController();
 
   String? _supplierId;
-  String _purchaseType = 'offline';
-  String _platform = 'Shopee';
-  String _deviceTag = 'HP 1';
-  String _paymentAccount = 'SeaBank';
-  String _status = 'received';
+  String _purchaseType = 'offline', _platform = 'Shopee', _deviceTag = 'HP 1', _paymentAccount = 'SeaBank', _status = 'received';
   String? _proofImagePath;
-  int _poDays = 3;
-  DateTime? _estArrivalStart;
-  DateTime? _estArrivalEnd;
+  int _poDays = 3, _installmentMonths = 1;
+  DateTime? _estArrivalStart, _estArrivalEnd;
 
   final List<CreatePurchaseItemDto> _items = [];
   bool _isSubmitting = false;
@@ -78,6 +72,7 @@ class _AddPurchaseBottomSheetState extends ConsumerState<AddPurchaseBottomSheet>
     _notesController.dispose();
     _serviceFeeController.dispose();
     _shippingFeeController.dispose();
+    _installmentController.dispose();
     super.dispose();
   }
 
@@ -104,8 +99,7 @@ class _AddPurchaseBottomSheetState extends ConsumerState<AddPurchaseBottomSheet>
       String? effectiveSupplierId = _supplierId;
       final rawSup = _supplierController.text.trim();
       if (rawSup.isNotEmpty) {
-        final suppliers = ref.read(supplierListProvider).suppliers;
-        final match = suppliers.where((s) => s.name.trim().toLowerCase() == rawSup.toLowerCase()).firstOrNull;
+        final match = ref.read(supplierListProvider).suppliers.where((s) => s.name.trim().toLowerCase() == rawSup.toLowerCase()).firstOrNull;
         if (match != null) {
           effectiveSupplierId = match.id;
         } else {
@@ -132,15 +126,17 @@ class _AddPurchaseBottomSheetState extends ConsumerState<AddPurchaseBottomSheet>
             ? (_estArrivalEnd != null ? DateTime(_estArrivalEnd!.year, _estArrivalEnd!.month, _estArrivalEnd!.day, 23, 59, 59) : DateTime.now().add(Duration(days: _status == 'pre_order' ? _poDays + 3 : 4)))
             : null,
         notes: _notesController.text.trim().isEmpty ? null : _notesController.text.trim(),
-        imagePath: _proofImagePath, items: _items,
+        imagePath: _proofImagePath,
+        installmentMonths: _installmentMonths,
+        monthlyInstallment: CurrencyFormatter.parse(_installmentController.text),
+        items: _items,
       );
 
       final result = await ref.read(purchaseControllerProvider.notifier).recordPurchase(dto);
       if (!mounted) return;
       setState(() => _isSubmitting = false);
       if (result != null) {
-        final msg = _status == 'received' ? 'Pembelian berhasil disimpan.' : 'Pesanan dicatat via $_paymentAccount ($_deviceTag).';
-        AppToast.showSuccess(context, msg);
+        AppToast.showSuccess(context, _status == 'received' ? 'Pembelian berhasil disimpan.' : 'Pesanan dicatat via $_paymentAccount ($_deviceTag).');
         await Future.delayed(const Duration(milliseconds: 600));
         if (mounted) Navigator.of(context).pop();
       } else {
@@ -164,10 +160,7 @@ class _AddPurchaseBottomSheetState extends ConsumerState<AddPurchaseBottomSheet>
       padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
       child: Container(
         constraints: BoxConstraints(maxHeight: MediaQuery.of(context).size.height * 0.88),
-        decoration: const BoxDecoration(
-          color: AppColors.surface,
-          borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-        ),
+        decoration: const BoxDecoration(color: AppColors.surface, borderRadius: BorderRadius.vertical(top: Radius.circular(24))),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -213,23 +206,34 @@ class _AddPurchaseBottomSheetState extends ConsumerState<AddPurchaseBottomSheet>
                     ],
                     const SizedBox(height: 12),
                     PurchasePaymentAccountChips(selectedAccount: _paymentAccount, onAccountSelected: (acc) => setState(() => _paymentAccount = acc)),
+                    if (_paymentAccount.toLowerCase().contains('paylater') || _paymentAccount.toLowerCase().contains('spaylater') || _installmentMonths > 1)
+                      PurchaseInstallmentCard(
+                        selectedTenor: _installmentMonths,
+                        installmentController: _installmentController,
+                        itemsTotal: _itemsTotal + _serviceFee + _shippingFee,
+                        onTenorChanged: (t) => setState(() {
+                          _installmentMonths = t;
+                          if (t > 1 && _installmentController.text.isEmpty && _itemsTotal > 0) {
+                            final est = ((_itemsTotal + _serviceFee + _shippingFee) * (1.0 + (0.0295 * t))) / t;
+                            _installmentController.text = CurrencyFormatter.formatNumber(est);
+                          }
+                        }),
+                        onChanged: () => setState(() {}),
+                      ),
                     const SizedBox(height: 14),
                     PurchaseStatusSelector(
-                      status: _status,
-                      poDays: _poDays,
-                      onStatusChanged: (s) {
-                        setState(() {
-                          _status = s;
-                          final now = DateTime.now();
-                          if (s == 'shipping' && _estArrivalStart == null) {
-                            _estArrivalStart = now.add(const Duration(days: 2));
-                            _estArrivalEnd = now.add(const Duration(days: 4));
-                          } else if (s == 'pre_order' && _estArrivalStart == null) {
-                            _estArrivalStart = now.add(Duration(days: _poDays));
-                            _estArrivalEnd = now.add(Duration(days: _poDays + 3));
-                          }
-                        });
-                      },
+                      status: _status, poDays: _poDays,
+                      onStatusChanged: (s) => setState(() {
+                        _status = s;
+                        final now = DateTime.now();
+                        if (s == 'shipping' && _estArrivalStart == null) {
+                          _estArrivalStart = now.add(const Duration(days: 2));
+                          _estArrivalEnd = now.add(const Duration(days: 4));
+                        } else if (s == 'pre_order' && _estArrivalStart == null) {
+                          _estArrivalStart = now.add(Duration(days: _poDays));
+                          _estArrivalEnd = now.add(Duration(days: _poDays + 3));
+                        }
+                      }),
                       onPoDaysChanged: (d) => setState(() => _poDays = d),
                     ),
                     if (_status != 'received') ...[
@@ -252,16 +256,13 @@ class _AddPurchaseBottomSheetState extends ConsumerState<AddPurchaseBottomSheet>
                     if (_purchaseType == 'online') ...[
                       const SizedBox(height: 12),
                       PurchaseFeeInputs(
-                        serviceFeeController: _serviceFeeController,
-                        shippingFeeController: _shippingFeeController,
+                        serviceFeeController: _serviceFeeController, shippingFeeController: _shippingFeeController,
                         onChanged: () => setState(() {}),
                       ),
                     ],
                     const SizedBox(height: 14),
                     PurchaseSummaryCard(
-                      itemsTotal: _itemsTotal,
-                      serviceFee: _serviceFee,
-                      shippingFee: _shippingFee,
+                      itemsTotal: _itemsTotal, serviceFee: _serviceFee, shippingFee: _shippingFee,
                       isOnline: _purchaseType == 'online',
                     ),
                     const SizedBox(height: 12),
@@ -276,7 +277,7 @@ class _AddPurchaseBottomSheetState extends ConsumerState<AddPurchaseBottomSheet>
                     const SizedBox(height: 12),
                     ProofPhotoPicker(
                       imagePath: _proofImagePath,
-                      label: _purchaseType == 'online' ? 'Foto Bukti Nota / Faktur Marketplace' : 'Foto Nota Faktur / Fisik Barang',
+                      label: _purchaseType == 'online' ? 'Foto Nota Marketplace' : 'Foto Nota Fisik Barang',
                       hint: 'Ambil foto kamera atau pilih galeri (opsional)',
                       onImagePicked: (p) => setState(() => _proofImagePath = p),
                     ),

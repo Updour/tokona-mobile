@@ -151,7 +151,7 @@ class _BackupRestoreBottomSheetState extends ConsumerState<BackupRestoreBottomSh
       final store = ref.read(authProvider).currentStore;
       if (store != null) await ref.read(productListProvider.notifier).loadProducts(store.id);
       if (mounted) {
-        AppToast.showSuccess(context, 'Data toko berhasil dipulihkan dari Cloud Supabase!');
+        AppToast.showSuccess(context, 'Data toko berhasil dipulihkan dari Cloud!');
         Navigator.of(context).pop();
       }
     } catch (e) {

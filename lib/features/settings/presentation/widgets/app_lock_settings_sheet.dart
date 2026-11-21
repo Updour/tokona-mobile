@@ -158,9 +158,9 @@ class _AppLockSettingsSheetState extends ConsumerState<AppLockSettingsSheet> {
                   SwitchListTile(
                     value: lockState.config.useBiometrics,
                     activeThumbColor: AppColors.primary,
-                    title: const Text('Gunakan Sidik Jari (Fingerprint)', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700)),
+                    title: const Text('Gunakan Sidik Jari', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700)),
                     subtitle: Text(
-                      lockState.hasBiometricsHardware ? 'Buka kunci cepat dengan sensor biometrik HP' : 'Sensor biometrik tidak tersedia di perangkat ini',
+                      lockState.hasBiometricsHardware ? 'Buka kunci cepat dengan sensor biometrik' : 'Sensor biometrik tidak tersedia di perangkat ini',
                       style: const TextStyle(fontSize: 11, color: AppColors.textSecondary),
                     ),
                     onChanged: lockState.hasBiometricsHardware

@@ -113,6 +113,9 @@ class DatabaseTables {
   static const String columnPurchaseNotes = 'notes';
   static const String columnPurchaseImagePath = 'image_path';
   static const String columnPurchaseTrackingNumber = 'tracking_number';
+  static const String columnPurchaseInstallmentMonths = 'installment_months';
+  static const String columnPurchaseMonthlyInstallment = 'monthly_installment';
+  static const String columnPurchasePaidInstallments = 'paid_installments';
 
   static const String columnPurchaseItemPurchaseId = 'purchase_id';
   static const String columnPurchaseItemProductId = 'product_id';

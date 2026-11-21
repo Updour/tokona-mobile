@@ -88,7 +88,7 @@ class AddScheduledReminderFields extends StatelessWidget {
           child: OutlinedButton.icon(
             onPressed: onImportContact,
             icon: const Icon(Icons.contact_phone_rounded, size: 15, color: Color(0xFF059669)),
-            label: const Text('Kontak HP', style: TextStyle(fontSize: 11.5, fontWeight: FontWeight.w700, color: Color(0xFF047857))),
+            label: const Text('Kontak', style: TextStyle(fontSize: 11.5, fontWeight: FontWeight.w700, color: Color(0xFF047857))),
             style: OutlinedButton.styleFrom(
               padding: const EdgeInsets.symmetric(vertical: 9),
               side: const BorderSide(color: Color(0xFF6EE7B7)),

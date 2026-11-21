@@ -265,7 +265,7 @@ class ReportKpiCards extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text('Dana Tertahan di Rekening HP', style: TextStyle(fontSize: 11.5, fontWeight: FontWeight.w700, color: Color(0xFF991B1B))),
+                const Text('Dana Tertahan di Rekening', style: TextStyle(fontSize: 11.5, fontWeight: FontWeight.w700, color: Color(0xFF991B1B))),
                 Text('${CurrencyFormatter.format(summary.totalPendingRefund)} menunggu penarikan', style: const TextStyle(fontSize: 10.5, color: Color(0xFFB91C1C))),
               ],
             ),

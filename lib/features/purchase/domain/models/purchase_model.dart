@@ -24,6 +24,9 @@ class PurchaseModel {
   final String? notes;
   final String? imagePath;
   final String? trackingNumber;
+  final int installmentMonths;
+  final double monthlyInstallment;
+  final int paidInstallments;
   final List<PurchaseItemModel> items;
   final DateTime createdAt;
   final DateTime updatedAt;
@@ -52,6 +55,9 @@ class PurchaseModel {
     this.notes,
     this.imagePath,
     this.trackingNumber,
+    this.installmentMonths = 1,
+    this.monthlyInstallment = 0.0,
+    this.paidInstallments = 0,
     this.items = const [],
     required this.createdAt,
     required this.updatedAt,
@@ -65,7 +71,11 @@ class PurchaseModel {
   bool get isCancelled => status == 'cancelled';
   bool get hasPendingRefund => refundStatus == 'pending_refund';
   bool get isPaylater => (paymentAccount != null && paymentAccount!.toLowerCase().contains('paylater'));
+  bool get isInstallment => isPaylater && installmentMonths > 1;
   double get grandTotal => totalAmount + serviceFee + shippingFee;
+  double get currentMonthlyBill => isInstallment ? (monthlyInstallment > 0 ? monthlyInstallment : (grandTotal / installmentMonths)) : grandTotal;
+  int get remainingInstallments => (installmentMonths - paidInstallments).clamp(0, installmentMonths);
+  bool get isInstallmentCompleted => isInstallment && paidInstallments >= installmentMonths;
 
   factory PurchaseModel.fromMap(Map<String, dynamic> map, {List<PurchaseItemModel> items = const []}) {
     return PurchaseModel(
@@ -95,6 +105,9 @@ class PurchaseModel {
       notes: map[DatabaseTables.columnPurchaseNotes] as String?,
       imagePath: map[DatabaseTables.columnPurchaseImagePath] as String?,
       trackingNumber: map[DatabaseTables.columnPurchaseTrackingNumber] as String?,
+      installmentMonths: (map[DatabaseTables.columnPurchaseInstallmentMonths] as num? ?? 1).toInt(),
+      monthlyInstallment: (map[DatabaseTables.columnPurchaseMonthlyInstallment] as num? ?? 0.0).toDouble(),
+      paidInstallments: (map[DatabaseTables.columnPurchasePaidInstallments] as num? ?? 0).toInt(),
       items: items,
       createdAt: DateTime.parse(map[DatabaseTables.columnCreatedAt] as String),
       updatedAt: DateTime.parse(map[DatabaseTables.columnUpdatedAt] as String),
@@ -128,6 +141,9 @@ class PurchaseModel {
       DatabaseTables.columnPurchaseNotes: notes,
       DatabaseTables.columnPurchaseImagePath: imagePath,
       DatabaseTables.columnPurchaseTrackingNumber: trackingNumber,
+      DatabaseTables.columnPurchaseInstallmentMonths: installmentMonths,
+      DatabaseTables.columnPurchaseMonthlyInstallment: monthlyInstallment,
+      DatabaseTables.columnPurchasePaidInstallments: paidInstallments,
       DatabaseTables.columnCreatedAt: createdAt.toIso8601String(),
       DatabaseTables.columnUpdatedAt: updatedAt.toIso8601String(),
       DatabaseTables.columnSyncedAt: syncedAt?.toIso8601String(),
@@ -157,6 +173,9 @@ class PurchaseModel {
     String? notes,
     String? imagePath,
     String? trackingNumber,
+    int? installmentMonths,
+    double? monthlyInstallment,
+    int? paidInstallments,
     List<PurchaseItemModel>? items,
     DateTime? createdAt,
     DateTime? updatedAt,
@@ -185,6 +204,9 @@ class PurchaseModel {
       notes: notes ?? this.notes,
       imagePath: imagePath ?? this.imagePath,
       trackingNumber: trackingNumber ?? this.trackingNumber,
+      installmentMonths: installmentMonths ?? this.installmentMonths,
+      monthlyInstallment: monthlyInstallment ?? this.monthlyInstallment,
+      paidInstallments: paidInstallments ?? this.paidInstallments,
       items: items ?? this.items,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,

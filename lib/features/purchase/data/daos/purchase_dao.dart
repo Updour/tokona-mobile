@@ -66,6 +66,8 @@ class PurchaseDao {
     double? totalAmount,
     double? serviceFee,
     double? shippingFee,
+    int? installmentMonths,
+    double? monthlyInstallment,
   }) async {
     final values = <String, dynamic>{
       DatabaseTables.columnPurchaseInvoiceNumber: invoiceNumber,
@@ -76,9 +78,27 @@ class PurchaseDao {
     if (totalAmount != null) values[DatabaseTables.columnPurchaseTotalAmount] = totalAmount;
     if (serviceFee != null) values[DatabaseTables.columnPurchaseServiceFee] = serviceFee;
     if (shippingFee != null) values[DatabaseTables.columnPurchaseShippingFee] = shippingFee;
+    if (installmentMonths != null) values[DatabaseTables.columnPurchaseInstallmentMonths] = installmentMonths;
+    if (monthlyInstallment != null) values[DatabaseTables.columnPurchaseMonthlyInstallment] = monthlyInstallment;
     await db.update(
       DatabaseTables.purchases,
       values,
+      where: '${DatabaseTables.columnId} = ?',
+      whereArgs: [id],
+    );
+  }
+
+  Future<void> updateInstallmentProgress(
+    DatabaseExecutor db,
+    String id, {
+    required int paidInstallments,
+  }) async {
+    await db.update(
+      DatabaseTables.purchases,
+      {
+        DatabaseTables.columnPurchasePaidInstallments: paidInstallments,
+        DatabaseTables.columnUpdatedAt: DateTime.now().toIso8601String(),
+      },
       where: '${DatabaseTables.columnId} = ?',
       whereArgs: [id],
     );

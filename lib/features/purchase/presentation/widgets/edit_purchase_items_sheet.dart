@@ -10,6 +10,7 @@ import 'package:tokona/features/purchase/domain/dtos/create_purchase_item_dto.da
 import 'package:tokona/features/purchase/domain/models/purchase_model.dart';
 import 'package:tokona/features/purchase/presentation/controllers/purchase_controller.dart';
 import 'package:tokona/features/purchase/presentation/widgets/purchase_fee_inputs.dart';
+import 'package:tokona/features/purchase/presentation/widgets/purchase_installment_card.dart';
 import 'package:tokona/features/purchase/presentation/widgets/purchase_item_list_section.dart';
 import 'package:tokona/features/purchase/presentation/widgets/purchase_product_selector.dart';
 
@@ -38,6 +39,8 @@ class _EditPurchaseItemsSheetState extends ConsumerState<EditPurchaseItemsSheet>
   late final TextEditingController _notesController;
   late final TextEditingController _serviceFeeController;
   late final TextEditingController _shippingFeeController;
+  late final TextEditingController _installmentController;
+  late int _selectedTenor;
 
   final List<CreatePurchaseItemDto> _items = [];
   bool _isSubmitting = false;
@@ -49,11 +52,11 @@ class _EditPurchaseItemsSheetState extends ConsumerState<EditPurchaseItemsSheet>
     _invoiceController = TextEditingController(text: p.invoiceNumber);
     _supplierController = TextEditingController(text: p.supplierName ?? '');
     _notesController = TextEditingController(text: p.notes ?? '');
-    _serviceFeeController = TextEditingController(
-      text: p.serviceFee > 0 ? CurrencyFormatter.formatNumber(p.serviceFee) : '',
-    );
-    _shippingFeeController = TextEditingController(
-      text: p.shippingFee > 0 ? CurrencyFormatter.formatNumber(p.shippingFee) : '',
+    _serviceFeeController = TextEditingController(text: p.serviceFee > 0 ? CurrencyFormatter.formatNumber(p.serviceFee) : '');
+    _shippingFeeController = TextEditingController(text: p.shippingFee > 0 ? CurrencyFormatter.formatNumber(p.shippingFee) : '');
+    _selectedTenor = p.installmentMonths > 0 ? p.installmentMonths : 1;
+    _installmentController = TextEditingController(
+      text: p.monthlyInstallment > 0 ? CurrencyFormatter.formatNumber(p.monthlyInstallment) : '',
     );
 
     for (final it in p.items) {
@@ -76,6 +79,7 @@ class _EditPurchaseItemsSheetState extends ConsumerState<EditPurchaseItemsSheet>
     _notesController.dispose();
     _serviceFeeController.dispose();
     _shippingFeeController.dispose();
+    _installmentController.dispose();
     super.dispose();
   }
 
@@ -101,6 +105,8 @@ class _EditPurchaseItemsSheetState extends ConsumerState<EditPurchaseItemsSheet>
       notes: _notesController.text.trim().isEmpty ? null : _notesController.text.trim(),
       serviceFee: _serviceFee,
       shippingFee: _shippingFee,
+      installmentMonths: _selectedTenor,
+      monthlyInstallment: CurrencyFormatter.parse(_installmentController.text),
       newItems: _items,
       storeId: storeId,
     );
@@ -187,6 +193,22 @@ class _EditPurchaseItemsSheetState extends ConsumerState<EditPurchaseItemsSheet>
                   shippingFeeController: _shippingFeeController,
                   onChanged: () => setState(() {}),
                 ),
+                if (widget.purchase.isPaylater)
+                  PurchaseInstallmentCard(
+                    selectedTenor: _selectedTenor,
+                    installmentController: _installmentController,
+                    itemsTotal: _itemsTotal,
+                    onTenorChanged: (t) {
+                      setState(() {
+                        _selectedTenor = t;
+                        if (t > 1 && _installmentController.text.trim().isEmpty) {
+                          final estMonthly = (_itemsTotal * (1 + (0.0295 * t))) / t;
+                          _installmentController.text = CurrencyFormatter.formatNumber(estMonthly);
+                        }
+                      });
+                    },
+                    onChanged: () => setState(() {}),
+                  ),
                 const SizedBox(height: 10),
                 TextField(
                   controller: _notesController,

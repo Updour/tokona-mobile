@@ -159,7 +159,7 @@ class ProfileSettingsSheet extends ConsumerWidget {
                   icon: Icons.fingerprint_rounded,
                   color: const Color(0xFF0F766E),
                   title: 'Kunci Aplikasi & Biometrik',
-                  subtitle: 'Amankan kasir dengan PIN 6 digit & Sidik Jari HP',
+                  subtitle: 'Amankan kasir dengan PIN 6 digit & Sidik Jari',
                   trailing: Container(
                     padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                     decoration: BoxDecoration(color: const Color(0xFFCCFBF1), borderRadius: BorderRadius.circular(8)),
@@ -188,8 +188,8 @@ class ProfileSettingsSheet extends ConsumerWidget {
                 _buildSettingTile(
                   icon: Icons.print_outlined,
                   color: const Color(0xFF4F46E5),
-                  title: 'Printer Struk Kasir',
-                  subtitle: 'Format 58mm / 80mm • ESC/POS Bluetooth',
+                  title: 'Printer Struk & Layout',
+                  subtitle: 'Format 58mm / 80mm • Header & Footer Dinamis • ESC/POS',
                   onTap: () {
                     Navigator.of(context).pop();
                     ThermalPrinterSettingsSheet.show(context);

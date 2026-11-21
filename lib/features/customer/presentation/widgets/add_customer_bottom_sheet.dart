@@ -197,7 +197,7 @@ class _AddCustomerBottomSheetState extends State<AddCustomerBottomSheet> {
               OutlinedButton.icon(
                 onPressed: _importFromPhoneContacts,
                 icon: const Icon(Icons.contact_phone_rounded, size: 17, color: AppColors.primary),
-                label: const Text('Import dari Kontak HP', style: TextStyle(fontSize: 12.5, fontWeight: FontWeight.w700, color: AppColors.primary)),
+                label: const Text('Import dari Kontak', style: TextStyle(fontSize: 12.5, fontWeight: FontWeight.w700, color: AppColors.primary)),
                 style: OutlinedButton.styleFrom(
                   padding: const EdgeInsets.symmetric(vertical: 10),
                   side: BorderSide(color: AppColors.primary.withValues(alpha: 0.45)),
@@ -234,7 +234,7 @@ class _AddCustomerBottomSheetState extends State<AddCustomerBottomSheet> {
                   prefixIcon: const Icon(Icons.phone_rounded, size: 20),
                   suffixIcon: IconButton(
                     onPressed: _importFromPhoneContacts,
-                    tooltip: 'Ambil dari Kontak HP',
+                    tooltip: 'Ambil dari Kontak',
                     icon: const Icon(Icons.contacts_rounded, size: 19, color: AppColors.primary),
                   ),
                 ),

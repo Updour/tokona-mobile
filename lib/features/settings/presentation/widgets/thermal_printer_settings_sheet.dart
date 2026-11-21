@@ -1,20 +1,25 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:tokona/core/theme/app_colors.dart';
 import 'package:tokona/core/widgets/app_toast.dart';
 import 'package:tokona/features/auth/presentation/controllers/auth_controller.dart';
+import 'package:tokona/features/pos/presentation/utils/receipt_thermal_formatter.dart';
+import 'package:tokona/features/settings/domain/models/app_preferences.dart';
 import 'package:tokona/features/settings/presentation/controllers/app_preferences_controller.dart';
+import 'package:tokona/features/settings/presentation/widgets/thermal_printer_footer_tab.dart';
+import 'package:tokona/features/settings/presentation/widgets/thermal_printer_header_tab.dart';
+import 'package:tokona/features/settings/presentation/widgets/thermal_printer_paper_tab.dart';
+import 'package:tokona/features/settings/presentation/widgets/thermal_printer_preview_tab.dart';
+import 'package:tokona/features/settings/presentation/widgets/thermal_printer_test_dialog.dart';
 
 class ThermalPrinterSettingsSheet extends ConsumerStatefulWidget {
   const ThermalPrinterSettingsSheet({super.key});
 
   static Future<void> show(BuildContext context) {
     return showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      useRootNavigator: true,
-      backgroundColor: Colors.transparent,
-      builder: (_) => const ThermalPrinterSettingsSheet(),
+      context: context, isScrollControlled: true, useRootNavigator: true,
+      backgroundColor: Colors.transparent, builder: (_) => const ThermalPrinterSettingsSheet(),
     );
   }
 
@@ -22,116 +27,150 @@ class ThermalPrinterSettingsSheet extends ConsumerStatefulWidget {
   ConsumerState<ThermalPrinterSettingsSheet> createState() => _ThermalPrinterSettingsSheetState();
 }
 
-class _ThermalPrinterSettingsSheetState extends ConsumerState<ThermalPrinterSettingsSheet> {
+class _ThermalPrinterSettingsSheetState extends ConsumerState<ThermalPrinterSettingsSheet>
+    with SingleTickerProviderStateMixin {
+  late TabController _tabController;
+
   late int _paperWidth;
+  late int _columnWidth;
   late bool _autoPrint;
+  late bool _autoCut;
+  late int _feedLines;
+  late bool _monospaceWhatsApp;
+
+  late TextEditingController _titleController;
+  late TextEditingController _subtitleController;
+  late bool _showAddress;
+  late TextEditingController _addressController;
+  late bool _showPhone;
+  late TextEditingController _phoneController;
+  late TextEditingController _customHeaderController;
+  late bool _showCashier;
+  late bool _showCustomer;
+  late bool _showDateTime;
+  late bool _showInvoiceNumber;
+
   late TextEditingController _footerController;
+  late TextEditingController _policyController;
+  late TextEditingController _socialController;
 
   @override
   void initState() {
     super.initState();
+    _tabController = TabController(length: 4, vsync: this);
+    _tabController.addListener(() {
+      if (mounted) setState(() {});
+    });
+
     final prefs = ref.read(appPreferencesProvider);
+    final store = ref.read(authProvider).currentStore;
+
     _paperWidth = prefs.printerPaperWidth;
+    _columnWidth = prefs.printerColumnWidth;
     _autoPrint = prefs.autoPrintReceipt;
+    _autoCut = prefs.printerAutoCut;
+    _feedLines = prefs.printerFeedLines;
+    _monospaceWhatsApp = prefs.printerMonospaceWhatsApp;
+
+    _titleController = TextEditingController(text: prefs.printerHeaderTitle ?? (store?.name ?? ''));
+    _subtitleController = TextEditingController(text: prefs.printerHeaderSubtitle ?? '');
+    _showAddress = prefs.printerShowAddress;
+    _addressController = TextEditingController(text: prefs.printerAddress ?? (store?.address ?? ''));
+    _showPhone = prefs.printerShowPhone;
+    _phoneController = TextEditingController(text: prefs.printerPhone ?? (store?.phone ?? ''));
+    _customHeaderController = TextEditingController(text: prefs.printerCustomHeader ?? '');
+
+    _showCashier = prefs.printerShowCashier;
+    _showCustomer = prefs.printerShowCustomer;
+    _showDateTime = prefs.printerShowDateTime;
+    _showInvoiceNumber = prefs.printerShowInvoiceNumber;
+
     _footerController = TextEditingController(text: prefs.printerFooterMessage);
+    _policyController = TextEditingController(text: prefs.printerFooterPolicy ?? '');
+    _socialController = TextEditingController(text: prefs.printerFooterSocial ?? '');
   }
 
   @override
   void dispose() {
+    _tabController.dispose();
+    _titleController.dispose();
+    _subtitleController.dispose();
+    _addressController.dispose();
+    _phoneController.dispose();
+    _customHeaderController.dispose();
     _footerController.dispose();
+    _policyController.dispose();
+    _socialController.dispose();
     super.dispose();
   }
 
+  AppPreferences _getCurrentDraftPreferences() {
+    return ref.read(appPreferencesProvider).copyWith(
+      printerPaperWidth: _paperWidth, printerColumnWidth: _columnWidth,
+      autoPrintReceipt: _autoPrint, printerAutoCut: _autoCut,
+      printerFeedLines: _feedLines, printerMonospaceWhatsApp: _monospaceWhatsApp,
+      printerHeaderTitle: _titleController.text.trim().isNotEmpty ? _titleController.text.trim() : null,
+      printerHeaderSubtitle: _subtitleController.text.trim().isNotEmpty ? _subtitleController.text.trim() : null,
+      printerShowAddress: _showAddress, printerAddress: _addressController.text.trim().isNotEmpty ? _addressController.text.trim() : null,
+      printerShowPhone: _showPhone, printerPhone: _phoneController.text.trim().isNotEmpty ? _phoneController.text.trim() : null,
+      printerCustomHeader: _customHeaderController.text.trim().isNotEmpty ? _customHeaderController.text.trim() : null,
+      printerShowCashier: _showCashier, printerShowCustomer: _showCustomer,
+      printerShowDateTime: _showDateTime, printerShowInvoiceNumber: _showInvoiceNumber,
+      printerFooterMessage: _footerController.text.trim(),
+      printerFooterPolicy: _policyController.text.trim().isNotEmpty ? _policyController.text.trim() : null,
+      printerFooterSocial: _socialController.text.trim().isNotEmpty ? _socialController.text.trim() : null,
+    );
+  }
+
   void _saveSettings() {
-    final updated = ref.read(appPreferencesProvider).copyWith(
-          printerPaperWidth: _paperWidth,
-          autoPrintReceipt: _autoPrint,
-          printerFooterMessage: _footerController.text.trim(),
-        );
+    HapticFeedback.lightImpact();
+    final updated = _getCurrentDraftPreferences();
     ref.read(appPreferencesProvider.notifier).save(updated);
-    AppToast.showSuccess(context, 'Pengaturan printer thermal berhasil disimpan');
+    AppToast.showSuccess(context, 'Pengaturan printer thermal & format struk berhasil disimpan');
     Navigator.of(context).pop();
   }
 
-  void _showTestPrintPreview() {
+  void _executeTestPrint() {
+    HapticFeedback.lightImpact();
     final store = ref.read(authProvider).currentStore;
-    final storeName = store?.name ?? 'TOKO BERKAH';
-    final width = _paperWidth;
-    final col = width == 80 ? 48 : 32;
+    final storeName = _titleController.text.trim().isNotEmpty ? _titleController.text.trim() : (store?.name ?? 'TOKO BERKAH');
+    final draft = _getCurrentDraftPreferences();
+    final sampleText = ReceiptThermalFormatter.formatSampleReceipt(
+      storeName: storeName,
+      storeAddress: _addressController.text.trim().isNotEmpty ? _addressController.text.trim() : store?.address,
+      storePhone: _phoneController.text.trim().isNotEmpty ? _phoneController.text.trim() : store?.phone,
+      prefs: draft,
+    );
 
-    showDialog(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
-        title: Row(
-          children: [
-            const Icon(Icons.receipt_long_rounded, color: Color(0xFF0F766E), size: 20),
-            const SizedBox(width: 8),
-            Text('Simulasi Struk ${width}mm', style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w800)),
-          ],
-        ),
-        content: Container(
-          padding: const EdgeInsets.all(12),
-          decoration: BoxDecoration(
-            color: const Color(0xFFF8FAFC),
-            borderRadius: BorderRadius.circular(10),
-            border: Border.all(color: const Color(0xFFE2E8F0)),
-          ),
-          child: SingleChildScrollView(
-            child: Text(
-              '${"=" * col}\n'
-              '${storeName.toUpperCase()}\n'
-              '${store?.address ?? "Jl. Raya Pertokoan No. 1"}\n'
-              '${"=" * col}\n'
-              'No: TKN-TEST-001\n'
-              'Tgl: 19/11/2026 15:30\n'
-              'Kasir: Kasir Toko\n'
-              '${"-" * col}\n'
-              '1. Beras Premium 5kg\n'
-              '   1 x Rp 75.000       Rp 75.000\n'
-              '2. Minyak Goreng 2L\n'
-              '   1 x Rp 34.000       Rp 34.000\n'
-              '${"-" * col}\n'
-              'Subtotal               Rp 109.000\n'
-              'TOTAL                  Rp 109.000\n'
-              'Bayar (TUNAI)          Rp 110.000\n'
-              'Kembalian                Rp 1.000\n'
-              '${"=" * col}\n'
-              '${_footerController.text}\n'
-              'Simpan struk ini sebagai bukti\n\n',
-              style: const TextStyle(fontFamily: 'monospace', fontSize: 11, height: 1.35, color: Color(0xFF0F172A)),
-            ),
-          ),
-        ),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Tutup')),
-          ElevatedButton.icon(
-            onPressed: () {
-              Navigator.pop(ctx);
-              AppToast.showSuccess(context, 'Perintah ESC/POS dikirim ke modul printer');
-            },
-            icon: const Icon(Icons.print_rounded, size: 16),
-            label: const Text('Kirim ke Printer'),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.primary,
-              foregroundColor: Colors.white,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-            ),
-          ),
-        ],
-      ),
+    ThermalPrinterTestDialog.show(
+      context,
+      paperWidth: _paperWidth,
+      columnWidth: _columnWidth,
+      feedLines: _feedLines,
+      autoCut: _autoCut,
+      sampleText: sampleText,
     );
   }
 
   @override
   Widget build(BuildContext context) {
+    final store = ref.watch(authProvider).currentStore;
+    final storeName = _titleController.text.trim().isNotEmpty ? _titleController.text.trim() : (store?.name ?? 'TOKO BERKAH');
+    final draft = _getCurrentDraftPreferences();
+    final sampleReceipt = ReceiptThermalFormatter.formatSampleReceipt(
+      storeName: storeName,
+      storeAddress: _addressController.text.trim().isNotEmpty ? _addressController.text.trim() : store?.address,
+      storePhone: _phoneController.text.trim().isNotEmpty ? _phoneController.text.trim() : store?.phone,
+      prefs: draft,
+    );
+
     return Container(
       decoration: const BoxDecoration(
         color: AppColors.surface,
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
-      padding: EdgeInsets.fromLTRB(20, 16, 20, MediaQuery.of(context).viewInsets.bottom + 24),
-      constraints: BoxConstraints(maxHeight: MediaQuery.of(context).size.height * 0.85),
+      padding: EdgeInsets.fromLTRB(16, 12, 16, MediaQuery.of(context).viewInsets.bottom + 16),
+      constraints: BoxConstraints(maxHeight: MediaQuery.of(context).size.height * 0.90),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
@@ -142,73 +181,90 @@ class _ThermalPrinterSettingsSheetState extends ConsumerState<ThermalPrinterSett
           Row(
             children: [
               Container(
-                padding: const EdgeInsets.all(7),
+                padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(color: const Color(0xFFEEF2FF), borderRadius: BorderRadius.circular(10)),
-                child: const Icon(Icons.print_rounded, color: Color(0xFF4F46E5), size: 20),
+                child: const Icon(Icons.print_rounded, color: Color(0xFF4F46E5), size: 22),
               ),
               const SizedBox(width: 10),
               const Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('Printer Struk Kasir (Thermal ESC/POS)', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
-                    Text('Format cetak 58mm & 80mm Bluetooth/USB', style: TextStyle(fontSize: 11, color: AppColors.textSecondary)),
+                    Text('Pengaturan Printer', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
+                    Text('Kertas 58mm/80mm • Header & Footer Dinamis • ESC/POS', style: TextStyle(fontSize: 11, color: AppColors.textSecondary)),
                   ],
                 ),
               ),
               IconButton(onPressed: () => Navigator.pop(context), icon: const Icon(Icons.close_rounded, size: 20, color: AppColors.textMuted)),
             ],
           ),
-          const Divider(height: 20),
+          const SizedBox(height: 10),
+          Container(
+            height: 38,
+            decoration: BoxDecoration(color: const Color(0xFFF1F5F9), borderRadius: BorderRadius.circular(10)),
+            child: TabBar(
+              controller: _tabController,
+              indicator: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(8),
+                boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.05), blurRadius: 4, offset: const Offset(0, 1))],
+              ),
+              labelColor: AppColors.primary,
+              unselectedLabelColor: AppColors.textSecondary,
+              labelStyle: const TextStyle(fontSize: 11, fontWeight: FontWeight.w800),
+              unselectedLabelStyle: const TextStyle(fontSize: 11, fontWeight: FontWeight.w600),
+              tabs: const [Tab(text: 'Kertas'), Tab(text: 'Header'), Tab(text: 'Footer'), Tab(text: 'Preview')],
+            ),
+          ),
+          const SizedBox(height: 12),
           Expanded(
-            child: ListView(
+            child: TabBarView(
+              controller: _tabController,
               children: [
-                const Text('Lebar Kertas Struk', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 13, color: AppColors.textPrimary)),
-                const SizedBox(height: 6),
-                Row(
-                  children: [
-                    Expanded(
-                      child: _buildPaperSizeOption(
-                        title: '58 mm (Standard)',
-                        subtitle: '32 Kolom (Printer Mini)',
-                        value: 58,
-                      ),
-                    ),
-                    const SizedBox(width: 10),
-                    Expanded(
-                      child: _buildPaperSizeOption(
-                        title: '80 mm (Lebar)',
-                        subtitle: '48 Kolom (Printer Kasir Besar)',
-                        value: 80,
-                      ),
-                    ),
-                  ],
+                ThermalPrinterPaperTab(
+                  paperWidth: _paperWidth, columnWidth: _columnWidth, feedLines: _feedLines,
+                  autoPrint: _autoPrint, autoCut: _autoCut,
+                  onPaperSizeSelected: (pw, cw) => setState(() { _paperWidth = pw; _columnWidth = cw; }),
+                  onColumnWidthChanged: (val) => setState(() => _columnWidth = val),
+                  onFeedLinesChanged: (val) => setState(() => _feedLines = val),
+                  onAutoPrintChanged: (val) => setState(() => _autoPrint = val),
+                  onAutoCutChanged: (val) => setState(() => _autoCut = val),
                 ),
-                const SizedBox(height: 16),
-                SwitchListTile(
-                  contentPadding: EdgeInsets.zero,
-                  value: _autoPrint,
-                  title: const Text('Cetak Otomatis Setelah Pembayaran', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700)),
-                  subtitle: const Text('Langsung print struk saat pembayaran kasir sukses', style: TextStyle(fontSize: 11, color: AppColors.textSecondary)),
-                  activeColor: AppColors.primary,
-                  onChanged: (val) => setState(() => _autoPrint = val),
+                ThermalPrinterHeaderTab(
+                  titleController: _titleController, subtitleController: _subtitleController,
+                  showAddress: _showAddress, addressController: _addressController,
+                  showPhone: _showPhone, phoneController: _phoneController,
+                  customHeaderController: _customHeaderController,
+                  showInvoiceNumber: _showInvoiceNumber, showDateTime: _showDateTime,
+                  showCashier: _showCashier, showCustomer: _showCustomer,
+                  onShowAddressChanged: (val) => setState(() => _showAddress = val),
+                  onShowPhoneChanged: (val) => setState(() => _showPhone = val),
+                  onShowInvoiceNumberChanged: (val) => setState(() => _showInvoiceNumber = val),
+                  onShowDateTimeChanged: (val) => setState(() => _showDateTime = val),
+                  onShowCashierChanged: (val) => setState(() => _showCashier = val),
+                  onShowCustomerChanged: (val) => setState(() => _showCustomer = val),
+                  onChanged: () => setState(() {}),
                 ),
-                const SizedBox(height: 10),
-                TextField(
-                  controller: _footerController,
-                  decoration: InputDecoration(
-                    labelText: 'Pesan Kaki Struk (Footer)',
-                    hintText: 'Contoh: Terima kasih atas kunjungan Anda!',
-                    filled: true,
-                    fillColor: const Color(0xFFF8FAFC),
-                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: const BorderSide(color: Color(0xFFE2E8F0))),
-                  ),
+                ThermalPrinterFooterTab(
+                  footerController: _footerController, policyController: _policyController,
+                  socialController: _socialController, monospaceWhatsApp: _monospaceWhatsApp,
+                  onMonospaceWhatsAppChanged: (val) => setState(() => _monospaceWhatsApp = val),
+                  onChanged: () => setState(() {}),
                 ),
-                const SizedBox(height: 16),
-                OutlinedButton.icon(
-                  onPressed: _showTestPrintPreview,
-                  icon: const Icon(Icons.preview_rounded, size: 16, color: Color(0xFF0F766E)),
-                  label: const Text('Uji Simulasi Struk (Test Print)', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 12.5, color: Color(0xFF0F766E))),
+                ThermalPrinterPreviewTab(
+                  paperWidth: _paperWidth, columnWidth: _columnWidth, sampleReceipt: sampleReceipt,
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 10),
+          Row(
+            children: [
+              Expanded(
+                child: OutlinedButton.icon(
+                  onPressed: _executeTestPrint,
+                  icon: const Icon(Icons.receipt_long_rounded, size: 16, color: Color(0xFF0F766E)),
+                  label: const Text('Uji Cetak', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 12.5, color: Color(0xFF0F766E))),
                   style: OutlinedButton.styleFrom(
                     side: const BorderSide(color: Color(0xFF99F6E4)),
                     backgroundColor: const Color(0xFFF0FDFA),
@@ -216,51 +272,25 @@ class _ThermalPrinterSettingsSheetState extends ConsumerState<ThermalPrinterSett
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                   ),
                 ),
-              ],
-            ),
-          ),
-          const SizedBox(height: 10),
-          ElevatedButton(
-            onPressed: _saveSettings,
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.primary,
-              foregroundColor: Colors.white,
-              padding: const EdgeInsets.symmetric(vertical: 13),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-            ),
-            child: const Text('Simpan Pengaturan Printer', style: TextStyle(fontWeight: FontWeight.w800, fontSize: 13.5)),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                flex: 2,
+                child: ElevatedButton.icon(
+                  onPressed: _saveSettings,
+                  icon: const Icon(Icons.check_rounded, size: 17),
+                  label: const Text('Simpan Pengaturan', style: TextStyle(fontWeight: FontWeight.w800, fontSize: 13)),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.primary,
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                  ),
+                ),
+              ),
+            ],
           ),
         ],
-      ),
-    );
-  }
-
-  Widget _buildPaperSizeOption({required String title, required String subtitle, required int value}) {
-    final isSelected = _paperWidth == value;
-    return InkWell(
-      onTap: () => setState(() => _paperWidth = value),
-      borderRadius: BorderRadius.circular(12),
-      child: Container(
-        padding: const EdgeInsets.all(12),
-        decoration: BoxDecoration(
-          color: isSelected ? const Color(0xFFF0FDFA) : Colors.white,
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: isSelected ? AppColors.primary : const Color(0xFFE2E8F0), width: isSelected ? 1.6 : 1),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(title, style: TextStyle(fontSize: 12, fontWeight: FontWeight.w800, color: isSelected ? AppColors.primary : AppColors.textPrimary)),
-                if (isSelected) const Icon(Icons.check_circle_rounded, color: AppColors.primary, size: 16),
-              ],
-            ),
-            const SizedBox(height: 2),
-            Text(subtitle, style: const TextStyle(fontSize: 10.5, color: AppColors.textSecondary)),
-          ],
-        ),
       ),
     );
   }

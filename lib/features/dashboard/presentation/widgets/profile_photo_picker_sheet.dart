@@ -103,7 +103,7 @@ class ProfilePhotoPickerSheet extends StatelessWidget {
           ),
           const SizedBox(height: 18),
           _buildOptionCard(
-            title: 'Pilih dari Galeri HP',
+            title: 'Pilih dari Galeri',
             subtitle: 'Ambil foto yang sudah tersimpan di perangkat',
             icon: Icons.photo_library_rounded,
             iconColor: const Color(0xFF2563EB),

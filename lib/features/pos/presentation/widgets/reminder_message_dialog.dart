@@ -184,7 +184,7 @@ class _ReminderMessageDialogState extends ConsumerState<ReminderMessageDialog> {
                   prefixIcon: const Icon(Icons.phone_rounded, size: 18, color: Color(0xFF059669)),
                   suffixIcon: IconButton(
                     onPressed: _pickContactPhone,
-                    tooltip: 'Ambil dari Kontak HP',
+                    tooltip: 'Ambil dari Kontak',
                     icon: const Icon(Icons.contact_phone_rounded, size: 19, color: AppColors.primary),
                   ),
                   border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),

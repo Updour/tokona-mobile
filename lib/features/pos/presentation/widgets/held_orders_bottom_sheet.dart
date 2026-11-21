@@ -53,7 +53,12 @@ class HeldOrdersBottomSheet extends ConsumerWidget {
   void _executeRestore(BuildContext context, WidgetRef ref, HeldCartModel order) {
     final restored = ref.read(heldCartProvider.notifier).restoreHeldCart(order.id);
     if (restored != null) {
-      ref.read(cartProvider.notifier).restoreCart(items: restored.items, discountAmount: restored.discountAmount, customerName: restored.customerName);
+      ref.read(cartProvider.notifier).restoreCart(
+        items: restored.items,
+        discountAmount: restored.discountAmount,
+        customerName: restored.customerName,
+        customerPhone: restored.customerPhone,
+      );
       Navigator.of(context).pop();
       AppToast.showSuccess(context, 'Pesanan ${restored.customerName ?? 'pelanggan'} dimuat kembali');
       PosCartBottomSheet.show(context);
@@ -247,7 +252,7 @@ class HeldOrdersBottomSheet extends ConsumerWidget {
               if (order.plannedDate != null)
                 IconButton(
                   icon: const Icon(Icons.calendar_month_outlined, color: Color(0xFFD97706), size: 18),
-                  tooltip: 'Simpan ke Kalender HP',
+                  tooltip: 'Simpan ke Kalender',
                   constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
                   padding: const EdgeInsets.all(4),
                   onPressed: () {

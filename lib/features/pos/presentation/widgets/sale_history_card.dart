@@ -101,9 +101,15 @@ class SaleHistoryCard extends StatelessWidget {
                               children: [
                                 const Icon(Icons.person_outline_rounded, size: 13, color: AppColors.textMuted),
                                 const SizedBox(width: 4),
-                                Text(
-                                  sale.customerName!,
-                                  style: const TextStyle(fontSize: 11.5, fontWeight: FontWeight.w600, color: AppColors.textSecondary),
+                                Expanded(
+                                  child: Text(
+                                    sale.customerPhone != null && sale.customerPhone!.isNotEmpty
+                                        ? '${sale.customerName} (${sale.customerPhone})'
+                                        : sale.customerName!,
+                                    style: const TextStyle(fontSize: 11.5, fontWeight: FontWeight.w600, color: AppColors.textSecondary),
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
                                 ),
                               ],
                             ),

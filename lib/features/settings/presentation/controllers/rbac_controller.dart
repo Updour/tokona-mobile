@@ -89,6 +89,7 @@ class RbacController extends StateNotifier<RolePermissionConfig> {
         return AppPermission.manageCustomers;
       case 'supplier':
         return AppPermission.manageSuppliers;
+      case 'printer_struk':
       case 'pengaturan_dinamis':
       case 'backup':
         return AppPermission.storeSettings;

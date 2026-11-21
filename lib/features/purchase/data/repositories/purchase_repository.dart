@@ -59,6 +59,7 @@ class PurchaseRepository {
         refundStatus: 'none', totalAmount: dto.itemsSubtotal,
         notes: dto.notes?.trim().isEmpty == true ? null : dto.notes?.trim(),
         imagePath: dto.imagePath, trackingNumber: dto.trackingNumber,
+        installmentMonths: dto.installmentMonths, monthlyInstallment: dto.monthlyInstallment,
         items: const [], createdAt: now, updatedAt: now,
       );
 
@@ -277,21 +278,18 @@ class PurchaseRepository {
     await purchaseDao.updateInvoiceAndSupplier(db, purchaseId, invoiceNumber: invoiceNumber, supplierName: supplierName, notes: notes);
   }
 
+  Future<void> updateInstallmentProgress({required String purchaseId, required int paidInstallments}) async {
+    final db = await appDatabase.database;
+    await purchaseDao.updateInstallmentProgress(db, purchaseId, paidInstallments: paidInstallments);
+  }
+
   String _generateInvoiceNumber(DateTime now, {String? supplierName, String? productName}) {
     final dStr = '${now.year.toString().substring(2)}${now.month.toString().padLeft(2, '0')}${now.day.toString().padLeft(2, '0')}';
-    String sTag = 'TKO';
-    if (supplierName != null && supplierName.trim().isNotEmpty) {
-      final c = supplierName.trim().replaceAll(RegExp(r'[^a-zA-Z0-9]'), '').toUpperCase();
-      if (c.isNotEmpty) sTag = c.length > 4 ? c.substring(0, 4) : c;
-    }
-    String pTag = 'STK';
-    if (productName != null && productName.trim().isNotEmpty) {
-      final c = productName.trim().replaceAll(RegExp(r'[^a-zA-Z0-9]'), '').toUpperCase();
-      if (c.isNotEmpty) pTag = c.length > 3 ? c.substring(0, 3) : c;
-    }
-    const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
-    final rng = Random();
-    final suffix = List.generate(4, (_) => chars[rng.nextInt(chars.length)]).join();
-    return 'PUR-$sTag-$pTag-$dStr-$suffix';
+    final sTag = supplierName?.trim().replaceAll(RegExp(r'[^a-zA-Z0-9]'), '').toUpperCase();
+    final pTag = productName?.trim().replaceAll(RegExp(r'[^a-zA-Z0-9]'), '').toUpperCase();
+    final sStr = (sTag != null && sTag.isNotEmpty) ? (sTag.length > 4 ? sTag.substring(0, 4) : sTag) : 'TKO';
+    final pStr = (pTag != null && pTag.isNotEmpty) ? (pTag.length > 3 ? pTag.substring(0, 3) : pTag) : 'STK';
+    final suffix = List.generate(4, (_) => 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'[Random().nextInt(32)]).join();
+    return 'PUR-$sStr-$pStr-$dStr-$suffix';
   }
 }

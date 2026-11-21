@@ -94,7 +94,7 @@ class _AuditLogSheetState extends ConsumerState<AuditLogSheet> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text('Log Aktivitas & Audit Kasir', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
-                    Text('Sinkron langsung dengan Cloud Supabase', style: TextStyle(fontSize: 11, color: AppColors.textSecondary)),
+                    Text('Sinkron langsung dengan Cloud', style: TextStyle(fontSize: 11, color: AppColors.textSecondary)),
                   ],
                 ),
               ),

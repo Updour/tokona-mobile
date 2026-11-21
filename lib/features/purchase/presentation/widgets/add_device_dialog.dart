@@ -59,7 +59,7 @@ class _AddDeviceDialogState extends State<AddDeviceDialog> {
           ),
           const SizedBox(width: 10),
           Text(
-            isEditing ? 'Ubah Nama HP' : 'Tambah HP Belanja',
+            isEditing ? 'Ubah Nama' : 'Tambah HP Belanja',
             style: AppTypography.headingSmall.copyWith(fontSize: 16),
           ),
         ],

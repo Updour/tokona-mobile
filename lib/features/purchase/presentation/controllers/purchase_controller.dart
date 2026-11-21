@@ -88,6 +88,8 @@ class PurchaseController extends StateNotifier<PurchaseState> {
     String? notes,
     double? serviceFee,
     double? shippingFee,
+    int? installmentMonths,
+    double? monthlyInstallment,
     required List<CreatePurchaseItemDto> newItems,
     required String storeId,
   }) async {
@@ -100,6 +102,8 @@ class PurchaseController extends StateNotifier<PurchaseState> {
         notes: notes,
         serviceFee: serviceFee,
         shippingFee: shippingFee,
+        installmentMonths: installmentMonths,
+        monthlyInstallment: monthlyInstallment,
         newItems: newItems,
       );
       await loadPurchases(storeId);
@@ -148,6 +152,21 @@ class PurchaseController extends StateNotifier<PurchaseState> {
       return true;
     } catch (e) {
       debugPrint('Error reverting purchase status: $e');
+      return false;
+    }
+  }
+
+  Future<bool> updateInstallmentProgress({
+    required String purchaseId,
+    required int paidInstallments,
+    required String storeId,
+  }) async {
+    try {
+      await _repository.updateInstallmentProgress(purchaseId: purchaseId, paidInstallments: paidInstallments);
+      await loadPurchases(storeId);
+      return true;
+    } catch (e) {
+      debugPrint('Error updating installment progress: $e');
       return false;
     }
   }

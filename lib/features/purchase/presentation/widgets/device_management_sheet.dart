@@ -54,7 +54,7 @@ class _DeviceManagementSheetState extends ConsumerState<DeviceManagementSheet> {
   Future<void> _handleDelete(String dev) async {
     final confirmed = await AppDialog.showConfirmation(
       context,
-      title: 'Hapus Device HP',
+      title: 'Hapus Device',
       message: 'Hapus penanda perangkat "$dev"? Riwayat belanja lama tetap aman.',
       confirmText: 'Hapus',
       isDestructive: true,
@@ -123,7 +123,7 @@ class _DeviceManagementSheetState extends ConsumerState<DeviceManagementSheet> {
           const SizedBox(height: 8),
           Expanded(
             child: devices.isEmpty
-                ? const Center(child: Text('Belum ada perangkat HP', style: TextStyle(color: AppColors.textMuted)))
+                ? const Center(child: Text('Belum ada perangkat', style: TextStyle(color: AppColors.textMuted)))
                 : ListView.separated(
                     padding: const EdgeInsets.fromLTRB(20, 8, 20, 20),
                     itemCount: devices.length,

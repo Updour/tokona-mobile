@@ -8,6 +8,7 @@ import 'package:tokona/core/widgets/app_toast.dart';
 import 'package:tokona/core/widgets/proof_photo_picker.dart';
 import 'package:tokona/features/auth/presentation/controllers/auth_controller.dart';
 import 'package:tokona/features/customer/domain/models/customer_model.dart';
+import 'package:tokona/features/customer/presentation/controllers/customer_controller.dart';
 import 'package:tokona/features/payment/domain/models/payment_account_model.dart';
 import 'package:tokona/features/payment/presentation/controllers/payment_account_controller.dart';
 import 'package:tokona/features/pos/presentation/controllers/cart_controller.dart';
@@ -53,6 +54,22 @@ class _PosCartBottomSheetState extends ConsumerState<PosCartBottomSheet> {
     if (store != null) ref.read(paymentAccountListProvider.notifier).loadAccounts(store.id);
     final cart = ref.read(cartProvider);
     _customerController.text = cart.customerName ?? '';
+    if (cart.customerPhone != null && cart.customerPhone!.isNotEmpty) {
+      final customers = ref.read(customerListProvider).customers;
+      final matched = customers.where((c) => c.phone == cart.customerPhone || (cart.customerName != null && c.name == cart.customerName));
+      if (matched.isNotEmpty) {
+        _selectedCustomer = matched.first;
+      } else {
+        _selectedCustomer = CustomerModel(
+          id: '',
+          storeId: store?.id ?? '',
+          name: cart.customerName ?? '',
+          phone: cart.customerPhone,
+          createdAt: DateTime.now(),
+          updatedAt: DateTime.now(),
+        );
+      }
+    }
     if (cart.discountAmount > 0) _discountController.text = CurrencyFormatter.formatNumber(cart.discountAmount);
     _cashController.text = CurrencyFormatter.formatNumber(cart.finalAmount);
 
@@ -96,31 +113,20 @@ class _PosCartBottomSheetState extends ConsumerState<PosCartBottomSheet> {
         : _selectedCustomer?.name;
     final customerPhone = _selectedCustomer?.phone;
 
-    ref.read(cartProvider.notifier).setCustomerName(customerName);
+    ref.read(cartProvider.notifier).setCustomerName(customerName, customerPhone);
 
     final sale = await ref.read(saleControllerProvider.notifier).checkout(
-      storeId: store.id,
-      userId: user.id,
-      customerId: _selectedCustomer?.id,
-      customerName: customerName,
-      customerPhone: customerPhone,
-      cart: ref.read(cartProvider),
-      cashPaid: _isKasbonSelected ? 0 : cashPaid,
+      storeId: store.id, userId: user.id, customerId: _selectedCustomer?.id, customerName: customerName,
+      customerPhone: customerPhone, cart: ref.read(cartProvider), cashPaid: _isKasbonSelected ? 0 : cashPaid,
       paymentMethod: _isKasbonSelected ? 'KASBON' : (activeAccount?.name ?? 'Kas Tunai'),
-      imagePath: _paymentProofPath,
-      dueDate: _isKasbonSelected ? _selectedDueDate : null,
+      imagePath: _paymentProofPath, dueDate: _isKasbonSelected ? _selectedDueDate : null,
     );
 
     if (mounted && sale != null) {
       Navigator.of(context).pop();
       PosReceiptDialog.show(
-        context,
-        sale: sale,
-        storeName: store.name,
-        cashierName: user.fullName,
-        customerPhone: sale.customerPhone ?? customerPhone,
-        storeAddress: store.address,
-        storePhone: store.phone,
+        context, sale: sale, storeName: store.name, cashierName: user.fullName,
+        customerPhone: sale.customerPhone ?? customerPhone, storeAddress: store.address, storePhone: store.phone,
       );
     }
   }
@@ -182,12 +188,8 @@ class _PosCartBottomSheetState extends ConsumerState<PosCartBottomSheet> {
                   }),
                   const SizedBox(height: 10),
                   PosPaymentSection(
-                    subtotal: cart.subtotal,
-                    discount: cart.discountAmount,
-                    finalAmount: cart.finalAmount,
-                    cashController: _cashController,
-                    discountController: _discountController,
-                    accounts: accounts,
+                    subtotal: cart.subtotal, discount: cart.discountAmount, finalAmount: cart.finalAmount,
+                    cashController: _cashController, discountController: _discountController, accounts: accounts,
                     selectedAccount: _selectedAccount ?? (accounts.isNotEmpty ? accounts.firstWhere((a) => a.type == 'cash', orElse: () => accounts.first) : null),
                     isKasbonSelected: _isKasbonSelected,
                     onAccountSelected: (acc) {
@@ -250,10 +252,8 @@ class _PosCartBottomSheetState extends ConsumerState<PosCartBottomSheet> {
           children: [
             if (cart.isNotEmpty)
               _buildActionBtn(
-                icon: Icons.pause_circle_rounded,
-                label: 'Tahan',
-                bgColor: const Color(0xFFFEF3C7),
-                color: const Color(0xFFB45309),
+                icon: Icons.pause_circle_rounded, label: 'Tahan',
+                bgColor: const Color(0xFFFEF3C7), color: const Color(0xFFB45309),
                 onTap: () async {
                   HapticFeedback.lightImpact();
                   final held = await HoldCartDialog.show(context, initialCustomerName: _customerController.text.trim());
@@ -262,10 +262,8 @@ class _PosCartBottomSheetState extends ConsumerState<PosCartBottomSheet> {
               ),
             const SizedBox(width: 6),
             _buildActionBtn(
-              icon: Icons.delete_sweep_rounded,
-              label: 'Kosongkan',
-              bgColor: const Color(0xFFFEE2E2),
-              color: const Color(0xFFDC2626),
+              icon: Icons.delete_sweep_rounded, label: 'Kosongkan',
+              bgColor: const Color(0xFFFEE2E2), color: const Color(0xFFDC2626),
               onTap: () {
                 HapticFeedback.mediumImpact();
                 ref.read(cartProvider.notifier).clearCart();

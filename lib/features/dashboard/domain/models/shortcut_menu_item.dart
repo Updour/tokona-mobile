@@ -153,7 +153,7 @@ class AppShortcutRegistry {
       icon: Icons.currency_exchange_rounded,
       iconColor: Color(0xFFE11D48),
       bgColor: Color(0xFFFFE4E6),
-      description: 'Pantau pengembalian dana marketplace Shopee/TikTok',
+      description: 'Pantau pengembalian dana marketplace',
     ),
     ShortcutMenuItem(
       id: 'hp_belanja',
@@ -230,6 +230,15 @@ class AppShortcutRegistry {
       iconColor: Color(0xFF64748B),
       bgColor: Color(0xFFF8FAFC),
       description: 'Daftar mitra distributor & pemasok barang',
+    ),
+    ShortcutMenuItem(
+      id: 'printer_struk',
+      label: 'Printer Struk',
+      category: 'Pelanggan & Relasi',
+      icon: Icons.print_rounded,
+      iconColor: Color(0xFF4F46E5),
+      bgColor: Color(0xFFEEF2FF),
+      description: 'Atur format cetak struk kasir, ukuran kertas & template ESC/POS',
     ),
     ShortcutMenuItem(
       id: 'pengaturan_dinamis',

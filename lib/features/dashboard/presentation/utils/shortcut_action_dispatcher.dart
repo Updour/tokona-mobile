@@ -24,6 +24,7 @@ import 'package:tokona/features/purchase/presentation/widgets/purchase_history_s
 import 'package:tokona/features/purchase/presentation/widgets/refund_monitor_sheet.dart';
 import 'package:tokona/features/settings/presentation/controllers/rbac_controller.dart';
 import 'package:tokona/features/settings/presentation/widgets/dynamic_settings_sheet.dart';
+import 'package:tokona/features/settings/presentation/widgets/thermal_printer_settings_sheet.dart';
 import 'package:tokona/features/supplier/presentation/widgets/supplier_list_bottom_sheet.dart';
 
 class ShortcutActionDispatcher {
@@ -131,6 +132,9 @@ class ShortcutActionDispatcher {
         break;
       case 'pengaturan_dinamis':
         DynamicSettingsSheet.show(context);
+        break;
+      case 'printer_struk':
+        ThermalPrinterSettingsSheet.show(context);
         break;
     }
   }

@@ -175,7 +175,7 @@ class _HoldCartDialogState extends ConsumerState<HoldCartDialog> {
                   ),
                   const SizedBox(width: 8),
                   const Expanded(
-                    child: Text('Pasang pengingat di Kalender HP', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600)),
+                    child: Text('Pasang pengingat di Kalender', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600)),
                   ),
                 ],
               ),

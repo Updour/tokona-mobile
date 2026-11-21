@@ -69,11 +69,11 @@ class PaylaterBillSummaryCard extends ConsumerWidget {
                 decoration: BoxDecoration(
                   color: isSettled
                       ? const Color(0xFF16A34A)
-                      : (isWindowActive ? const Color(0xFFDC2626) : const Color(0xFF64748B)),
+                      : (isWindowActive ? const Color(0xFFDC2626) : const Color(0xFFD97706)),
                   borderRadius: BorderRadius.circular(6),
                 ),
                 child: Text(
-                  isSettled ? 'LUNAS' : (isWindowActive ? 'TGL 01 JATUH TEMPO' : 'BELUM JATUH TEMPO'),
+                  isSettled ? 'LUNAS' : (isWindowActive ? 'SIAP DIBAYAR' : 'TAGIHAN AKTIF'),
                   style: const TextStyle(fontSize: 9.5, fontWeight: FontWeight.w800, color: Colors.white),
                 ),
               ),
@@ -100,10 +100,8 @@ class PaylaterBillSummaryCard extends ConsumerWidget {
               Expanded(
                 child: Text(
                   isSettled
-                      ? 'Tagihan bulan ini sudah dikonfirmasi lunas.'
-                      : (isWindowActive
-                          ? '$transactionCount transaksi kulakan siap dilunasi.'
-                          : 'Tagihan aktif dibuka mulai tgl 29 s/d 01.'),
+                      ? 'Tagihan siklus ini sudah dikonfirmasi lunas.'
+                      : '$transactionCount transaksi kulakan & cicilan PayLater berjalan.',
                   style: TextStyle(
                     fontSize: 11,
                     color: isSettled ? const Color(0xFF166534) : const Color(0xFF92400E),
@@ -169,73 +167,56 @@ class PaylaterBillSummaryCard extends ConsumerWidget {
       );
     }
 
-    if (!isWindowActive) {
-      return Container(
-        padding: const EdgeInsets.symmetric(vertical: 8),
-        alignment: Alignment.center,
-        decoration: BoxDecoration(
-          color: const Color(0xFFE2E8F0),
-          borderRadius: BorderRadius.circular(10),
-        ),
-        child: const Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(Icons.lock_clock_rounded, size: 14, color: Color(0xFF64748B)),
-            SizedBox(width: 6),
-            Text(
-              'Tombol Bayar Aktif Tgl 29 - 01',
-              style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: Color(0xFF64748B)),
-            ),
-          ],
-        ),
-      );
-    }
+    final btnColor = isWindowActive ? const Color(0xFF16A34A) : const Color(0xFF0D9488);
+    final btnLabel = isWindowActive ? 'Konfirmasi & Bayar Tagihan' : 'Bayar Lebih Awal / Cicil Sekarang';
 
     return ElevatedButton.icon(
-      onPressed: () async {
-        final accounts = ref.read(paymentAccountListProvider);
-        if (accounts.isEmpty && store != null) {
-          await ref.read(paymentAccountListProvider.notifier).loadAccounts(store.id);
-        }
-        final currentAccounts = ref.read(paymentAccountListProvider);
+      onPressed: effectiveBill <= 0
+          ? null
+          : () async {
+              final accounts = ref.read(paymentAccountListProvider);
+              if (accounts.isEmpty && store != null) {
+                await ref.read(paymentAccountListProvider.notifier).loadAccounts(store.id);
+              }
+              final currentAccounts = ref.read(paymentAccountListProvider);
 
-        if (!context.mounted) return;
-        final selectedAccount = await PaylaterSettlementAccountSheet.show(
-          context,
-          amount: effectiveBill,
-          accounts: currentAccounts,
-        );
-
-        if (selectedAccount == null || !context.mounted) return;
-
-        // Potong saldo dari akun terpilih
-        if (store != null) {
-          await ref.read(paymentAccountListProvider.notifier).adjustBalance(
-                store.id,
-                selectedAccount.id,
-                -effectiveBill,
+              if (!context.mounted) return;
+              final selectedAccount = await PaylaterSettlementAccountSheet.show(
+                context,
+                amount: effectiveBill,
+                accounts: currentAccounts,
               );
-        }
 
-        await ref.read(paylaterSettlementProvider.notifier).markSettled(
-              targetYear,
-              targetMonth,
-              accountId: selectedAccount.id,
-              accountName: selectedAccount.name,
-              amount: effectiveBill,
-            );
+              if (selectedAccount == null || !context.mounted) return;
 
-        if (context.mounted) {
-          AppToast.showSuccess(
-            context,
-            'Tagihan SPayLater lunas! Dipotong dari ${selectedAccount.name} (${CurrencyFormatter.format(effectiveBill)})',
-          );
-        }
-      },
+              if (store != null) {
+                await ref.read(paymentAccountListProvider.notifier).adjustBalance(
+                      store.id,
+                      selectedAccount.id,
+                      -effectiveBill,
+                    );
+              }
+
+              await ref.read(paylaterSettlementProvider.notifier).markSettled(
+                    targetYear,
+                    targetMonth,
+                    accountId: selectedAccount.id,
+                    accountName: selectedAccount.name,
+                    amount: effectiveBill,
+                  );
+
+              if (context.mounted) {
+                AppToast.showSuccess(
+                  context,
+                  'Tagihan SPayLater lunas! Dipotong dari ${selectedAccount.name} (${CurrencyFormatter.format(effectiveBill)})',
+                );
+              }
+            },
       icon: const Icon(Icons.check_circle_outline_rounded, size: 16, color: Colors.white),
-      label: const Text('Konfirmasi & Bayar Tagihan', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w800, color: Colors.white)),
+      label: Text(btnLabel, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w800, color: Colors.white)),
       style: ElevatedButton.styleFrom(
-        backgroundColor: const Color(0xFF16A34A),
+        backgroundColor: btnColor,
+        foregroundColor: Colors.white,
         padding: const EdgeInsets.symmetric(vertical: 10),
         elevation: 0,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),

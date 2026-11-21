@@ -25,7 +25,7 @@ Tokona POS dirancang khusus untuk toko kelontong, retail, dan grosir yang membut
 ### Fitur Unggulan:
 * **Offline-First:** Semua transaksi kasir, input produk, dan pencatatan kasbon disimpan langsung di database lokal SQLite pada ponsel Anda. Aplikasi tetap berjalan 100% lancar walau tanpa koneksi internet.
 * **Multi-Device Pairing (Offline QR):** HP Owner dapat menerbitkan kredensial untuk HP Kasir atau HP Admin cukup dengan memindai kode QR secara langsung tanpa butuh koneksi server.
-* **Auto-Sync Polling ke HP Owner:** Setiap 30 detik saat terhubung ke jaringan, data penjualan dan aktivitas kasir disinkronkan ke Supabase Cloud sehingga Owner dapat memantau omzet toko secara real-time dari mana saja.
+* **Auto-Sync Polling ke HP Owner:** Setiap 30 detik saat terhubung ke jaringan, data penjualan dan aktivitas kasir disinkronkan ke Cloud sehingga Owner dapat memantau omzet toko secara real-time dari mana saja.
 * **Audit Trail Komprehensif:** Setiap tindakan penting (tambah produk, ubah harga, opname stok, terima barang belanja, pendaftaran kasir, perubahan PIN) dicatat secara otomatis lengkap dengan waktu, nama staf, dan perannya.
 * **Cetak Struk Thermal Bluetooth:** Mendukung printer thermal 58mm dan 80mm dengan protokol ESC/POS standar.
 * **Sistem Keamanan Ganda:** Proteksi PIN 6-digit dan autentikasi biometrik (Fingerprint / Sidik Jari) dengan fitur *Auto-Lock* saat aplikasi diminimize.
@@ -196,6 +196,25 @@ Tokona POS mendukung pencetakan nota fisik menggunakan printer thermal mini port
 Untuk pembelian barang dalam jumlah besar yang dikirim melalui ekspedisi logistik:
 * Masukkan nomor resi pada detail pesanan.
 * Sistem Tokona terintegrasi dengan pelacakan status pengiriman cargo untuk memantau perjalanan logistik barang kulakan Anda.
+
+### D. Skema Cicilan Shopee PayLater (BNPL) & Alokasi Celengan Harian
+Bagi toko yang kulakan belanja modal barang dagangan lewat Shopee PayLater / SPayLater:
+1. **Tenor Cicilan Fleksibel (1x, 3x, 6x, 12x):**
+   * Saat mencatat pembelian baru atau mengedit faktur belanja yang sudah ada, pemilik toko dapat memilih skema cicilan: **1 Bulan (Tempo)**, **3 Bulan**, **6 Bulan**, atau **12 Bulan**.
+   * Masukkan nominal cicilan per bulan persis sesuai yang tertera di aplikasi Shopee (otomatis diberi estimasi bunga rata-rata SPayLater ~2.95%/bulan).
+2. **Pengecekan Margin vs Bunga (Safety Indicator):**
+   * Tokona otomatis menghitung total bunga cicilan dari tenor yang dipilih.
+   * Apabila persentase bunga di atas 10%, sistem memberikan peringatan (*Safety Margin Warning*) agar pemilik toko memastikan harga jual eceran di toko dinaikkan secukupnya agar margin laba tidak tergerus bunga cicilan.
+3. **Siklus Tanggal Jatuh Tempo Akun Shopee (Tgl 1, 5, 11, 25):**
+   * Akun Shopee setiap pemilik toko memiliki tanggal siklus penagihan jatuh tempo yang berbeda-beda.
+   * Di layar **Monitor Tagihan PayLater**, pemilik toko dapat memilih tanggal siklus jatuh tempo akun Shopee miliknya (Tanggal 1, 5, 11, atau 25), sehingga perhitungan tagihan jatuh tempo bulan berjalan selalu presisi.
+4. **Celengan Harian PayLater (Alokasi Tutup Kasir & Beranda):**
+   * Muncul kartu **Celengan Harian PayLater** saat kasir melakukan **Tutup Kasir Harian** maupun di Beranda Owner.
+   * Memberikan rekomendasi nominal uang kas harian yang sebaiknya disisihkan ke celengan/amplop bayar PayLater agar saat tanggal jatuh tempo tiba, uang pelunasan sudah terkumpul tanpa mengganggu modal operasional harian.
+5. **Pembayaran Fleksibel / Bayar Lebih Awal:**
+   * Tombol pelunasan dan cicil PayLater tidak dikunci hanya di akhir bulan, sehingga pemilik toko dapat mencicil atau melunasi tagihan Shopee PayLater lebih awal kapan saja saat kas toko sedang longgar.
+6. **Form Rapi & Tombol Sejajar:**
+   * Pada dialog **Ubah Item Belanja** dan form **Edit & Tambah Barang Faktur**, tombol aksi *Batal* dan *Simpan* ditata sejajar berdampingan (50:50) dalam satu baris dengan field input terstandarisasi.
 
 ---
 

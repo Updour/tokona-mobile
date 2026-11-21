@@ -263,8 +263,7 @@ class BerandaBookingMonitorCard extends ConsumerWidget {
                   padding: const EdgeInsets.all(5),
                   onPressed: () {
                     final method = isDelivery ? 'diantar' : 'diambil di toko/rumah';
-                    final msg = 'Halo Kak ${order.customerName ?? ""}, pesanan di Tokona sudah siap $method ya!';
-                    WhatsAppService.sendReceipt(phone: order.customerPhone!, message: msg);
+                    WhatsAppService.sendReceipt(phone: order.customerPhone!, message: 'Halo Kak ${order.customerName ?? ""}, pesanan di Tokona sudah siap $method ya!');
                   },
                 ),
               InkWell(
@@ -272,7 +271,10 @@ class BerandaBookingMonitorCard extends ConsumerWidget {
                   HapticFeedback.lightImpact();
                   final restored = ref.read(heldCartProvider.notifier).restoreHeldCart(order.id);
                   if (restored != null) {
-                    ref.read(cartProvider.notifier).restoreCart(items: restored.items, discountAmount: restored.discountAmount, customerName: restored.customerName);
+                    ref.read(cartProvider.notifier).restoreCart(
+                      items: restored.items, discountAmount: restored.discountAmount,
+                      customerName: restored.customerName, customerPhone: restored.customerPhone,
+                    );
                     PosCartBottomSheet.show(context);
                   }
                 },

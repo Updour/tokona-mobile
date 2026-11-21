@@ -120,8 +120,14 @@ class CartController extends StateNotifier<CartState> {
     state = state.copyWith(discountAmount: discount < 0 ? 0 : discount);
   }
 
-  void setCustomerName(String? name) {
-    state = state.copyWith(customerName: name, clearCustomer: name == null || name.isEmpty);
+  void setCustomerName(String? name, [String? phone]) {
+    final cleanName = name?.trim().isEmpty == true ? null : name?.trim();
+    final cleanPhone = phone?.trim().isEmpty == true ? null : phone?.trim();
+    state = state.copyWith(
+      customerName: cleanName,
+      customerPhone: cleanPhone,
+      clearCustomer: cleanName == null && cleanPhone == null,
+    );
   }
 
   void clearCart() {
@@ -132,11 +138,13 @@ class CartController extends StateNotifier<CartState> {
     required List<CartItemModel> items,
     double discountAmount = 0.0,
     String? customerName,
+    String? customerPhone,
   }) {
     state = CartState(
       items: List.from(items),
       discountAmount: discountAmount,
       customerName: customerName,
+      customerPhone: customerPhone,
     );
   }
 

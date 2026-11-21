@@ -81,6 +81,7 @@ class ReminderBookingTile extends ConsumerWidget {
             items: restored.items,
             discountAmount: restored.discountAmount,
             customerName: restored.customerName,
+            customerPhone: restored.customerPhone,
           );
       onOrderRestored?.call();
       AppToast.showSuccess(context, 'Pesanan dimuat ke kasir POS');
