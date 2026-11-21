@@ -190,7 +190,7 @@ class AuthController extends StateNotifier<AuthState> {
         userName: result.user.fullName,
         userRole: result.user.role.label,
         actionType: AuditActionType.pairing,
-        title: 'Pairing HP Kasir Baru',
+        title: 'Pairing Kasir Baru',
         description: 'Perangkat kasir berhasil pairing offline dengan ${result.store.name}.',
       );
       return true;

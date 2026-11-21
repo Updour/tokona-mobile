@@ -18,35 +18,63 @@ class PosCartCustomerBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final hasPhone = selectedCustomer != null && selectedCustomer!.phone != null && selectedCustomer!.phone!.trim().isNotEmpty;
+
     return Container(
-      height: 38,
-      padding: const EdgeInsets.symmetric(horizontal: 4),
+      constraints: const BoxConstraints(minHeight: 38),
+      padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 3),
       decoration: BoxDecoration(
         color: AppColors.surfaceElevated,
         borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: AppColors.border),
+        border: Border.all(
+          color: selectedCustomer != null ? AppColors.primary.withValues(alpha: 0.5) : AppColors.border,
+        ),
       ),
       child: Row(
         children: [
           const SizedBox(width: 6),
-          const Icon(Icons.person_outline_rounded, size: 16, color: AppColors.textSecondary),
+          Icon(
+            selectedCustomer != null ? Icons.person_rounded : Icons.person_outline_rounded,
+            size: 16,
+            color: selectedCustomer != null ? AppColors.primary : AppColors.textSecondary,
+          ),
           const SizedBox(width: 6),
           Expanded(
-            child: TextField(
-              controller: controller,
-              onChanged: (val) {
-                if (selectedCustomer != null && val != selectedCustomer!.name) {
-                  onCustomerChanged(null);
-                }
-              },
-              style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
-              decoration: const InputDecoration(
-                hintText: 'Nama pelanggan (opsional / kasbon)',
-                hintStyle: TextStyle(fontSize: 11.5, color: AppColors.textMuted),
-                isDense: true,
-                contentPadding: EdgeInsets.symmetric(vertical: 8),
-                border: InputBorder.none,
-              ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                TextField(
+                  controller: controller,
+                  onChanged: (val) {
+                    if (selectedCustomer != null && val != selectedCustomer!.name) {
+                      onCustomerChanged(null);
+                    }
+                  },
+                  style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
+                  decoration: const InputDecoration(
+                    hintText: 'Nama pelanggan (opsional / kasbon)',
+                    hintStyle: TextStyle(fontSize: 11.5, color: AppColors.textMuted),
+                    isDense: true,
+                    contentPadding: EdgeInsets.symmetric(vertical: 6),
+                    border: InputBorder.none,
+                  ),
+                ),
+                if (hasPhone)
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 2),
+                    child: Row(
+                      children: [
+                        const Icon(Icons.phone_outlined, size: 11, color: AppColors.textMuted),
+                        const SizedBox(width: 3),
+                        Text(
+                          selectedCustomer!.phone!.trim(),
+                          style: const TextStyle(fontSize: 10, color: AppColors.textSecondary, fontWeight: FontWeight.w500),
+                        ),
+                      ],
+                    ),
+                  ),
+              ],
             ),
           ),
           if (selectedCustomer != null)

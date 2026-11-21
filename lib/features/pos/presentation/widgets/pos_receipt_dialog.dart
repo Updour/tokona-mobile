@@ -50,13 +50,19 @@ class PosReceiptDialog extends StatelessWidget {
     );
   }
 
+  String? get _effectivePhone => (customerPhone != null && customerPhone!.trim().isNotEmpty)
+      ? customerPhone!.trim()
+      : (sale.customerPhone != null && sale.customerPhone!.trim().isNotEmpty
+          ? sale.customerPhone!.trim()
+          : null);
+
   String _getFormattedReceipt() {
     return ReceiptTextFormatter.formatReceipt(
       sale: sale,
       storeName: storeName,
       cashierName: cashierName,
       customerName: sale.customerName,
-      customerPhone: customerPhone,
+      customerPhone: _effectivePhone,
       storeAddress: storeAddress,
       storePhone: storePhone,
     );
@@ -70,12 +76,13 @@ class PosReceiptDialog extends StatelessWidget {
 
   Future<void> _handleSendWhatsApp(BuildContext context) async {
     final receiptText = _getFormattedReceipt();
+    final phone = _effectivePhone;
 
-    if (customerPhone != null && customerPhone!.trim().isNotEmpty) {
+    if (phone != null && phone.isNotEmpty) {
       HapticFeedback.lightImpact();
-      AppToast.showInfo(context, 'Membuka WhatsApp ke $customerPhone...');
+      AppToast.showInfo(context, 'Membuka WhatsApp ke $phone...');
       final launched = await WhatsAppService.sendReceipt(
-        phone: customerPhone!,
+        phone: phone,
         message: receiptText,
       );
       if (!launched && context.mounted) {
@@ -127,6 +134,33 @@ class PosReceiptDialog extends StatelessWidget {
               const SizedBox(height: 4),
               Text(sale.invoiceNumber, style: AppTypography.labelMedium.copyWith(color: AppColors.primary)),
               Text(dateFormat.format(sale.createdAt), style: AppTypography.bodySmall.copyWith(fontSize: 11)),
+              if (sale.customerName != null && sale.customerName!.trim().isNotEmpty) ...[
+                const SizedBox(height: 6),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: AppColors.primaryContainer.withValues(alpha: 0.5),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Icon(Icons.person_rounded, size: 14, color: AppColors.primaryDark),
+                      const SizedBox(width: 4),
+                      Text(
+                        sale.customerName!.trim(),
+                        style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: AppColors.primaryDark),
+                      ),
+                      if (_effectivePhone != null && _effectivePhone!.isNotEmpty) ...[
+                        Text(
+                          ' (${_effectivePhone!})',
+                          style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: AppColors.primaryDark),
+                        ),
+                      ],
+                    ],
+                  ),
+                ),
+              ],
               const Divider(height: 20),
               ...sale.items.map((item) {
                 return Padding(

@@ -27,6 +27,9 @@ class AppPreferences {
   final bool autoPrintReceipt;
   final String printerFooterMessage;
 
+  // 6. Sinkronisasi Cloud
+  final int syncIntervalSeconds;
+
   const AppPreferences({
     this.paylaterName = 'SPayLater',
     this.paylaterDueDay = 1,
@@ -48,6 +51,7 @@ class AppPreferences {
     this.printerPaperWidth = 58,
     this.autoPrintReceipt = false,
     this.printerFooterMessage = 'Terima kasih atas kunjungan Anda!',
+    this.syncIntervalSeconds = 30,
   });
 
   static const String defaultBookingTemplate =
@@ -120,6 +124,7 @@ class AppPreferences {
     int? printerPaperWidth,
     bool? autoPrintReceipt,
     String? printerFooterMessage,
+    int? syncIntervalSeconds,
   }) {
     return AppPreferences(
       paylaterName: paylaterName ?? this.paylaterName,
@@ -142,6 +147,7 @@ class AppPreferences {
       printerPaperWidth: printerPaperWidth ?? this.printerPaperWidth,
       autoPrintReceipt: autoPrintReceipt ?? this.autoPrintReceipt,
       printerFooterMessage: printerFooterMessage ?? this.printerFooterMessage,
+      syncIntervalSeconds: syncIntervalSeconds ?? this.syncIntervalSeconds,
     );
   }
 
@@ -166,6 +172,7 @@ class AppPreferences {
         'printerPaperWidth': printerPaperWidth,
         'autoPrintReceipt': autoPrintReceipt,
         'printerFooterMessage': printerFooterMessage,
+        'syncIntervalSeconds': syncIntervalSeconds,
       };
 
   factory AppPreferences.fromMap(Map<String, dynamic> map) {
@@ -190,6 +197,7 @@ class AppPreferences {
       printerPaperWidth: (map['printerPaperWidth'] as num? ?? 58).toInt() == 80 ? 80 : 58,
       autoPrintReceipt: map['autoPrintReceipt'] as bool? ?? false,
       printerFooterMessage: (map['printerFooterMessage'] as String?) ?? 'Terima kasih atas kunjungan Anda!',
+      syncIntervalSeconds: (map['syncIntervalSeconds'] as num? ?? 30).toInt().clamp(10, 86400),
     );
   }
 }

@@ -23,7 +23,7 @@ import 'package:tokona/features/supplier/data/schemas/supplier_schema.dart';
 
 class AppDatabase {
   static const String databaseName = 'tokona_pos.db';
-  static const int databaseVersion = 18;
+  static const int databaseVersion = 19;
 
   static final AppDatabase instance = AppDatabase._internal();
   AppDatabase._internal();
@@ -114,6 +114,9 @@ class AppDatabase {
         if (oldVersion < 18) {
           await CustomerReceivablePaymentSchema.create(db);
         }
+        if (oldVersion < 19) {
+          await _addColumnIfNotExists(db, DatabaseTables.sales, DatabaseTables.columnSaleCustomerPhone, 'TEXT');
+        }
       },
       onOpen: (db) async {
         await _ensurePurchaseColumnsExist(db);
@@ -161,6 +164,7 @@ class AppDatabase {
     await _addColumnIfNotExists(db, DatabaseTables.purchases, DatabaseTables.columnPurchaseImagePath, 'TEXT');
     await _addColumnIfNotExists(db, DatabaseTables.purchases, DatabaseTables.columnPurchaseTrackingNumber, 'TEXT');
     await _addColumnIfNotExists(db, DatabaseTables.sales, DatabaseTables.columnSaleCustomerId, 'TEXT');
+    await _addColumnIfNotExists(db, DatabaseTables.sales, DatabaseTables.columnSaleCustomerPhone, 'TEXT');
     await _addColumnIfNotExists(db, DatabaseTables.sales, DatabaseTables.columnSaleStatus, "TEXT DEFAULT 'COMPLETED'");
     await _addColumnIfNotExists(db, DatabaseTables.sales, DatabaseTables.columnSaleDueDate, 'TEXT');
     await _addColumnIfNotExists(db, DatabaseTables.sales, DatabaseTables.columnSaleImagePath, 'TEXT');

@@ -12,6 +12,7 @@ class SaleSchema {
       ${DatabaseTables.columnSaleCustomerId} TEXT,
       ${DatabaseTables.columnSaleInvoiceNumber} TEXT NOT NULL,
       ${DatabaseTables.columnSaleCustomerName} TEXT,
+      ${DatabaseTables.columnSaleCustomerPhone} TEXT,
       ${DatabaseTables.columnSaleTotalAmount} REAL NOT NULL DEFAULT 0.0,
       ${DatabaseTables.columnSaleDiscountAmount} REAL NOT NULL DEFAULT 0.0,
       ${DatabaseTables.columnSaleFinalAmount} REAL NOT NULL DEFAULT 0.0,

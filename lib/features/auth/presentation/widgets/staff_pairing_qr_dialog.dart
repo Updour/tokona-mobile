@@ -89,7 +89,7 @@ $payload
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text('QR Pairing HP Kasir', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
+                      const Text('QR Pairing Kasir', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
                       Text('${staff.fullName} (${staff.role.label})', style: const TextStyle(fontSize: 11.5, color: AppColors.textSecondary)),
                     ],
                   ),

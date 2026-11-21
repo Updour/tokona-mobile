@@ -14,6 +14,7 @@ import 'package:tokona/features/settings/presentation/widgets/app_lock_settings_
 import 'package:tokona/features/settings/presentation/widgets/audit_log_sheet.dart';
 import 'package:tokona/features/settings/presentation/widgets/rbac_management_sheet.dart';
 import 'package:tokona/features/settings/presentation/widgets/thermal_printer_settings_sheet.dart';
+import 'package:tokona/features/sync/presentation/widgets/sync_detail_bottom_sheet.dart';
 
 class ProfileSettingsSheet extends ConsumerWidget {
   final StoreModel? store;
@@ -167,6 +168,21 @@ class ProfileSettingsSheet extends ConsumerWidget {
                   onTap: () {
                     Navigator.of(context).pop();
                     AppLockSettingsSheet.show(context);
+                  },
+                ),
+                _buildSettingTile(
+                  icon: Icons.cloud_sync_rounded,
+                  color: AppColors.primary,
+                  title: 'Sinkronisasi Cloud & Interval',
+                  subtitle: 'Atur jeda polling (15 dtk s/d 1 jam) & auto-sync',
+                  trailing: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                    decoration: BoxDecoration(color: AppColors.primaryContainer, borderRadius: BorderRadius.circular(8)),
+                    child: const Text('Atur', style: TextStyle(fontSize: 10.5, fontWeight: FontWeight.w800, color: AppColors.primaryDark)),
+                  ),
+                  onTap: () {
+                    Navigator.of(context).pop();
+                    SyncDetailBottomSheet.show(context);
                   },
                 ),
                 _buildSettingTile(

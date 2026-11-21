@@ -8,6 +8,7 @@ class SaleModel {
   final String? customerId;
   final String invoiceNumber;
   final String? customerName;
+  final String? customerPhone;
   final double totalAmount;
   final double discountAmount;
   final double finalAmount;
@@ -30,6 +31,7 @@ class SaleModel {
     this.customerId,
     required this.invoiceNumber,
     this.customerName,
+    this.customerPhone,
     required this.totalAmount,
     this.discountAmount = 0.0,
     required this.finalAmount,
@@ -76,6 +78,7 @@ class SaleModel {
       customerId: map[DatabaseTables.columnSaleCustomerId] as String?,
       invoiceNumber: map[DatabaseTables.columnSaleInvoiceNumber] as String,
       customerName: map[DatabaseTables.columnSaleCustomerName] as String?,
+      customerPhone: map[DatabaseTables.columnSaleCustomerPhone] as String?,
       totalAmount: (map[DatabaseTables.columnSaleTotalAmount] as num).toDouble(),
       discountAmount: (map[DatabaseTables.columnSaleDiscountAmount] as num?)?.toDouble() ?? 0.0,
       finalAmount: (map[DatabaseTables.columnSaleFinalAmount] as num).toDouble(),
@@ -105,6 +108,7 @@ class SaleModel {
       DatabaseTables.columnSaleCustomerId: customerId,
       DatabaseTables.columnSaleInvoiceNumber: invoiceNumber,
       DatabaseTables.columnSaleCustomerName: customerName,
+      DatabaseTables.columnSaleCustomerPhone: customerPhone,
       DatabaseTables.columnSaleTotalAmount: totalAmount,
       DatabaseTables.columnSaleDiscountAmount: discountAmount,
       DatabaseTables.columnSaleFinalAmount: finalAmount,
@@ -128,6 +132,7 @@ class SaleModel {
     String? customerId,
     String? invoiceNumber,
     String? customerName,
+    String? customerPhone,
     double? totalAmount,
     double? discountAmount,
     double? finalAmount,
@@ -150,6 +155,7 @@ class SaleModel {
       customerId: customerId ?? this.customerId,
       invoiceNumber: invoiceNumber ?? this.invoiceNumber,
       customerName: customerName ?? this.customerName,
+      customerPhone: customerPhone ?? this.customerPhone,
       totalAmount: totalAmount ?? this.totalAmount,
       discountAmount: discountAmount ?? this.discountAmount,
       finalAmount: finalAmount ?? this.finalAmount,

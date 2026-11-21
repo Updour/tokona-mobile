@@ -130,7 +130,7 @@ class ProfileStaffManagementCard extends ConsumerWidget {
                       StaffManagementSheet.show(context);
                     },
                     icon: const Icon(Icons.qr_code_scanner_rounded, size: 15, color: AppColors.primaryDark),
-                    label: const Text('Pairing HP (QR)', style: TextStyle(fontSize: 11.5, fontWeight: FontWeight.w800, color: AppColors.primaryDark)),
+                    label: const Text('Pairing', style: TextStyle(fontSize: 11.5, fontWeight: FontWeight.w800, color: AppColors.primaryDark)),
                     style: OutlinedButton.styleFrom(
                       side: BorderSide(color: AppColors.primary.withValues(alpha: 0.4), width: 1.2),
                       backgroundColor: AppColors.primaryContainer.withValues(alpha: 0.45),
@@ -162,7 +162,7 @@ class ProfileStaffManagementCard extends ConsumerWidget {
                   SizedBox(width: 7),
                   Expanded(
                     child: Text(
-                      'Atur Hak Akses Menu Kasir & Admin (RBAC)',
+                      'Atur Hak Akses Menu Kasir & Admin',
                       style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: AppColors.textPrimary),
                     ),
                   ),

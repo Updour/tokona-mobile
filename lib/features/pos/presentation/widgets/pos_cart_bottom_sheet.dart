@@ -91,22 +91,37 @@ class _PosCartBottomSheetState extends ConsumerState<PosCartBottomSheet> {
 
     if (isCash && cashPaid < cart.finalAmount) return AppToast.showWarning(context, 'Uang pembayaran kurang');
 
-    ref.read(cartProvider.notifier).setCustomerName(_customerController.text.trim());
+    final customerName = _customerController.text.trim().isNotEmpty
+        ? _customerController.text.trim()
+        : _selectedCustomer?.name;
+    final customerPhone = _selectedCustomer?.phone;
+
+    ref.read(cartProvider.notifier).setCustomerName(customerName);
 
     final sale = await ref.read(saleControllerProvider.notifier).checkout(
-          storeId: store.id,
-          userId: user.id,
-          customerId: _selectedCustomer?.id,
-          cart: cart,
-          cashPaid: _isKasbonSelected ? 0 : cashPaid,
-          paymentMethod: _isKasbonSelected ? 'KASBON' : (activeAccount?.name ?? 'Kas Tunai'),
-          imagePath: _paymentProofPath,
-          dueDate: _isKasbonSelected ? _selectedDueDate : null,
-        );
+      storeId: store.id,
+      userId: user.id,
+      customerId: _selectedCustomer?.id,
+      customerName: customerName,
+      customerPhone: customerPhone,
+      cart: ref.read(cartProvider),
+      cashPaid: _isKasbonSelected ? 0 : cashPaid,
+      paymentMethod: _isKasbonSelected ? 'KASBON' : (activeAccount?.name ?? 'Kas Tunai'),
+      imagePath: _paymentProofPath,
+      dueDate: _isKasbonSelected ? _selectedDueDate : null,
+    );
 
     if (mounted && sale != null) {
       Navigator.of(context).pop();
-      PosReceiptDialog.show(context, sale: sale, storeName: store.name, cashierName: user.fullName, customerPhone: _selectedCustomer?.phone, storeAddress: store.address, storePhone: store.phone);
+      PosReceiptDialog.show(
+        context,
+        sale: sale,
+        storeName: store.name,
+        cashierName: user.fullName,
+        customerPhone: sale.customerPhone ?? customerPhone,
+        storeAddress: store.address,
+        storePhone: store.phone,
+      );
     }
   }
 
@@ -263,13 +278,7 @@ class _PosCartBottomSheetState extends ConsumerState<PosCartBottomSheet> {
     );
   }
 
-  Widget _buildActionBtn({
-    required IconData icon,
-    required String label,
-    required Color bgColor,
-    required Color color,
-    required VoidCallback onTap,
-  }) {
+  Widget _buildActionBtn({required IconData icon, required String label, required Color bgColor, required Color color, required VoidCallback onTap}) {
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(8),

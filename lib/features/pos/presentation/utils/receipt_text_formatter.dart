@@ -34,11 +34,22 @@ class ReceiptTextFormatter {
     if (cashierName != null && cashierName.trim().isNotEmpty) {
       buffer.writeln('Kasir    : $cashierName');
     }
-    if (customerName != null && customerName.trim().isNotEmpty) {
-      final phoneSuffix = (customerPhone != null && customerPhone.trim().isNotEmpty)
-          ? ' ($customerPhone)'
+    final effectiveCustomerName = (customerName != null && customerName.trim().isNotEmpty)
+        ? customerName.trim()
+        : (sale.customerName != null && sale.customerName!.trim().isNotEmpty
+            ? sale.customerName!.trim()
+            : null);
+    final effectiveCustomerPhone = (customerPhone != null && customerPhone.trim().isNotEmpty)
+        ? customerPhone.trim()
+        : (sale.customerPhone != null && sale.customerPhone!.trim().isNotEmpty
+            ? sale.customerPhone!.trim()
+            : null);
+
+    if (effectiveCustomerName != null) {
+      final phoneSuffix = (effectiveCustomerPhone != null)
+          ? ' ($effectiveCustomerPhone)'
           : '';
-      buffer.writeln('Pelanggan: $customerName$phoneSuffix');
+      buffer.writeln('Pelanggan: $effectiveCustomerName$phoneSuffix');
     }
     buffer.writeln('Metode   : *${sale.paymentMethod}*');
     buffer.writeln(divider);

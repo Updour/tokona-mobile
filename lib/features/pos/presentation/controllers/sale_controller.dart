@@ -52,6 +52,8 @@ class SaleController extends StateNotifier<SaleState> {
     required String storeId,
     required String userId,
     String? customerId,
+    String? customerName,
+    String? customerPhone,
     required CartState cart,
     required double cashPaid,
     String paymentMethod = 'CASH',
@@ -74,11 +76,16 @@ class SaleController extends StateNotifier<SaleState> {
         );
       }).toList();
 
+      final resolvedCustomerName = customerName?.trim().isNotEmpty == true
+          ? customerName!.trim()
+          : (cart.customerName?.trim().isNotEmpty == true ? cart.customerName!.trim() : null);
+
       final dto = CreateSaleDto(
         storeId: storeId,
         userId: userId,
         customerId: customerId,
-        customerName: cart.customerName,
+        customerName: resolvedCustomerName,
+        customerPhone: customerPhone?.trim().isNotEmpty == true ? customerPhone!.trim() : null,
         discountAmount: cart.discountAmount,
         cashPaid: cashPaid,
         paymentMethod: paymentMethod,
@@ -91,10 +98,11 @@ class SaleController extends StateNotifier<SaleState> {
       final sale = await _repository.recordSale(dto);
 
       final itemSummary = cart.items.map((e) => '${e.product.name} (${e.quantity.toInt()} ${e.unitName})').join(', ');
+      final customerLog = resolvedCustomerName != null ? ' (Plg: $resolvedCustomerName)' : '';
       AuditLogService.log(
         storeId: storeId,
         userId: userId,
-        userName: cart.customerName != null && cart.customerName!.isNotEmpty ? 'Kasir (Plg: ${cart.customerName})' : 'Kasir',
+        userName: 'Kasir$customerLog',
         userRole: 'cashier',
         actionType: AuditActionType.transaction,
         title: 'Penjualan #${sale.invoiceNumber} (${paymentMethod.toUpperCase()})',

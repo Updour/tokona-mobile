@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:tokona/core/theme/app_colors.dart';
@@ -19,17 +20,28 @@ class SyncDetailBottomSheet extends ConsumerWidget {
     );
   }
 
+  String _formatInterval(int seconds) {
+    if (seconds < 60) return '$seconds Detik';
+    if (seconds < 3600) return '${seconds ~/ 60} Menit';
+    return '${seconds ~/ 3600} Jam';
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final syncState = ref.watch(syncControllerProvider);
     final authState = ref.watch(authProvider);
     final user = authState.currentUser;
     final isOwner = user?.role == UserRole.owner;
-    final roleName = isOwner ? 'HP Pusat' : 'HP Kasir';
+    final roleName = isOwner ? 'HP Pusat (Owner)' : 'HP Kasir';
 
     final lastSyncText = syncState.lastSyncedAt != null
         ? DateFormat('dd MMM yyyy, HH:mm:ss', 'id_ID').format(syncState.lastSyncedAt!)
         : 'Belum pernah sinkron';
+
+    final availableIntervals = [15, 30, 60, 300, 900, 1800, 3600];
+    final selectedInterval = availableIntervals.contains(syncState.autoSyncIntervalSeconds)
+        ? syncState.autoSyncIntervalSeconds
+        : 30;
 
     return Container(
       decoration: const BoxDecoration(
@@ -57,10 +69,10 @@ class SyncDetailBottomSheet extends ConsumerWidget {
               Container(
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
-                  color: const Color(0xFFCCFBF1),
+                  color: AppColors.primaryContainer,
                   borderRadius: BorderRadius.circular(10),
                 ),
-                child: const Icon(Icons.cloud_sync_rounded, color: AppColors.primary, size: 22),
+                child: const Icon(Icons.cloud_sync_rounded, color: AppColors.primaryDark, size: 22),
               ),
               const SizedBox(width: 10),
               const Expanded(
@@ -68,11 +80,11 @@ class SyncDetailBottomSheet extends ConsumerWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Sinkronisasi Cloud',
+                      'Sinkronisasi Cloud & Multi-Device',
                       style: TextStyle(fontSize: 15, fontWeight: FontWeight.w800, color: AppColors.textPrimary),
                     ),
                     Text(
-                      'Sinkronisasi data multi-perangkat realtime ',
+                      'Atur jeda waktu penarikan transaksi kasir & audit log',
                       style: TextStyle(fontSize: 11, color: AppColors.textSecondary),
                     ),
                   ],
@@ -118,17 +130,67 @@ class SyncDetailBottomSheet extends ConsumerWidget {
               'Auto-Sync di Latar Belakang',
               style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: AppColors.textPrimary),
             ),
-            subtitle: const Text(
-              'Otomatis sync setiap 30 detik & saat ada perubahan data',
-              style: TextStyle(fontSize: 11, color: AppColors.textSecondary),
+            subtitle: Text(
+              'Otomatis sinkron setiap ${_formatInterval(syncState.autoSyncIntervalSeconds)} ke cloud',
+              style: const TextStyle(fontSize: 11, color: AppColors.textSecondary),
             ),
             value: syncState.isAutoSyncEnabled,
             activeTrackColor: AppColors.primary,
             onChanged: (val) => ref.read(syncControllerProvider.notifier).toggleAutoSync(val),
           ),
-          const SizedBox(height: 14),
+          const Divider(height: 18),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              const Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Pilihan Interval Polling',
+                    style: TextStyle(fontSize: 12.5, fontWeight: FontWeight.w700, color: AppColors.textPrimary),
+                  ),
+                  Text(
+                    'Bisa diatur bebas (15 dtk s/d 1 jam)',
+                    style: TextStyle(fontSize: 10.5, color: AppColors.textSecondary),
+                  ),
+                ],
+              ),
+              DropdownButtonHideUnderline(
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 2),
+                  decoration: BoxDecoration(
+                    color: AppColors.primaryContainer.withValues(alpha: 0.55),
+                    borderRadius: BorderRadius.circular(10),
+                    border: Border.all(color: AppColors.primary.withValues(alpha: 0.3)),
+                  ),
+                  child: DropdownButton<int>(
+                    value: selectedInterval,
+                    icon: const Icon(Icons.arrow_drop_down_rounded, color: AppColors.primaryDark),
+                    style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 12, color: AppColors.primaryDark),
+                    onChanged: (val) {
+                      if (val != null) {
+                        HapticFeedback.selectionClick();
+                        ref.read(syncControllerProvider.notifier).setInterval(val);
+                      }
+                    },
+                    items: const [
+                      DropdownMenuItem(value: 15, child: Text('15 Detik (Realtime)')),
+                      DropdownMenuItem(value: 30, child: Text('30 Detik (Standar)')),
+                      DropdownMenuItem(value: 60, child: Text('1 Menit')),
+                      DropdownMenuItem(value: 300, child: Text('5 Menit')),
+                      DropdownMenuItem(value: 900, child: Text('15 Menit')),
+                      DropdownMenuItem(value: 1800, child: Text('30 Menit')),
+                      DropdownMenuItem(value: 3600, child: Text('1 Jam (Hemat Baterai)')),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 18),
           SizedBox(
             width: double.infinity,
+            height: 46,
             child: ElevatedButton.icon(
               onPressed: syncState.isSyncing
                   ? null
@@ -149,8 +211,7 @@ class SyncDetailBottomSheet extends ConsumerWidget {
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.primary,
                 foregroundColor: Colors.white,
-                padding: const EdgeInsets.symmetric(vertical: 13),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                 elevation: 0,
               ),
               icon: syncState.isSyncing
@@ -162,7 +223,7 @@ class SyncDetailBottomSheet extends ConsumerWidget {
                   : const Icon(Icons.sync_rounded, size: 20),
               label: Text(
                 syncState.isSyncing ? 'Sedang Menyinkronkan...' : 'Sinkronkan Sekarang',
-                style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 13.5),
+                style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 13),
               ),
             ),
           ),

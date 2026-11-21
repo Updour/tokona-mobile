@@ -193,7 +193,11 @@ class SaleDetailSheet extends ConsumerWidget {
         children: [
           _buildMetaRow('Waktu Transaksi', dateFormat.format(sale.createdAt)),
           const SizedBox(height: 8),
-          _buildMetaRow('Pelanggan', sale.customerName ?? 'Pelanggan Umum'),
+          _buildMetaRow('Pelanggan', sale.customerName != null && sale.customerName!.trim().isNotEmpty ? sale.customerName!.trim() : 'Pelanggan Umum'),
+          if (sale.customerPhone != null && sale.customerPhone!.trim().isNotEmpty) ...[
+            const SizedBox(height: 8),
+            _buildMetaRow('No. Kontak', sale.customerPhone!.trim()),
+          ],
           const SizedBox(height: 8),
           _buildMetaRow('Metode Pembayaran', sale.paymentMethod),
           if (sale.notes != null && sale.notes!.isNotEmpty) ...[
@@ -278,6 +282,7 @@ class SaleDetailSheet extends ConsumerWidget {
                 sale: sale,
                 storeName: auth.currentStore?.name ?? 'Tokona Store',
                 cashierName: auth.currentUser?.fullName,
+                customerPhone: sale.customerPhone,
                 storeAddress: auth.currentStore?.address,
                 storePhone: auth.currentStore?.phone,
               );

@@ -217,7 +217,7 @@ class _StaffManagementSheetState extends ConsumerState<StaffManagementSheet> {
           if (!isOwner && store != null) ...[
             IconButton(
               icon: const Icon(Icons.qr_code_2_rounded, color: AppColors.primary, size: 22),
-              tooltip: 'QR Pairing HP Kasir (Offline)',
+              tooltip: 'QR Pairing Kasir (Offline)',
               onPressed: () => StaffPairingQrDialog.show(context, staff: user, store: store),
             ),
             IconButton(

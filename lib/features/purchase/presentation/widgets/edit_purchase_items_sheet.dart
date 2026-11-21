@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:tokona/core/theme/app_colors.dart';
-import 'package:tokona/core/theme/app_typography.dart';
 import 'package:tokona/core/utils/currency_formatter.dart';
 import 'package:tokona/core/widgets/app_toast.dart';
 import 'package:tokona/features/auth/presentation/controllers/auth_controller.dart';
@@ -92,6 +92,7 @@ class _EditPurchaseItemsSheetState extends ConsumerState<EditPurchaseItemsSheet>
       return;
     }
 
+    HapticFeedback.lightImpact();
     setState(() => _isSubmitting = true);
     final success = await ref.read(purchaseControllerProvider.notifier).updatePurchaseItemsAndDetails(
       purchaseId: widget.purchase.id,
@@ -109,8 +110,8 @@ class _EditPurchaseItemsSheetState extends ConsumerState<EditPurchaseItemsSheet>
 
     if (success) {
       AppToast.showSuccess(context, 'Faktur & barang belanjaan berhasil diperbarui');
-      Navigator.of(context).pop(); // Tutup edit sheet
-      Navigator.of(context).pop(); // Tutup detail sheet lama agar ter-refresh
+      Navigator.of(context).pop();
+      Navigator.of(context).pop();
     } else {
       AppToast.showError(context, 'Gagal memperbarui faktur pembelian');
     }
@@ -137,33 +138,39 @@ class _EditPurchaseItemsSheetState extends ConsumerState<EditPurchaseItemsSheet>
           const SizedBox(height: 12),
           Row(
             children: [
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(color: AppColors.primaryContainer, borderRadius: BorderRadius.circular(10)),
+                child: const Icon(Icons.receipt_long_rounded, color: AppColors.primaryDark, size: 20),
+              ),
+              const SizedBox(width: 10),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text('Edit & Tambah Barang Faktur', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w800)),
-                    Text('Nota: ${widget.purchase.invoiceNumber}', style: const TextStyle(fontSize: 11, color: AppColors.textMuted)),
+                    const Text('Edit & Tambah Barang Faktur', style: TextStyle(fontSize: 15.5, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
+                    Text('Nota: ${widget.purchase.invoiceNumber}', style: const TextStyle(fontSize: 11, color: AppColors.textSecondary)),
                   ],
                 ),
               ),
-              IconButton(icon: const Icon(Icons.close_rounded), onPressed: () => Navigator.of(context).pop()),
+              IconButton(icon: const Icon(Icons.close_rounded, size: 20), onPressed: () => Navigator.of(context).pop()),
             ],
           ),
-          const SizedBox(height: 10),
+          const Divider(height: 20),
           Expanded(
             child: ListView(
               children: [
                 TextField(
                   controller: _invoiceController,
-                  decoration: const InputDecoration(labelText: 'No. Faktur', isDense: true),
+                  decoration: _inputDeco('No. Faktur Pembelian', Icons.receipt_rounded, 'Contoh: INV-9901'),
                 ),
-                const SizedBox(height: 8),
+                const SizedBox(height: 10),
                 TextField(
                   controller: _supplierController,
-                  decoration: const InputDecoration(labelText: 'Nama Supplier', isDense: true),
+                  decoration: _inputDeco('Nama Supplier / Toko Kulakan', Icons.storefront_rounded, 'Contoh: Grosir Makmur Jaya'),
                 ),
-                const SizedBox(height: 12),
-                const Text('Tambah Produk ke Faktur:', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700)),
+                const SizedBox(height: 14),
+                const Text('Tambah Produk ke Faktur:', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
                 const SizedBox(height: 6),
                 PurchaseProductSelector(
                   products: products,
@@ -183,40 +190,85 @@ class _EditPurchaseItemsSheetState extends ConsumerState<EditPurchaseItemsSheet>
                 const SizedBox(height: 10),
                 TextField(
                   controller: _notesController,
-                  decoration: const InputDecoration(labelText: 'Catatan Faktur', isDense: true),
+                  decoration: _inputDeco('Catatan Faktur (Opsional)', Icons.edit_note_rounded, 'Catatan tambahan pengadaan'),
                 ),
                 const SizedBox(height: 14),
                 Container(
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(color: AppColors.surfaceInput, borderRadius: BorderRadius.circular(12)),
+                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                  decoration: BoxDecoration(
+                    color: AppColors.primaryContainer.withValues(alpha: 0.5),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: AppColors.primary.withValues(alpha: 0.25)),
+                  ),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      const Text('Total Faktur Baru:', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700)),
-                      Text(CurrencyFormatter.format(_grandTotal), style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w900, color: AppColors.primary)),
+                      const Text('Total Faktur Baru:', style: TextStyle(fontSize: 12.5, fontWeight: FontWeight.w700)),
+                      Text(
+                        CurrencyFormatter.format(_grandTotal),
+                        style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w900, color: AppColors.primaryDark),
+                      ),
                     ],
                   ),
                 ),
               ],
             ),
           ),
-          const SizedBox(height: 12),
-          ElevatedButton.icon(
-            onPressed: _isSubmitting ? null : _handleSave,
-            icon: _isSubmitting
-                ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
-                : const Icon(Icons.check_circle_outline_rounded, size: 18),
-            label: Text(_isSubmitting ? 'Menyimpan...' : 'Simpan Perubahan Faktur'),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.primary,
-              foregroundColor: Colors.white,
-              padding: const EdgeInsets.symmetric(vertical: 13),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-            ),
+          const SizedBox(height: 14),
+          Row(
+            children: [
+              Expanded(
+                flex: 1,
+                child: SizedBox(
+                  height: 46,
+                  child: OutlinedButton(
+                    onPressed: _isSubmitting ? null : () => Navigator.of(context).pop(),
+                    style: OutlinedButton.styleFrom(
+                      side: const BorderSide(color: Color(0xFFCBD5E1), width: 1.2),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    ),
+                    child: const Text('Batal', style: TextStyle(color: AppColors.textSecondary, fontWeight: FontWeight.w700, fontSize: 13)),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                flex: 2,
+                child: SizedBox(
+                  height: 46,
+                  child: ElevatedButton.icon(
+                    onPressed: _isSubmitting ? null : _handleSave,
+                    icon: _isSubmitting
+                        ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
+                        : const Icon(Icons.check_circle_outline_rounded, size: 18),
+                    label: Text(_isSubmitting ? 'Menyimpan...' : 'Simpan Perubahan', style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 13)),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.primary,
+                      foregroundColor: Colors.white,
+                      elevation: 0,
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    ),
+                  ),
+                ),
+              ),
+            ],
           ),
         ],
       ),
     );
   }
-}
 
+  InputDecoration _inputDeco(String label, IconData icon, String hint) {
+    return InputDecoration(
+      labelText: label,
+      hintText: hint,
+      prefixIcon: Icon(icon, size: 18, color: AppColors.textSecondary),
+      filled: true,
+      fillColor: AppColors.surfaceInput,
+      contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+      border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: AppColors.border)),
+      enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: AppColors.border)),
+      focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: AppColors.primary, width: 1.5)),
+    );
+  }
+}

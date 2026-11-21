@@ -5,6 +5,7 @@ class CreateSaleDto {
   final String userId;
   final String? customerId;
   final String? customerName;
+  final String? customerPhone;
   final double discountAmount;
   final double cashPaid;
   final String paymentMethod;
@@ -18,6 +19,7 @@ class CreateSaleDto {
     required this.userId,
     this.customerId,
     this.customerName,
+    this.customerPhone,
     this.discountAmount = 0.0,
     required this.cashPaid,
     this.paymentMethod = 'CASH',

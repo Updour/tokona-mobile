@@ -57,9 +57,10 @@ class SaleDao {
 
     if (searchQuery != null && searchQuery.trim().isNotEmpty) {
       whereClauses.add(
-        '(${DatabaseTables.columnSaleInvoiceNumber} LIKE ? OR ${DatabaseTables.columnSaleCustomerName} LIKE ?)',
+        '(${DatabaseTables.columnSaleInvoiceNumber} LIKE ? OR ${DatabaseTables.columnSaleCustomerName} LIKE ? OR ${DatabaseTables.columnSaleCustomerPhone} LIKE ?)',
       );
       final pattern = '%${searchQuery.trim()}%';
+      whereArgs.add(pattern);
       whereArgs.add(pattern);
       whereArgs.add(pattern);
     }

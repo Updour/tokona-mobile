@@ -31,6 +31,7 @@ import 'package:tokona/features/purchase/presentation/controllers/purchase_contr
 import 'package:tokona/features/purchase/presentation/widgets/incoming_orders_sheet.dart';
 import 'package:tokona/features/report/presentation/controllers/report_controller.dart';
 import 'package:tokona/features/settings/data/services/audit_log_service.dart';
+import 'package:tokona/features/sync/presentation/controllers/sync_controller.dart';
 
 class BerandaTabView extends ConsumerStatefulWidget {
   final StoreModel? store;
@@ -54,8 +55,13 @@ class _BerandaTabViewState extends ConsumerState<BerandaTabView> {
   @override
   void initState() {
     super.initState();
-    // Auto-sync polling setiap 30 detik untuk menarik omset kasir & audit log terbaru dari Cloud
-    _pollingTimer = Timer.periodic(const Duration(seconds: 30), (_) {
+    _startPolling();
+  }
+
+  void _startPolling([int? customSeconds]) {
+    _pollingTimer?.cancel();
+    final interval = customSeconds ?? ref.read(syncControllerProvider).autoSyncIntervalSeconds;
+    _pollingTimer = Timer.periodic(Duration(seconds: interval), (_) {
       if (!mounted) return;
       final store = widget.store;
       if (store != null) {
@@ -77,6 +83,15 @@ class _BerandaTabViewState extends ConsumerState<BerandaTabView> {
     final store = widget.store;
     final user = widget.user;
     final onNavigateTab = widget.onNavigateTab;
+
+    ref.listen<int>(
+      syncControllerProvider.select((s) => s.autoSyncIntervalSeconds),
+      (prev, next) {
+        if (prev != next) {
+          _startPolling(next);
+        }
+      },
+    );
     ref.listen<List<AppNotificationItem>>(notificationListProvider, (prev, next) {
       if (next.isNotEmpty && (prev == null || prev.isEmpty || next.first.id != prev.first.id)) {
         final readIds = ref.read(readNotificationIdsProvider);

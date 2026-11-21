@@ -6,6 +6,7 @@ import 'package:tokona/features/customer/presentation/controllers/customer_contr
 import 'package:tokona/features/pos/presentation/controllers/sale_history_controller.dart';
 import 'package:tokona/features/product/presentation/controllers/product_controller.dart';
 import 'package:tokona/features/report/presentation/controllers/report_controller.dart';
+import 'package:tokona/features/settings/presentation/controllers/app_preferences_controller.dart';
 import 'package:tokona/features/sync/data/services/cloud_sync_service.dart';
 import 'package:tokona/features/sync/domain/models/sync_status_model.dart';
 
@@ -22,6 +23,8 @@ class SyncController extends StateNotifier<SyncState> {
   }
 
   void _initAutoSync() {
+    final prefInterval = _ref.read(appPreferencesProvider).syncIntervalSeconds;
+    state = state.copyWith(autoSyncIntervalSeconds: prefInterval);
     _startTimer();
     // Delay first check slightly so app startup finishes smoothly
     Future.delayed(const Duration(seconds: 4), () {
@@ -37,6 +40,16 @@ class SyncController extends StateNotifier<SyncState> {
         (_) => triggerSync(isManual: false),
       );
     }
+  }
+
+  Future<void> setInterval(int seconds) async {
+    state = state.copyWith(autoSyncIntervalSeconds: seconds);
+    _startTimer();
+    try {
+      final prefController = _ref.read(appPreferencesProvider.notifier);
+      final currentPref = _ref.read(appPreferencesProvider);
+      await prefController.save(currentPref.copyWith(syncIntervalSeconds: seconds));
+    } catch (_) {}
   }
 
   void toggleAutoSync(bool enabled) {

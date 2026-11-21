@@ -131,6 +131,7 @@ class DatabaseTables {
   static const String columnSaleCustomerId = 'customer_id';
   static const String columnSaleInvoiceNumber = 'invoice_number';
   static const String columnSaleCustomerName = 'customer_name';
+  static const String columnSaleCustomerPhone = 'customer_phone';
   static const String columnSaleTotalAmount = 'total_amount';
   static const String columnSaleDiscountAmount = 'discount_amount';
   static const String columnSaleFinalAmount = 'final_amount';

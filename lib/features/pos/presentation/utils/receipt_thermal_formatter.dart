@@ -28,6 +28,7 @@ class ReceiptThermalFormatter {
     String? storeAddress,
     String? storePhone,
     String? cashierName,
+    String? customerPhone,
     int paperWidth = 58,
     String footerMessage = 'Terima kasih atas kunjungan Anda!',
   }) {
@@ -52,8 +53,15 @@ class ReceiptThermalFormatter {
     if (cashierName != null && cashierName.isNotEmpty) {
       b.writeln(_twoColumn('Kasir: $cashierName', sale.paymentMethod, col));
     }
-    if (sale.customerName != null && sale.customerName!.isNotEmpty) {
-      b.writeln('Plg : ${sale.customerName}');
+    final custName = sale.customerName;
+    final custPhone = (customerPhone != null && customerPhone.trim().isNotEmpty)
+        ? customerPhone.trim()
+        : (sale.customerPhone != null && sale.customerPhone!.trim().isNotEmpty
+            ? sale.customerPhone!.trim()
+            : null);
+    if (custName != null && custName.trim().isNotEmpty) {
+      final phonePart = custPhone != null ? ' ($custPhone)' : '';
+      b.writeln('Plg : ${custName.trim()}$phonePart');
     }
     b.writeln(divider);
 
@@ -93,6 +101,7 @@ class ReceiptThermalFormatter {
     String? storeAddress,
     String? storePhone,
     String? cashierName,
+    String? customerPhone,
     int paperWidth = 58,
     String footerMessage = 'Terima kasih atas kunjungan Anda!',
   }) {
@@ -102,6 +111,7 @@ class ReceiptThermalFormatter {
       storeAddress: storeAddress,
       storePhone: storePhone,
       cashierName: cashierName,
+      customerPhone: customerPhone,
       paperWidth: paperWidth,
       footerMessage: footerMessage,
     );

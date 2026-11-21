@@ -153,11 +153,17 @@ class ProofPhotoPicker extends StatelessWidget {
                 ],
               ),
               const SizedBox(height: 6),
-              ClipRRect(
-                borderRadius: BorderRadius.circular(12),
-                child: InteractiveViewer(
-                  maxScale: 4.0,
-                  child: Image.file(File(path), fit: BoxFit.contain),
+              ConstrainedBox(
+                constraints: BoxConstraints(
+                  maxHeight: MediaQuery.of(context).size.height * 0.72,
+                  maxWidth: MediaQuery.of(context).size.width,
+                ),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(12),
+                  child: InteractiveViewer(
+                    maxScale: 4.0,
+                    child: Image.file(File(path), fit: BoxFit.contain),
+                  ),
                 ),
               ),
             ],
@@ -173,7 +179,7 @@ class ProofPhotoPicker extends StatelessWidget {
 
     if (hasImage) {
       return Container(
-        padding: const EdgeInsets.all(10),
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
         decoration: BoxDecoration(
           color: AppColors.surface,
           borderRadius: BorderRadius.circular(12),
@@ -185,34 +191,55 @@ class ProofPhotoPicker extends StatelessWidget {
               onTap: () => _showFullImage(context, imagePath!),
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(8),
-                child: Image.file(File(imagePath!), width: 48, height: 48, fit: BoxFit.cover),
+                child: Image.file(File(imagePath!), width: 44, height: 44, fit: BoxFit.cover),
               ),
             ),
             const SizedBox(width: 10),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
                 children: [
                   Row(
                     children: [
                       const Icon(Icons.check_circle_rounded, size: 14, color: Color(0xFF10B981)),
                       const SizedBox(width: 4),
-                      Text(label, style: const TextStyle(fontSize: 11.5, fontWeight: FontWeight.w700, color: AppColors.textPrimary), maxLines: 1, overflow: TextOverflow.ellipsis),
+                      Expanded(
+                        child: Text(
+                          label,
+                          style: const TextStyle(fontSize: 11.5, fontWeight: FontWeight.w700, color: AppColors.textPrimary),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
                     ],
                   ),
                   const SizedBox(height: 2),
-                  const Text('Ketuk foto untuk perbesar (zoom)', style: TextStyle(fontSize: 10, color: AppColors.textMuted)),
+                  const Text(
+                    'Ketuk foto untuk perbesar (zoom)',
+                    style: TextStyle(fontSize: 10, color: AppColors.textMuted),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
                 ],
               ),
             ),
+            const SizedBox(width: 4),
             IconButton(
               icon: const Icon(Icons.refresh_rounded, size: 18, color: AppColors.primary),
               tooltip: 'Ganti Foto',
+              visualDensity: VisualDensity.compact,
+              padding: const EdgeInsets.all(6),
+              constraints: const BoxConstraints(),
               onPressed: () => _showSourcePicker(context),
             ),
+            const SizedBox(width: 2),
             IconButton(
               icon: const Icon(Icons.delete_outline_rounded, size: 18, color: Color(0xFFEF4444)),
               tooltip: 'Hapus Foto',
+              visualDensity: VisualDensity.compact,
+              padding: const EdgeInsets.all(6),
+              constraints: const BoxConstraints(),
               onPressed: () => onImagePicked(null),
             ),
           ],
@@ -242,7 +269,12 @@ class ProofPhotoPicker extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(label, style: const TextStyle(fontSize: 11.5, fontWeight: FontWeight.w700, color: AppColors.textPrimary)),
+                  Text(
+                    label,
+                    style: const TextStyle(fontSize: 11.5, fontWeight: FontWeight.w700, color: AppColors.textPrimary),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
                   const SizedBox(height: 1),
                   Text(hint, style: const TextStyle(fontSize: 10, color: AppColors.textMuted), maxLines: 1, overflow: TextOverflow.ellipsis),
                 ],

@@ -104,7 +104,7 @@ class _OfflinePairingSheetState extends ConsumerState<OfflinePairingSheet> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text('Pairing HP Kasir Offline', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
+                      Text('Pairing Kasir Offline', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
                       Text('Hubungkan ke toko tanpa internet via QR Code', style: TextStyle(fontSize: 11, color: AppColors.textSecondary)),
                     ],
                   ),

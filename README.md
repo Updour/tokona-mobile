@@ -201,9 +201,14 @@ Untuk pembelian barang dalam jumlah besar yang dikirim melalui ekspedisi logisti
 
 ## ☁️ 9. Sinkronisasi Cloud & Audit Trail Otomatis
 
-### A. Sinkronisasi Otomatis Tiap 30 Detik (Cloud Polling)
-* Di ponsel Owner, layar **Beranda** secara otomatis memeriksa dan memperbarui rekap transaksi kasir setiap **30 detik**.
-* Owner tidak perlu melakukan refresh manual atau bertanya ke kasir mengenai total penjualan hari ini.
+### A. Sinkronisasi Otomatis Dinamis (Cloud Polling Bebas Diatur)
+* Di ponsel Owner & Kasir, jeda waktu sinkronisasi otomatis kini dapat **disetel bebas** sesuai kebutuhan:
+  - **15 Detik:** Real-time super cepat saat jam sibuk toko.
+  - **30 Detik (Standar Rekomendasi):** Keseimbangan ideal antara kecepatan dan penggunaan data.
+  - **1 Menit / 5 Menit / 15 Menit / 30 Menit:** Untuk toko dengan volume transaksi santai.
+  - **1 Jam:** Mode hemat baterai dan kuota internet maksimal.
+* Pengaturan dapat diubah kapan saja melalui dialog **Sinkronisasi Cloud** (klik status sync di header) atau melalui menu **Profil > Pengaturan & Preferensi > Sinkronisasi Cloud & Interval**.
+* Layar **Beranda** Owner secara otomatis menyesuaikan jeda waktu polling untuk menarik transaksi kasir dan audit log sesuai interval yang dipilih tanpa perlu refresh manual.
 
 ### B. Audit Trail (Log Aktivitas Seluruh Role)
 Setiap tindakan operasional dicatat secara sistematis untuk mencegah kecurangan (*fraud*):

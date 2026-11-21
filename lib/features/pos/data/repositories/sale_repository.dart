@@ -50,6 +50,7 @@ class SaleRepository {
         customerId: dto.customerId,
         invoiceNumber: invoiceNumber,
         customerName: dto.customerName?.trim().isEmpty == true ? null : dto.customerName?.trim(),
+        customerPhone: dto.customerPhone?.trim().isEmpty == true ? null : dto.customerPhone?.trim(),
         totalAmount: dto.totalAmount,
         discountAmount: dto.discountAmount,
         finalAmount: dto.finalAmount,

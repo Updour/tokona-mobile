@@ -77,7 +77,7 @@ class PurchaseTrackingSection extends StatelessWidget {
                 onConfirmArrival: onConfirmArrival,
               ),
               icon: const Icon(Icons.my_location_rounded, size: 14),
-              label: const Text('Lacak Posisi Paket Live', style: TextStyle(fontSize: 11.5, fontWeight: FontWeight.w700)),
+              label: const Text('Lacak Paket', style: TextStyle(fontSize: 11.5, fontWeight: FontWeight.w700)),
               style: ElevatedButton.styleFrom(
                 backgroundColor: const Color(0xFF0284C7),
                 foregroundColor: Colors.white,
