@@ -37,4 +37,27 @@ class PurchaseItemDao {
     ''', [purchaseId]);
     return rows.map((r) => PurchaseItemModel.fromMap(r)).toList();
   }
+
+  /// Batch query mengambil item dari banyak pembelian sekaligus (mencegah N+1 query loop)
+  Future<Map<String, List<PurchaseItemModel>>> getByPurchaseIds(DatabaseExecutor db, List<String> purchaseIds) async {
+    if (purchaseIds.isEmpty) return {};
+    final map = <String, List<PurchaseItemModel>>{};
+    const chunkSize = 500;
+    for (var i = 0; i < purchaseIds.length; i += chunkSize) {
+      final chunk = purchaseIds.sublist(i, (i + chunkSize > purchaseIds.length) ? purchaseIds.length : i + chunkSize);
+      final placeholders = List.filled(chunk.length, '?').join(',');
+      final rows = await db.rawQuery('''
+        SELECT pi.*, p.${DatabaseTables.columnProductName} AS product_name
+        FROM ${DatabaseTables.purchaseItems} pi
+        LEFT JOIN ${DatabaseTables.products} p ON pi.${DatabaseTables.columnPurchaseItemProductId} = p.${DatabaseTables.columnId}
+        WHERE pi.${DatabaseTables.columnPurchaseItemPurchaseId} IN ($placeholders)
+        ORDER BY pi.${DatabaseTables.columnCreatedAt} ASC
+      ''', chunk);
+      for (final r in rows) {
+        final item = PurchaseItemModel.fromMap(r);
+        map.putIfAbsent(item.purchaseId, () => []).add(item);
+      }
+    }
+    return map;
+  }
 }

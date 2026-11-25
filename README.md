@@ -184,7 +184,7 @@ Tokona POS mendukung pencetakan nota fisik menggunakan printer thermal mini port
    - Harga Beli Pokok (HPP)
    - Harga Jual Eceran
    - Stok Awal & Batas Peringatan Stok Minimum
-   - Satuan Kemasan Bertingkat (misal: 1 Dus = 24 Pcs dengan harga grosir khusus)
+   - Satuan Kemasan Bertingkat ( 1 Dus = 24 Pcs dengan harga grosir khusus)
 3. Tekan **Simpan Produk**.
 
 ### B. Kulakan & Pemesanan Barang (Purchase Order)
@@ -215,6 +215,40 @@ Bagi toko yang kulakan belanja modal barang dagangan lewat Shopee PayLater / SPa
    * Tombol pelunasan dan cicil PayLater tidak dikunci hanya di akhir bulan, sehingga pemilik toko dapat mencicil atau melunasi tagihan Shopee PayLater lebih awal kapan saja saat kas toko sedang longgar.
 6. **Form Rapi & Tombol Sejajar:**
    * Pada dialog **Ubah Item Belanja** dan form **Edit & Tambah Barang Faktur**, tombol aksi *Batal* dan *Simpan* ditata sejajar berdampingan (50:50) dalam satu baris dengan field input terstandarisasi.
+
+### E. Modal Toko & Penarikan Kas (Prive)
+Menu **Profil > Kas Toko & Pembayaran > Modal Toko & Prive** menyediakan pencatatan arus modal pemilik toko yang akurat:
+1. **Catat Modal Awal & Tambahan Modal:**
+   * Mencatat suntikan dana segar ke akun kas/bank toko lengkap dengan tanggal, sumber dana, dan catatan transaksi.
+2. **Tarik Kas Toko (Prive):**
+   * Pemilik toko dapat menarik laba atau modal toko (prive).
+   * **Proteksi Saldo Defisit (*Overdrawn Protection*):** Sistem memvalidasi saldo akun kas yang dipilih secara real-time. Jika nominal yang ingin ditarik melebihi saldo kas riil, sistem otomatis mencegah penarikan agar akun tidak minus fiktif.
+   * **Proyeksi Sisa Saldo Langsung:** Ditampilkan simulasi sisa saldo kas dan sisa modal bersih toko setelah penarikan dilakukan.
+3. **Riwayat & Pembatalan:**
+   * Seluruh riwayat penarikan kas dapat dibatalkan (dihapus). Jika dihapus, nominal penarikan otomatis dikembalikan ke saldo rekening yang bersangkutan.
+
+### F. Master Rekening Pembayaran & Reset Saldo
+Menu **Profil > Kas Toko & Pembayaran > Metode Pembayaran & Bank**:
+1. **Dukungan Multi-Akun:**
+   * Mengelola akun Kasir (Kas Tunai Laci), Rekening Bank (BCA, BRI, Mandiri, BNI, SeaBank), E-Wallet (DANA, GoPay, ShopeePay), dan QRIS Toko.
+2. **Fitur Reset Saldo Saat Ini:**
+   * Pemilik toko dapat mengedit rekening dan menggunakan field **Reset Saldo Saat Ini (Rp)** untuk me-reset saldo akun yang minus atau salah rekap transaksi lama secara langsung tanpa perlu menghapus riwayat faktur.
+
+### G. Pembelian Co-Order & Pengalihan Sumber Dana
+1. **Pilihan Sumber Dana Belanja:**
+   * Saat kulakan barang, Anda dapat memilih apakah pembayaran menggunakan akun kas toko atau **Dana Rekan / Non-Kas Toko** (dana talangan pribadi).
+   * Jika memilih *Non-Kas Toko*, kas operasional toko tidak akan terpotong.
+2. **Faktur Khusus Biaya Pengiriman (Ongkir Saja):**
+   * Jika barang belanjaan ditalangi pihak luar dan kas toko hanya menanggung ongkos kirim, pemilik toko cukup mengedit faktur barang dan mengosongkan item produk dengan tetap mengisi nilai pada field **Ongkos Kirim**. Sistem akan otomatis mengembalikan selisih harga barang ke kas toko.
+
+### H. Master Pembulatan Harga Kasir (POS Rounding)
+Menu **Profil > Kas Toko & Pembayaran > Master Pembulatan Harga**:
+* **Mode Pembulatan:** *Bulatkan ke Atas (Round Up)*, *Bulatkan ke Bawah (Round Down)*, atau *Terdekat (Nearest)*.
+* **Kelipatan:** Mendukung kelipatan Rp 50, Rp 100, Rp 500, dan Rp 1.000.
+* Dilengkapi simulator pembulatan interaktif agar staf kasir dapat melihat simulasi total kembalian uang pelanggan sebelum disimpan.
+
+### I. Standar Tampilan Bersih (Zero-Emoji Clean UI)
+* Seluruh antarmuka aplikasi, pesan notifikasi, rekap penutupan toko, dan bukti nota cetak thermal telah distandarisasi bebas dari teks emoji non-formal demi kerapian dan konsistensi visual di seluruh jenis perangkat Android.
 
 ---
 

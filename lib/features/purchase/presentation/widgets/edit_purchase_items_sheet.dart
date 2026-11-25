@@ -168,12 +168,12 @@ class _EditPurchaseItemsSheetState extends ConsumerState<EditPurchaseItemsSheet>
               children: [
                 TextField(
                   controller: _invoiceController,
-                  decoration: _inputDeco('No. Faktur Pembelian', Icons.receipt_rounded, 'Contoh: INV-9901'),
+                  decoration: _inputDeco('No. Faktur Pembelian', Icons.receipt_rounded, 'INV-9901'),
                 ),
                 const SizedBox(height: 10),
                 TextField(
                   controller: _supplierController,
-                  decoration: _inputDeco('Nama Supplier / Toko Kulakan', Icons.storefront_rounded, 'Contoh: Grosir Makmur Jaya'),
+                  decoration: _inputDeco('Nama Supplier / Toko Kulakan', Icons.storefront_rounded, 'Grosir Makmur Jaya'),
                 ),
                 const SizedBox(height: 14),
                 const Text('Tambah Produk ke Faktur:', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),

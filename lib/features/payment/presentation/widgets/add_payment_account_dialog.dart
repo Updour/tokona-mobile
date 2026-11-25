@@ -32,6 +32,7 @@ class _AddPaymentAccountDialogState extends ConsumerState<AddPaymentAccountDialo
   final _numberController = TextEditingController();
   final _holderController = TextEditingController();
   final _initialBalanceController = TextEditingController();
+  final _currentBalanceController = TextEditingController();
   String _selectedType = 'bank';
 
   static const List<Map<String, String>> _presets = [
@@ -54,6 +55,7 @@ class _AddPaymentAccountDialogState extends ConsumerState<AddPaymentAccountDialo
       _numberController.text = acc.accountNumber ?? '';
       _holderController.text = acc.holderName ?? '';
       _initialBalanceController.text = acc.initialBalance > 0 ? CurrencyFormatter.formatNumber(acc.initialBalance) : '';
+      _currentBalanceController.text = acc.currentBalance != 0 ? CurrencyFormatter.formatNumber(acc.currentBalance.abs()) : '0';
       _selectedType = acc.type;
     }
   }
@@ -64,6 +66,7 @@ class _AddPaymentAccountDialogState extends ConsumerState<AddPaymentAccountDialo
     _numberController.dispose();
     _holderController.dispose();
     _initialBalanceController.dispose();
+    _currentBalanceController.dispose();
     super.dispose();
   }
 
@@ -93,12 +96,17 @@ class _AddPaymentAccountDialogState extends ConsumerState<AddPaymentAccountDialo
     final initialBal = double.tryParse(_initialBalanceController.text.replaceAll(RegExp(r'[^0-9]'), '')) ?? 0.0;
 
     if (widget.initialAccount != null) {
+      final currentBal = _currentBalanceController.text.trim().isEmpty
+          ? 0.0
+          : CurrencyFormatter.parse(_currentBalanceController.text);
+
       final updated = widget.initialAccount!.copyWith(
         name: name,
         type: _selectedType,
         accountNumber: number.isEmpty ? null : number,
         holderName: holder.isEmpty ? null : holder,
         initialBalance: initialBal,
+        currentBalance: currentBal,
       );
       await ref.read(paymentAccountListProvider.notifier).updateAccount(updated);
       if (mounted) Navigator.of(context).pop(updated);
@@ -178,8 +186,8 @@ class _AddPaymentAccountDialogState extends ConsumerState<AddPaymentAccountDialo
               controller: _nameController,
               textCapitalization: TextCapitalization.words,
               decoration: InputDecoration(
-                labelText: 'Nama Akun / Bank *',
-                hintText: 'Misal: Bank BCA, QRIS Toko, Kas Laci',
+                labelText: 'Nama Akun *',
+                hintText: ' Bank BCA, QRIS Toko, Kas Laci',
                 border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
               ),
             ),
@@ -188,8 +196,8 @@ class _AddPaymentAccountDialogState extends ConsumerState<AddPaymentAccountDialo
               controller: _numberController,
               keyboardType: TextInputType.number,
               decoration: InputDecoration(
-                labelText: 'Nomor Rekening / No. HP',
-                hintText: 'Misal: 8801234567 / 0812xxxx',
+                labelText: 'Nomor Rekening',
+                hintText: ' 8801234567',
                 border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
               ),
             ),
@@ -199,7 +207,7 @@ class _AddPaymentAccountDialogState extends ConsumerState<AddPaymentAccountDialo
               textCapitalization: TextCapitalization.words,
               decoration: InputDecoration(
                 labelText: 'Atas Nama (A.N.)',
-                hintText: 'Misal: Toko Makmur / Kasir',
+                hintText: ' Toko Makmur',
                 border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
               ),
             ),
@@ -209,12 +217,28 @@ class _AddPaymentAccountDialogState extends ConsumerState<AddPaymentAccountDialo
               keyboardType: TextInputType.number,
               inputFormatters: [CurrencyTextInputFormatter()],
               decoration: InputDecoration(
-                labelText: 'Saldo Awal / Modal (Rp)',
+                labelText: 'Saldo Awal (Rp)',
                 hintText: '0',
                 prefixText: 'Rp ',
                 border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
               ),
             ),
+            if (isEditing) ...[
+              const SizedBox(height: 12),
+              TextField(
+                controller: _currentBalanceController,
+                keyboardType: TextInputType.number,
+                inputFormatters: [CurrencyTextInputFormatter()],
+                decoration: InputDecoration(
+                  labelText: 'Reset Saldo Saat Ini (Rp)',
+                  hintText: '0',
+                  prefixText: 'Rp ',
+                  helperText: 'Ubah ke 0 atau nominal baru untuk mereset saldo yang minus',
+                  helperStyle: const TextStyle(color: Color(0xFF0F766E), fontSize: 11),
+                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                ),
+              ),
+            ],
           ],
         ),
       ),

@@ -106,7 +106,7 @@ class ShopeeNotificationService {
       await _refreshAppState(storeId);
       await NativePushNotificationService.showPushNotification(
         id: order.id.hashCode,
-        title: 'Pesanan Shopee Diterima! 📦',
+        title: 'Pesanan Shopee Diterima!',
         body: 'Faktur ${order.invoiceNumber} otomatis diterima & stok toko bertambah.',
       );
     }
@@ -116,7 +116,7 @@ class ShopeeNotificationService {
       await _ref.read(activeOrdersProvider.notifier).loadOrders(storeId);
       await NativePushNotificationService.showPushNotification(
         id: order.id.hashCode,
-        title: 'Pesanan Sedang Dikirim 🚚',
+        title: 'Pesanan Sedang Dikirim',
         body: 'Paket ${order.invoiceNumber} sedang dalam perjalanan.${extractedResi != null ? " Resi: $extractedResi" : ""}',
       );
     }

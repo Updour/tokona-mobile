@@ -150,7 +150,7 @@ class ProductDeviceHistorySheet extends StatelessWidget {
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                     decoration: BoxDecoration(color: const Color(0xFFEEF2FF), borderRadius: BorderRadius.circular(6)),
-                    child: Text('📱 ${item.deviceTag}', style: const TextStyle(fontSize: 10.5, fontWeight: FontWeight.w800, color: Color(0xFF4338CA))),
+                    child: Text(item.deviceTag, style: const TextStyle(fontSize: 10.5, fontWeight: FontWeight.w800, color: Color(0xFF4338CA))),
                   ),
                   const SizedBox(width: 6),
                   Container(
@@ -204,7 +204,7 @@ class ProductDeviceHistorySheet extends StatelessWidget {
               ],
               if (item.isAutoReceived) ...[
                 const SizedBox(width: 6),
-                const Text('• 🤖 Sistem', style: TextStyle(fontSize: 10, color: Color(0xFF15803D), fontWeight: FontWeight.w700)),
+                const Text('• Otomatis', style: TextStyle(fontSize: 10, color: Color(0xFF15803D), fontWeight: FontWeight.w700)),
               ],
             ],
           ),

@@ -84,15 +84,15 @@ class _StoreClosingSheetState extends ConsumerState<StoreClosingSheet> {
   void _shareClosingReportWA(String storeName, double totalOmset, int totalTrx, double cashPaid, double nonCash, double totalProfit) {
     final nowStr = DateFormat('EEEE, d MMM yyyy • HH:mm', 'id_ID').format(DateTime.now());
     final msg =
-        '📊 *REKAP PENUTUPAN TOKO - $storeName*\n'
-        '⏰ Waktu: $nowStr\n\n'
-        '💰 *Total Omset*: ${CurrencyFormatter.format(totalOmset)}\n'
-        '🧾 *Total Transaksi*: $totalTrx nota\n'
-        '💵 *Uang Tunai Kasir*: ${CurrencyFormatter.format(cashPaid)}\n'
-        '💳 *Non-Tunai / Lainnya*: ${CurrencyFormatter.format(nonCash)}\n'
-        '📈 *Estimasi Laba Kotor*: ${CurrencyFormatter.format(totalProfit)}\n\n'
-        '☁️ *Cadangan Cloud*: ${_backupResult != null ? "Sukses tersimpan di cloud (${_backupResult!.formattedSize})" : "Offline"}\n'
-        '✅ Toko berhasil ditutup dengan aman.';
+        '*REKAP PENUTUPAN TOKO - $storeName*\n'
+        'Waktu: $nowStr\n\n'
+        '*Total Omset*: ${CurrencyFormatter.format(totalOmset)}\n'
+        '*Total Transaksi*: $totalTrx nota\n'
+        '*Uang Tunai Kasir*: ${CurrencyFormatter.format(cashPaid)}\n'
+        '*Non-Tunai / Lainnya*: ${CurrencyFormatter.format(nonCash)}\n'
+        '*Estimasi Laba Kotor*: ${CurrencyFormatter.format(totalProfit)}\n\n'
+        '*Cadangan Cloud*: ${_backupResult != null ? "Sukses tersimpan di cloud (${_backupResult!.formattedSize})" : "Offline"}\n'
+        'Toko berhasil ditutup dengan aman.';
 
     WhatsAppService.sendReceipt(phone: '', message: msg);
   }

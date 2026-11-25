@@ -188,7 +188,10 @@ class _PosCartBottomSheetState extends ConsumerState<PosCartBottomSheet> {
                   }),
                   const SizedBox(height: 10),
                   PosPaymentSection(
-                    subtotal: cart.subtotal, discount: cart.discountAmount, finalAmount: cart.finalAmount,
+                    subtotal: cart.subtotal,
+                    discount: cart.discountAmount,
+                    roundingAmount: cart.roundingAmount,
+                    finalAmount: cart.finalAmount,
                     cashController: _cashController, discountController: _discountController, accounts: accounts,
                     selectedAccount: _selectedAccount ?? (accounts.isNotEmpty ? accounts.firstWhere((a) => a.type == 'cash', orElse: () => accounts.first) : null),
                     isKasbonSelected: _isKasbonSelected,

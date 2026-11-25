@@ -22,9 +22,9 @@ class EditPurchaseInvoiceDialog {
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            TextField(controller: invController, decoration: const InputDecoration(labelText: 'No. Faktur', hintText: 'Contoh: INV-SHOPEE-991')),
+            TextField(controller: invController, decoration: const InputDecoration(labelText: 'No. Faktur', hintText: 'INV-SHOPEE-991')),
             const SizedBox(height: 10),
-            TextField(controller: supplierController, decoration: const InputDecoration(labelText: 'Nama Supplier', hintText: 'Contoh: UD. Mustakim')),
+            TextField(controller: supplierController, decoration: const InputDecoration(labelText: 'Nama Supplier', hintText: 'UD. Mustakim')),
             const SizedBox(height: 10),
             TextField(controller: notesController, decoration: const InputDecoration(labelText: 'Catatan Faktur')),
           ],

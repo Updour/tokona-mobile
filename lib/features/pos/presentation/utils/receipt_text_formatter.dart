@@ -33,11 +33,11 @@ class ReceiptTextFormatter {
     final buffer = StringBuffer();
 
     if (forWhatsApp && p.printerMonospaceWhatsApp) {
-      buffer.writeln('🧾 *BUKTI NOTA PEMBELIAN RESMI*');
+      buffer.writeln('*BUKTI NOTA PEMBELIAN RESMI*');
       buffer.writeln('```');
       buffer.writeln(thermalText);
       buffer.writeln('```');
-      buffer.writeln('🙏 _Terima kasih telah berbelanja! Simpan nota ini sebagai bukti resmi transaksi._');
+      buffer.writeln('_Terima kasih telah berbelanja! Simpan nota ini sebagai bukti resmi transaksi._');
     } else {
       buffer.writeln(thermalText);
     }

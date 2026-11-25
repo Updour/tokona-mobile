@@ -11,6 +11,7 @@ class SaleModel {
   final String? customerPhone;
   final double totalAmount;
   final double discountAmount;
+  final double roundingAmount;
   final double finalAmount;
   final double cashPaid;
   final double changeAmount;
@@ -34,6 +35,7 @@ class SaleModel {
     this.customerPhone,
     required this.totalAmount,
     this.discountAmount = 0.0,
+    this.roundingAmount = 0.0,
     required this.finalAmount,
     required this.cashPaid,
     required this.changeAmount,
@@ -59,7 +61,7 @@ class SaleModel {
     for (final item in items) {
       profit += item.totalProfit;
     }
-    return profit - discountAmount;
+    return profit - discountAmount + roundingAmount;
   }
 
   double get totalItemQuantity {
@@ -81,6 +83,7 @@ class SaleModel {
       customerPhone: map[DatabaseTables.columnSaleCustomerPhone] as String?,
       totalAmount: (map[DatabaseTables.columnSaleTotalAmount] as num).toDouble(),
       discountAmount: (map[DatabaseTables.columnSaleDiscountAmount] as num?)?.toDouble() ?? 0.0,
+      roundingAmount: (map[DatabaseTables.columnSaleRoundingAmount] as num?)?.toDouble() ?? 0.0,
       finalAmount: (map[DatabaseTables.columnSaleFinalAmount] as num).toDouble(),
       cashPaid: (map[DatabaseTables.columnSaleCashPaid] as num).toDouble(),
       changeAmount: (map[DatabaseTables.columnSaleChangeAmount] as num).toDouble(),
@@ -111,6 +114,7 @@ class SaleModel {
       DatabaseTables.columnSaleCustomerPhone: customerPhone,
       DatabaseTables.columnSaleTotalAmount: totalAmount,
       DatabaseTables.columnSaleDiscountAmount: discountAmount,
+      DatabaseTables.columnSaleRoundingAmount: roundingAmount,
       DatabaseTables.columnSaleFinalAmount: finalAmount,
       DatabaseTables.columnSaleCashPaid: cashPaid,
       DatabaseTables.columnSaleChangeAmount: changeAmount,
@@ -135,6 +139,7 @@ class SaleModel {
     String? customerPhone,
     double? totalAmount,
     double? discountAmount,
+    double? roundingAmount,
     double? finalAmount,
     double? cashPaid,
     double? changeAmount,
@@ -158,6 +163,7 @@ class SaleModel {
       customerPhone: customerPhone ?? this.customerPhone,
       totalAmount: totalAmount ?? this.totalAmount,
       discountAmount: discountAmount ?? this.discountAmount,
+      roundingAmount: roundingAmount ?? this.roundingAmount,
       finalAmount: finalAmount ?? this.finalAmount,
       cashPaid: cashPaid ?? this.cashPaid,
       changeAmount: changeAmount ?? this.changeAmount,

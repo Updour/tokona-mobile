@@ -116,6 +116,11 @@ class DatabaseTables {
   static const String columnPurchaseInstallmentMonths = 'installment_months';
   static const String columnPurchaseMonthlyInstallment = 'monthly_installment';
   static const String columnPurchasePaidInstallments = 'paid_installments';
+  static const String columnPurchaseCoPartner = 'co_partner';
+  static const String columnPurchaseCoProfit = 'co_profit';
+  static const String columnPurchaseAddToStock = 'add_to_stock';
+  static const String columnPurchaseShippingDiscount = 'shipping_discount';
+  static const String columnPurchaseVoucherDiscount = 'voucher_discount';
 
   static const String columnPurchaseItemPurchaseId = 'purchase_id';
   static const String columnPurchaseItemProductId = 'product_id';
@@ -137,6 +142,7 @@ class DatabaseTables {
   static const String columnSaleCustomerPhone = 'customer_phone';
   static const String columnSaleTotalAmount = 'total_amount';
   static const String columnSaleDiscountAmount = 'discount_amount';
+  static const String columnSaleRoundingAmount = 'rounding_amount';
   static const String columnSaleFinalAmount = 'final_amount';
   static const String columnSaleCashPaid = 'cash_paid';
   static const String columnSaleChangeAmount = 'change_amount';

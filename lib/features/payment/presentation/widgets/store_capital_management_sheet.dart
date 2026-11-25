@@ -4,9 +4,11 @@ import 'package:tokona/core/theme/app_colors.dart';
 import 'package:tokona/core/theme/app_typography.dart';
 import 'package:tokona/core/utils/currency_formatter.dart';
 import 'package:tokona/features/auth/presentation/controllers/auth_controller.dart';
+import 'package:tokona/features/payment/presentation/controllers/payment_account_controller.dart';
 import 'package:tokona/features/payment/presentation/controllers/store_capital_controller.dart';
 import 'package:tokona/features/payment/presentation/widgets/add_store_capital_bottom_sheet.dart';
 import 'package:tokona/features/payment/presentation/widgets/store_capital_card.dart';
+import 'package:tokona/features/payment/presentation/widgets/store_capital_kpi_card.dart';
 
 class StoreCapitalManagementSheet extends ConsumerStatefulWidget {
   const StoreCapitalManagementSheet({super.key});
@@ -32,6 +34,7 @@ class _StoreCapitalManagementSheetState extends ConsumerState<StoreCapitalManage
       final storeId = ref.read(authProvider).currentStore?.id;
       if (storeId != null) {
         ref.read(storeCapitalControllerProvider.notifier).loadCapitals(storeId);
+        ref.read(paymentAccountListProvider.notifier).loadAccounts(storeId);
       }
     });
   }
@@ -41,6 +44,7 @@ class _StoreCapitalManagementSheetState extends ConsumerState<StoreCapitalManage
     final store = ref.watch(authProvider).currentStore;
     final state = ref.watch(storeCapitalControllerProvider);
     final notifier = ref.read(storeCapitalControllerProvider.notifier);
+    final totalStoreBalance = ref.watch(totalStoreBalanceProvider);
 
     return SafeArea(
       top: false,
@@ -90,7 +94,7 @@ class _StoreCapitalManagementSheetState extends ConsumerState<StoreCapitalManage
               ],
             ),
             const SizedBox(height: 12),
-            _buildKpiCard(state),
+            StoreCapitalKpiCard(state: state, totalStoreBalance: totalStoreBalance),
             const SizedBox(height: 12),
             Row(
               children: [
@@ -112,7 +116,12 @@ class _StoreCapitalManagementSheetState extends ConsumerState<StoreCapitalManage
                   child: OutlinedButton.icon(
                     onPressed: () => AddStoreCapitalBottomSheet.show(context, initialType: 'TARIK_MODAL'),
                     icon: const Icon(Icons.remove_circle_outline_rounded, size: 15, color: AppColors.error),
-                    label: const Text('Tarik Modal', style: TextStyle(fontSize: 11.5, fontWeight: FontWeight.w700, color: AppColors.error)),
+                    label: Text(
+                      totalStoreBalance > 0
+                          ? 'Tarik Kas (${CurrencyFormatter.format(totalStoreBalance)})'
+                          : 'Tarik Kas',
+                      style: const TextStyle(fontSize: 11.5, fontWeight: FontWeight.w700, color: AppColors.error),
+                    ),
                     style: OutlinedButton.styleFrom(
                       side: const BorderSide(color: Color(0xFFFCA5A5)),
                       backgroundColor: const Color(0xFFFEF2F2),
@@ -153,72 +162,12 @@ class _StoreCapitalManagementSheetState extends ConsumerState<StoreCapitalManage
     );
   }
 
-  Widget _buildKpiCard(dynamic state) {
-    return Container(
-      padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          colors: [Color(0xFF0F172A), Color(0xFF1E293B)],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: const Color(0xFF0F172A).withValues(alpha: 0.15),
-            blurRadius: 12,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Text(
-            'Total Modal Bersih Toko (Net)',
-            style: TextStyle(color: Color(0xFF94A3B8), fontSize: 11, fontWeight: FontWeight.w600),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            CurrencyFormatter.format(state.netCapital),
-            style: const TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.w900),
-          ),
-          const SizedBox(height: 10),
-          const Divider(height: 1, color: Color(0xFF334155)),
-          const SizedBox(height: 10),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              _buildMiniMetric('Modal Awal', state.initialCapital, const Color(0xFF38BDF8)),
-              _buildMiniMetric('Tambahan Modal', state.addedCapital, const Color(0xFF2DD4BF)),
-              _buildMiniMetric('Penarikan Prive', state.withdrawnCapital, const Color(0xFFFB7185)),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildMiniMetric(String label, double value, Color color) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(label, style: const TextStyle(color: Color(0xFF94A3B8), fontSize: 10)),
-        const SizedBox(height: 2),
-        Text(
-          CurrencyFormatter.format(value),
-          style: TextStyle(color: color, fontSize: 11.5, fontWeight: FontWeight.w700),
-        ),
-      ],
-    );
-  }
-
   Widget _buildFilterChips(String? storeId, dynamic state, dynamic notifier) {
     final types = [
       ('ALL', 'Semua'),
       ('TAMBAH_MODAL', 'Tambahan'),
       ('MODAL_AWAL', 'Modal Awal'),
-      ('TARIK_MODAL', 'Tarik Modal'),
+      ('TARIK_MODAL', 'Tarik Kas'),
     ];
 
     return SingleChildScrollView(

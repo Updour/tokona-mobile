@@ -129,7 +129,7 @@ class _HoldCartDialogState extends ConsumerState<HoldCartDialog> {
               style: const TextStyle(fontSize: 12.5, fontWeight: FontWeight.w600),
               decoration: const InputDecoration(
                 labelText: 'Nama Pelanggan',
-                hintText: 'Contoh: Bu Siti / Mas Budi',
+                hintText: 'Bu Siti / Mas Budi',
                 prefixIcon: Icon(Icons.person_outline_rounded, size: 18),
                 isDense: true,
               ),
@@ -154,7 +154,7 @@ class _HoldCartDialogState extends ConsumerState<HoldCartDialog> {
               style: const TextStyle(fontSize: 12.5),
               decoration: InputDecoration(
                 labelText: _deliveryMethod == 'delivery' ? 'Alamat Antar / Catatan' : 'Catatan Tambahan',
-                hintText: _deliveryMethod == 'delivery' ? 'Contoh: Jl. Mawar No. 4' : 'Contoh: Titip sampai sore',
+                hintText: _deliveryMethod == 'delivery' ? 'Jl. Mawar No. 4' : 'Titip sampai sore',
                 prefixIcon: const Icon(Icons.edit_note_rounded, size: 18),
                 isDense: true,
               ),

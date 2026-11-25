@@ -91,12 +91,16 @@ class CustomerRepository {
     String storeId, {
     String? type,
     String? searchQuery,
+    int? limit,
+    int? offset,
   }) async {
     await initialize();
     return await _customerDao.getCustomersByStore(
       storeId,
       type: type,
       searchQuery: searchQuery,
+      limit: limit,
+      offset: offset,
     );
   }
 

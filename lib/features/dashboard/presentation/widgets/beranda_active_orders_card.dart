@@ -212,7 +212,7 @@ class BerandaActiveOrdersCard extends ConsumerWidget {
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 2),
                     decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(5), border: Border.all(color: AppColors.border)),
-                    child: Text('📱 ${p.deviceTag!}', style: const TextStyle(fontSize: 9.5, fontWeight: FontWeight.w700, color: Color(0xFF6366F1))),
+                    child: Text(p.deviceTag!, style: const TextStyle(fontSize: 9.5, fontWeight: FontWeight.w700, color: Color(0xFF6366F1))),
                   ),
                 ],
                 if (p.platform != null && p.platform!.isNotEmpty) ...[

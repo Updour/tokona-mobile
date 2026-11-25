@@ -8,7 +8,6 @@ import 'package:tokona/features/auth/presentation/controllers/auth_controller.da
 import 'package:tokona/features/auth/presentation/widgets/auth_header_widget.dart';
 import 'package:tokona/features/auth/presentation/widgets/cashier_scan_invite_banner.dart';
 import 'package:tokona/features/auth/presentation/widgets/login_form_widget.dart';
-import 'package:tokona/features/auth/presentation/widgets/offline_pairing_sheet.dart';
 import 'package:tokona/features/auth/presentation/widgets/register_form_widget.dart';
 import 'package:tokona/features/dashboard/presentation/screens/dashboard_screen.dart';
 
@@ -122,12 +121,28 @@ class _AuthScreenState extends ConsumerState<AuthScreen> with SingleTickerProvid
                                       BoxShadow(color: const Color(0xFF0D9488).withValues(alpha: 0.04), blurRadius: 10, offset: const Offset(0, 2)),
                                     ],
                                   ),
-                                  padding: const EdgeInsets.fromLTRB(22, 20, 22, 22),
+                                  padding: const EdgeInsets.fromLTRB(22, 18, 22, 22),
                                   child: Column(
                                     children: [
-                                      const CashierScanInviteBanner(),
+                                      Row(
+                                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                        crossAxisAlignment: CrossAxisAlignment.center,
+                                        children: [
+                                          Text(
+                                            isRegisterMode ? 'Buka Toko Baru' : 'Masuk ke Kasir',
+                                            style: const TextStyle(
+                                              fontSize: 16,
+                                              fontWeight: FontWeight.w800,
+                                              color: AppColors.textPrimary,
+                                              letterSpacing: -0.2,
+                                            ),
+                                          ),
+                                          const CashierScanInviteBanner(),
+                                        ],
+                                      ),
+                                      const SizedBox(height: 14),
                                       _buildModeSelector(isRegisterMode),
-                                      const SizedBox(height: 20),
+                                      const SizedBox(height: 18),
                                       AnimatedCrossFade(
                                         firstChild: LoginFormWidget(
                                           isLoading: authState.isLoading,
@@ -265,32 +280,12 @@ class _AuthScreenState extends ConsumerState<AuthScreen> with SingleTickerProvid
   }
 
   Widget _buildFooter() {
-    return Column(
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        InkWell(
-          onTap: () => OfflinePairingSheet.show(context),
-          borderRadius: BorderRadius.circular(8),
-          child: const Padding(
-            padding: EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(Icons.qr_code_scanner_rounded, size: 14, color: AppColors.primary),
-                SizedBox(width: 5),
-                Text('Hubungkan HP Kasir (Scan QR Toko)', style: TextStyle(fontSize: 11.5, color: AppColors.primary, fontWeight: FontWeight.w700)),
-              ],
-            ),
-          ),
-        ),
-        const SizedBox(height: 6),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Container(width: 7, height: 7, decoration: const BoxDecoration(shape: BoxShape.circle, color: Color(0xFF10B981))),
-            const SizedBox(width: 6),
-            const Text('Tokona POS • Mode Offline Aktif', style: TextStyle(fontSize: 11, color: Color(0xFF94A3B8), fontWeight: FontWeight.w600)),
-          ],
-        ),
+        Container(width: 7, height: 7, decoration: const BoxDecoration(shape: BoxShape.circle, color: Color(0xFF10B981))),
+        const SizedBox(width: 6),
+        const Text('Tokona POS • Mode Offline Aktif', style: TextStyle(fontSize: 11, color: Color(0xFF94A3B8), fontWeight: FontWeight.w600)),
       ],
     );
   }

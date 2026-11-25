@@ -10,12 +10,12 @@ class CameraBarcodeScanner extends StatefulWidget {
 
   const CameraBarcodeScanner({
     super.key,
-    this.title = 'Pindai Barcode / QR',
+    this.title = 'Pindai QRCode',
   });
 
   static Future<String?> scan(
     BuildContext context, {
-    String title = 'Pindai Barcode / QR',
+    String title = 'Pindai QRCode',
   }) {
     return Navigator.of(context).push<String>(
       MaterialPageRoute(

@@ -88,7 +88,7 @@ class PurchaseEstimateRangeCard extends StatelessWidget {
           const Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Icon(Icons.auto_awesome, size: 12, color: Color(0xFF15803D)),
+              Icon(Icons.schedule_rounded, size: 12, color: Color(0xFF15803D)),
               SizedBox(width: 4),
               Expanded(
                 child: Text(

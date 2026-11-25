@@ -88,12 +88,12 @@ class ReportExportService {
     final buffer = StringBuffer();
 
     buffer.writeln(divider);
-    buffer.writeln('📊 *LAPORAN PENJUALAN TOKONA*');
-    buffer.writeln('🏪 *${storeName.toUpperCase().trim()}*');
-    buffer.writeln('📅 Periode : *${report.activeFilterLabel}*');
-    buffer.writeln('🕒 Dicetak : ${dateFormat.format(DateTime.now())}');
+    buffer.writeln('*LAPORAN PENJUALAN TOKONA*');
+    buffer.writeln('*${storeName.toUpperCase().trim()}*');
+    buffer.writeln('Periode : *${report.activeFilterLabel}*');
+    buffer.writeln('Dicetak : ${dateFormat.format(DateTime.now())}');
     buffer.writeln(divider);
-    buffer.writeln('💰 *RINGKASAN LABA & OMSET*');
+    buffer.writeln('*RINGKASAN LABA & OMSET*');
     buffer.writeln('• Total Omset : *${currency.format(report.summary.totalRevenue)}*');
     buffer.writeln('• Laba Kotor  : *${currency.format(report.summary.grossProfit)}*');
     buffer.writeln('• Total Struk : ${report.summary.transactionCount} Transaksi');
@@ -101,7 +101,7 @@ class ReportExportService {
     buffer.writeln(divider);
 
     if (report.topProducts.isNotEmpty) {
-      buffer.writeln('🏆 *TOP 5 PRODUK TERLARIS*');
+      buffer.writeln('*TOP 5 PRODUK TERLARIS*');
       int rank = 1;
       for (final p in report.topProducts.take(5)) {
         buffer.writeln('$rank. ${p.productName} (${p.quantitySold.toStringAsFixed(0)} terjual)');
@@ -113,7 +113,7 @@ class ReportExportService {
 
     final kasbonSales = sales.where((s) => s.isKasbon && !s.isVoided);
     final totalKasbon = kasbonSales.fold(0.0, (acc, s) => acc + s.finalAmount);
-    buffer.writeln('⚠️ *STATUS PIUTANG KASBON*');
+    buffer.writeln('*STATUS PIUTANG KASBON*');
     buffer.writeln('• Belum Lunas : ${kasbonSales.length} Nota');
     buffer.writeln('• Total Kasbon: *${currency.format(totalKasbon)}*');
     buffer.writeln(divider);

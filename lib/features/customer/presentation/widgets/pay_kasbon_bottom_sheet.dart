@@ -208,7 +208,7 @@ class _PayKasbonBottomSheetState extends ConsumerState<PayKasbonBottomSheet> {
               ],
               TextField(
                 controller: _notesController,
-                decoration: const InputDecoration(labelText: 'Catatan / Keterangan (Opsional)', hintText: 'Titip tetangga / transfer bank', prefixIcon: Icon(Icons.edit_note_rounded, size: 20)),
+                decoration: const InputDecoration(labelText: 'Catatan (Opsional)', hintText: 'Titip tetangga / transfer bank', prefixIcon: Icon(Icons.edit_note_rounded, size: 20)),
               ),
               const SizedBox(height: 18),
               SizedBox(

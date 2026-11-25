@@ -1,30 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:tokona/core/theme/app_colors.dart';
-import 'package:tokona/core/theme/app_typography.dart';
 import 'package:tokona/core/utils/currency_formatter.dart';
 import 'package:tokona/core/widgets/app_toast.dart';
-import 'package:tokona/core/widgets/proof_photo_picker.dart';
 import 'package:tokona/features/auth/presentation/controllers/auth_controller.dart';
+import 'package:tokona/features/product/domain/models/product_model.dart';
 import 'package:tokona/features/product/presentation/controllers/product_controller.dart';
 import 'package:tokona/features/purchase/domain/dtos/create_purchase_dto.dart';
 import 'package:tokona/features/purchase/domain/dtos/create_purchase_item_dto.dart';
 import 'package:tokona/features/purchase/presentation/controllers/purchase_controller.dart';
 import 'package:tokona/features/purchase/presentation/widgets/add_purchase_header.dart';
+import 'package:tokona/features/purchase/presentation/widgets/add_purchase_payload_builder.dart';
 import 'package:tokona/features/purchase/presentation/widgets/purchase_channel_selector.dart';
-import 'package:tokona/features/purchase/presentation/widgets/purchase_device_chips.dart';
-import 'package:tokona/features/purchase/presentation/widgets/purchase_estimate_range_card.dart';
-import 'package:tokona/features/purchase/presentation/widgets/purchase_fee_inputs.dart';
-import 'package:tokona/features/purchase/presentation/widgets/purchase_installment_card.dart';
-import 'package:tokona/features/purchase/presentation/widgets/purchase_item_list_section.dart';
-import 'package:tokona/features/purchase/presentation/widgets/purchase_payment_account_chips.dart';
-import 'package:tokona/features/purchase/presentation/widgets/purchase_product_selector.dart';
-import 'package:tokona/features/purchase/presentation/widgets/purchase_status_selector.dart';
-import 'package:tokona/features/purchase/presentation/widgets/purchase_submit_button.dart';
-import 'package:tokona/features/purchase/presentation/widgets/purchase_summary_card.dart';
-import 'package:tokona/features/purchase/presentation/widgets/purchase_supplier_field.dart';
-import 'package:tokona/features/supplier/domain/dtos/create_supplier_dto.dart';
-import 'package:tokona/features/supplier/domain/models/supplier_model.dart';
+import 'package:tokona/features/purchase/presentation/widgets/purchase_co_order_form.dart';
+import 'package:tokona/features/purchase/presentation/widgets/purchase_regular_form.dart';
 import 'package:tokona/features/supplier/presentation/controllers/supplier_controller.dart';
 
 class AddPurchaseBottomSheet extends ConsumerStatefulWidget {
@@ -32,8 +21,11 @@ class AddPurchaseBottomSheet extends ConsumerStatefulWidget {
 
   static Future<void> show(BuildContext context) {
     return showModalBottomSheet(
-      context: context, isScrollControlled: true, useSafeArea: true,
-      backgroundColor: Colors.transparent, builder: (_) => const AddPurchaseBottomSheet(),
+      context: context,
+      isScrollControlled: true,
+      useSafeArea: true,
+      backgroundColor: Colors.transparent,
+      builder: (_) => const AddPurchaseBottomSheet(),
     );
   }
 
@@ -45,15 +37,20 @@ class _AddPurchaseBottomSheetState extends ConsumerState<AddPurchaseBottomSheet>
   final _supplierController = TextEditingController(), _invoiceController = TextEditingController();
   final _notesController = TextEditingController(), _serviceFeeController = TextEditingController();
   final _shippingFeeController = TextEditingController(), _installmentController = TextEditingController();
+  final _shippingDiscountController = TextEditingController(), _voucherDiscountController = TextEditingController();
+  final _coPartnerController = TextEditingController(), _coProfitController = TextEditingController();
+  final _coProductNameController = TextEditingController(), _coQtyController = TextEditingController(text: '1');
+  final _coCostController = TextEditingController(), _coPricePerUnitController = TextEditingController();
+  final _coTotalReceivedController = TextEditingController(), _coTrackingController = TextEditingController(), _coNotesController = TextEditingController();
+  ProductModel? _coSelectedProduct;
 
   String? _supplierId;
   String _purchaseType = 'offline', _platform = 'Shopee', _deviceTag = 'HP 1', _paymentAccount = 'SeaBank', _status = 'received';
   String? _proofImagePath;
   int _poDays = 3, _installmentMonths = 1;
   DateTime? _estArrivalStart, _estArrivalEnd;
-
+  bool _addToStock = false, _isFundedByPartner = true, _isSubmitting = false;
   final List<CreatePurchaseItemDto> _items = [];
-  bool _isSubmitting = false;
   String? _errorMessage;
 
   @override
@@ -67,82 +64,113 @@ class _AddPurchaseBottomSheetState extends ConsumerState<AddPurchaseBottomSheet>
 
   @override
   void dispose() {
-    _supplierController.dispose();
-    _invoiceController.dispose();
-    _notesController.dispose();
-    _serviceFeeController.dispose();
-    _shippingFeeController.dispose();
-    _installmentController.dispose();
+    for (final c in [
+      _supplierController, _invoiceController, _notesController, _serviceFeeController,
+      _shippingFeeController, _shippingDiscountController, _voucherDiscountController,
+      _installmentController, _coPartnerController, _coProfitController,
+      _coProductNameController, _coQtyController, _coCostController,
+      _coPricePerUnitController, _coTotalReceivedController, _coTrackingController, _coNotesController,
+    ]) {
+      c.dispose();
+    }
     super.dispose();
   }
 
   double get _itemsTotal => _items.fold(0.0, (acc, item) => acc + item.subtotal);
   double get _serviceFee => CurrencyFormatter.parse(_serviceFeeController.text);
   double get _shippingFee => CurrencyFormatter.parse(_shippingFeeController.text);
+  double get _shippingDiscount => CurrencyFormatter.parse(_shippingDiscountController.text);
+  double get _voucherDiscount => CurrencyFormatter.parse(_voucherDiscountController.text);
+
+  double get _coQty => double.tryParse(_coQtyController.text) ?? 1.0;
+  double get _coTotalCost => CurrencyFormatter.parse(_coCostController.text);
+  double get _coPricePerUnit => CurrencyFormatter.parse(_coPricePerUnitController.text);
+  double get _coTotalReceived => CurrencyFormatter.parse(_coTotalReceivedController.text);
+  double get _coProfit => _coTotalReceived - _coTotalCost;
+  double get _coMarginPct => _coTotalReceived > 0 ? (_coProfit / _coTotalReceived) * 100 : 0.0;
+
+  void _onCoPriceChanged(String val) {
+    _coTotalReceivedController.text = CurrencyFormatter.formatNumber(_coQty * CurrencyFormatter.parse(val));
+    setState(() {});
+  }
+
+  void _onCoTotalChanged(String val) {
+    final t = CurrencyFormatter.parse(val);
+    _coPricePerUnitController.text = CurrencyFormatter.formatNumber(_coQty > 0 ? (t / _coQty) : 0.0);
+    setState(() {});
+  }
+
+  void _onCoQtyChanged(String val) {
+    final q = double.tryParse(val) ?? 1.0;
+    final p = CurrencyFormatter.parse(_coPricePerUnitController.text);
+    if (p > 0) _coTotalReceivedController.text = CurrencyFormatter.formatNumber(q * p);
+    setState(() {});
+  }
 
   Future<void> _handleSubmit() async {
-    final authState = ref.read(authProvider);
-    final store = authState.currentStore;
-    final user = authState.currentUser;
-    if (store == null || user == null) {
-      AppToast.showError(context, 'Sesi toko tidak ditemukan. Silakan login kembali.');
-      return;
-    }
-    if (_items.isEmpty) {
-      AppToast.showWarning(context, 'Pilih minimal 1 barang belanjaan');
-      return;
+    final auth = ref.read(authProvider);
+    final store = auth.currentStore;
+    final user = auth.currentUser;
+    if (store == null || user == null) return AppToast.showError(context, 'Sesi toko tidak ditemukan.');
+
+    final isCo = _purchaseType == 'co_order';
+    if (isCo) {
+      if (_coPartnerController.text.trim().isEmpty) return AppToast.showWarning(context, 'Masukkan nama rekan');
+      if (_coProductNameController.text.trim().isEmpty && _coSelectedProduct == null) return AppToast.showWarning(context, 'Masukkan nama barang');
+      if (_coTotalCost <= 0) return AppToast.showWarning(context, 'Masukkan modal belanja checkout');
+    } else if (_items.isEmpty) {
+      return AppToast.showWarning(context, 'Pilih minimal 1 barang belanjaan');
     }
 
     setState(() { _isSubmitting = true; _errorMessage = null; });
-
     try {
-      String? effectiveSupplierId = _supplierId;
-      final rawSup = _supplierController.text.trim();
-      if (rawSup.isNotEmpty) {
-        final match = ref.read(supplierListProvider).suppliers.where((s) => s.name.trim().toLowerCase() == rawSup.toLowerCase()).firstOrNull;
-        if (match != null) {
-          effectiveSupplierId = match.id;
-        } else {
-          try {
-            final c = await ref.read(supplierRepositoryProvider).createSupplier(
-              store.id, CreateSupplierDto(name: rawSup, type: _purchaseType, platform: _purchaseType == 'online' ? _platform : null),
-            );
-            effectiveSupplierId = c.id;
-            ref.read(supplierListProvider.notifier).loadSuppliers(store.id);
-          } catch (_) {}
-        }
-      }
+      final supId = isCo ? null : await AddPurchasePayloadBuilder.resolveSupplierId(
+        ref: ref, storeId: store.id, rawSupplierName: _supplierController.text.trim(),
+        purchaseType: _purchaseType, platform: _platform, existingSupplierId: _supplierId,
+      );
+      final effItems = isCo ? await AddPurchasePayloadBuilder.resolveCoOrderItems(
+        ref: ref, storeId: store.id, selectedProduct: _coSelectedProduct,
+        rawProductName: _coProductNameController.text.trim(), qty: _coQty,
+        totalCost: _coTotalCost, pricePerUnit: _coPricePerUnit,
+      ) : List<CreatePurchaseItemDto>.from(_items);
 
+      final isOnlineOrCo = _purchaseType == 'online' || isCo;
       final dto = CreatePurchaseDto(
         storeId: store.id, userId: user.id,
-        invoiceNumber: _invoiceController.text.trim().isEmpty ? null : _invoiceController.text.trim(),
-        supplierId: effectiveSupplierId, supplierName: rawSup.isEmpty ? null : rawSup,
-        purchaseType: _purchaseType, platform: _purchaseType == 'online' ? _platform : null,
-        deviceTag: _purchaseType == 'online' ? _deviceTag : null, paymentAccount: _paymentAccount,
-        serviceFee: _serviceFee, shippingFee: _shippingFee, status: _status,
-        poDays: _status == 'pre_order' ? _poDays : null,
+        invoiceNumber: isCo ? null : (_invoiceController.text.trim().isEmpty ? null : _invoiceController.text.trim()),
+        supplierId: supId,
+        supplierName: isCo ? '$_platform (Co-Order)' : (_supplierController.text.trim().isEmpty ? null : _supplierController.text.trim()),
+        purchaseType: _purchaseType, platform: isOnlineOrCo ? _platform : null,
+        deviceTag: isOnlineOrCo ? _deviceTag : null,
+        paymentAccount: (isCo && _isFundedByPartner) ? 'Dana Rekan' : _paymentAccount,
+        serviceFee: isCo ? 0.0 : _serviceFee, shippingFee: isCo ? 0.0 : _shippingFee,
+        status: isCo ? 'shipping' : _status,
+        poDays: isCo ? null : (_status == 'pre_order' ? _poDays : null),
         estimatedArrival: _status != 'received' ? (_estArrivalStart ?? DateTime.now().add(Duration(days: _status == 'pre_order' ? _poDays : 2))) : null,
-        estimatedArrivalEnd: _status != 'received'
-            ? (_estArrivalEnd != null ? DateTime(_estArrivalEnd!.year, _estArrivalEnd!.month, _estArrivalEnd!.day, 23, 59, 59) : DateTime.now().add(Duration(days: _status == 'pre_order' ? _poDays + 3 : 4)))
-            : null,
-        notes: _notesController.text.trim().isEmpty ? null : _notesController.text.trim(),
-        imagePath: _proofImagePath,
-        installmentMonths: _installmentMonths,
-        monthlyInstallment: CurrencyFormatter.parse(_installmentController.text),
-        items: _items,
+        estimatedArrivalEnd: _status != 'received' ? (_estArrivalEnd ?? DateTime.now().add(Duration(days: _status == 'pre_order' ? _poDays + 3 : 4))) : null,
+        notes: isCo ? (_coNotesController.text.trim().isEmpty ? null : _coNotesController.text.trim()) : (_notesController.text.trim().isEmpty ? null : _notesController.text.trim()),
+        imagePath: isCo ? null : _proofImagePath,
+        trackingNumber: isCo ? (_coTrackingController.text.trim().isEmpty ? null : _coTrackingController.text.trim()) : null,
+        installmentMonths: isCo ? 1 : _installmentMonths,
+        monthlyInstallment: isCo ? 0.0 : CurrencyFormatter.parse(_installmentController.text),
+        coPartner: isCo ? _coPartnerController.text.trim() : null,
+        coProfit: isCo ? _coProfit : CurrencyFormatter.parse(_coProfitController.text),
+        addToStock: isCo ? _addToStock : true,
+        shippingDiscount: isCo ? 0.0 : _shippingDiscount, voucherDiscount: isCo ? 0.0 : _voucherDiscount,
+        items: effItems,
       );
 
-      final result = await ref.read(purchaseControllerProvider.notifier).recordPurchase(dto);
+      final res = await ref.read(purchaseControllerProvider.notifier).recordPurchase(dto);
       if (!mounted) return;
       setState(() => _isSubmitting = false);
-      if (result != null) {
-        AppToast.showSuccess(context, _status == 'received' ? 'Pembelian berhasil disimpan.' : 'Pesanan dicatat via $_paymentAccount ($_deviceTag).');
-        await Future.delayed(const Duration(milliseconds: 600));
+      if (res != null) {
+        AppToast.showSuccess(context, isCo ? 'Co-Order Rekan berhasil dicatat!' : 'Pembelian berhasil disimpan.');
+        await Future.delayed(const Duration(milliseconds: 500));
         if (mounted) Navigator.of(context).pop();
       } else {
-        final errorMsg = ref.read(purchaseControllerProvider).errorMessage ?? 'Gagal menyimpan pembelian';
-        setState(() => _errorMessage = errorMsg);
-        AppToast.showError(context, errorMsg);
+        final err = ref.read(purchaseControllerProvider).errorMessage ?? 'Gagal menyimpan';
+        setState(() => _errorMessage = err);
+        AppToast.showError(context, err);
       }
     } catch (e) {
       if (mounted) {
@@ -173,44 +201,58 @@ class _AddPurchaseBottomSheetState extends ConsumerState<AddPurchaseBottomSheet>
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
                     PurchaseChannelSelector(
-                      purchaseType: _purchaseType,
-                      platform: _platform,
-                      onTypeChanged: (type) => setState(() => _purchaseType = type),
+                      purchaseType: _purchaseType, platform: _platform,
+                      onTypeChanged: (t) => setState(() {
+                        _purchaseType = t;
+                        if (t == 'co_order') {
+                          _addToStock = false; _isFundedByPartner = true;
+                          if (_status == 'received') _status = 'shipping';
+                        }
+                      }),
                       onPlatformChanged: (p) => setState(() => _platform = p),
                     ),
-                    const SizedBox(height: 12),
-                    PurchaseSupplierField(
-                      controller: _supplierController,
-                      purchaseType: _purchaseType,
-                      onSupplierSelected: (selected) {
-                        setState(() {
-                          _supplierId = selected.id;
-                          _supplierController.text = selected.name;
-                          _purchaseType = selected.type;
-                          if (selected.platform != null) _platform = selected.platform!;
-                        });
-                      },
-                    ),
-                    const SizedBox(height: 12),
-                    TextField(
-                      controller: _invoiceController,
-                      decoration: const InputDecoration(
-                        labelText: 'No. Faktur Toko (Opsional)',
-                        hintText: 'Otomatis: INV-[TOKO]-[PRODUK]-[ACAK]',
-                        prefixIcon: Icon(Icons.receipt_outlined, size: 20),
-                      ),
-                    ),
-                    if (_purchaseType == 'online') ...[
-                      const SizedBox(height: 12),
-                      PurchaseDeviceChips(selectedDevice: _deviceTag, onDeviceSelected: (d) => setState(() => _deviceTag = d)),
-                    ],
-                    const SizedBox(height: 12),
-                    PurchasePaymentAccountChips(selectedAccount: _paymentAccount, onAccountSelected: (acc) => setState(() => _paymentAccount = acc)),
-                    if (_paymentAccount.toLowerCase().contains('paylater') || _paymentAccount.toLowerCase().contains('spaylater') || _installmentMonths > 1)
-                      PurchaseInstallmentCard(
-                        selectedTenor: _installmentMonths,
-                        installmentController: _installmentController,
-                        itemsTotal: _itemsTotal + _serviceFee + _shippingFee,
+                    const SizedBox(height: 14),
+                    if (_purchaseType == 'co_order')
+                      PurchaseCoOrderForm(
+                        products: products,
+                        coPartnerController: _coPartnerController, coTrackingController: _coTrackingController,
+                        platform: _platform, onPlatformChanged: (p) => setState(() => _platform = p),
+                        coProductNameController: _coProductNameController, coSelectedProduct: _coSelectedProduct,
+                        onProductSelected: (p) => setState(() {
+                          _coSelectedProduct = p;
+                          if (p != null) {
+                            _coProductNameController.text = p.name;
+                            if (p.baseCostPrice > 0 && _coCostController.text.isEmpty) {
+                              _coCostController.text = CurrencyFormatter.formatNumber(p.baseCostPrice * _coQty);
+                            }
+                            if (p.baseSellingPrice > 0 && _coPricePerUnitController.text.isEmpty) {
+                              _coPricePerUnitController.text = CurrencyFormatter.formatNumber(p.baseSellingPrice);
+                              _onCoPriceChanged(_coPricePerUnitController.text);
+                            }
+                          }
+                        }),
+                        coQtyController: _coQtyController, coCostController: _coCostController,
+                        coPricePerUnitController: _coPricePerUnitController, coTotalReceivedController: _coTotalReceivedController,
+                        coQty: _coQty, coTotalCost: _coTotalCost, coTotalReceived: _coTotalReceived,
+                        coProfit: _coProfit, coMarginPercent: _coMarginPct,
+                        isFundedByPartner: _isFundedByPartner, onFundedChanged: (v) => setState(() => _isFundedByPartner = v),
+                        addToStock: _addToStock, onAddToStockChanged: (v) => setState(() => _addToStock = v),
+                        coNotesController: _coNotesController, isSubmitting: _isSubmitting,
+                        isFormValid: _coPartnerController.text.trim().isNotEmpty && (_coProductNameController.text.trim().isNotEmpty || _coSelectedProduct != null) && _coTotalCost > 0,
+                        onSubmit: _handleSubmit, onQtyChanged: _onCoQtyChanged,
+                        onPricePerUnitChanged: _onCoPriceChanged, onTotalReceivedChanged: _onCoTotalChanged,
+                      )
+                    else
+                      PurchaseRegularForm(
+                        supplierController: _supplierController, purchaseType: _purchaseType,
+                        onSupplierSelected: (s) => setState(() {
+                          _supplierId = s.id; _supplierController.text = s.name;
+                          _purchaseType = s.type; if (s.platform != null) _platform = s.platform!;
+                        }),
+                        invoiceController: _invoiceController, deviceTag: _deviceTag,
+                        onDeviceSelected: (d) => setState(() => _deviceTag = d),
+                        paymentAccount: _paymentAccount, onAccountSelected: (a) => setState(() => _paymentAccount = a),
+                        installmentMonths: _installmentMonths, installmentController: _installmentController,
                         onTenorChanged: (t) => setState(() {
                           _installmentMonths = t;
                           if (t > 1 && _installmentController.text.isEmpty && _itemsTotal > 0) {
@@ -218,75 +260,32 @@ class _AddPurchaseBottomSheetState extends ConsumerState<AddPurchaseBottomSheet>
                             _installmentController.text = CurrencyFormatter.formatNumber(est);
                           }
                         }),
-                        onChanged: () => setState(() {}),
-                      ),
-                    const SizedBox(height: 14),
-                    PurchaseStatusSelector(
-                      status: _status, poDays: _poDays,
-                      onStatusChanged: (s) => setState(() {
-                        _status = s;
-                        final now = DateTime.now();
-                        if (s == 'shipping' && _estArrivalStart == null) {
-                          _estArrivalStart = now.add(const Duration(days: 2));
-                          _estArrivalEnd = now.add(const Duration(days: 4));
-                        } else if (s == 'pre_order' && _estArrivalStart == null) {
-                          _estArrivalStart = now.add(Duration(days: _poDays));
-                          _estArrivalEnd = now.add(Duration(days: _poDays + 3));
-                        }
-                      }),
-                      onPoDaysChanged: (d) => setState(() => _poDays = d),
-                    ),
-                    if (_status != 'received') ...[
-                      const SizedBox(height: 10),
-                      PurchaseEstimateRangeCard(
-                        startDate: _estArrivalStart ?? DateTime.now().add(Duration(days: _status == 'pre_order' ? _poDays : 2)),
-                        endDate: _estArrivalEnd ?? DateTime.now().add(Duration(days: _status == 'pre_order' ? _poDays + 3 : 4)),
-                        onRangeChanged: (r) {
-                          if (r != null) setState(() { _estArrivalStart = r.start; _estArrivalEnd = r.end; });
-                        },
-                      ),
-                    ],
-                    const SizedBox(height: 14),
-                    PurchaseProductSelector(products: products, onAddItem: (item) => setState(() => _items.add(item))),
-                    PurchaseItemListSection(
-                      items: _items,
-                      onEditItem: (idx, updated) => setState(() => _items[idx] = updated),
-                      onRemoveItem: (idx) => setState(() => _items.removeAt(idx)),
-                    ),
-                    if (_purchaseType == 'online') ...[
-                      const SizedBox(height: 12),
-                      PurchaseFeeInputs(
+                        onInstallmentChanged: () => setState(() {}),
+                        status: _status, poDays: _poDays,
+                        onStatusChanged: (s) => setState(() {
+                          _status = s; final now = DateTime.now();
+                          if (s == 'shipping' && _estArrivalStart == null) {
+                            _estArrivalStart = now.add(const Duration(days: 2)); _estArrivalEnd = now.add(const Duration(days: 4));
+                          } else if (s == 'pre_order' && _estArrivalStart == null) {
+                            _estArrivalStart = now.add(Duration(days: _poDays)); _estArrivalEnd = now.add(Duration(days: _poDays + 3));
+                          }
+                        }),
+                        onPoDaysChanged: (d) => setState(() => _poDays = d),
+                        estArrivalStart: _estArrivalStart, estArrivalEnd: _estArrivalEnd,
+                        onRangeChanged: (r) { if (r != null) setState(() { _estArrivalStart = r.start; _estArrivalEnd = r.end; }); },
+                        products: products, items: _items,
+                        onAddItem: (i) => setState(() => _items.add(i)),
+                        onEditItem: (idx, u) => setState(() => _items[idx] = u),
+                        onRemoveItem: (idx) => setState(() => _items.removeAt(idx)),
                         serviceFeeController: _serviceFeeController, shippingFeeController: _shippingFeeController,
-                        onChanged: () => setState(() {}),
+                        shippingDiscountController: _shippingDiscountController, voucherDiscountController: _voucherDiscountController,
+                        onMarketplaceFeesChanged: () => setState(() {}),
+                        itemsTotal: _itemsTotal, serviceFee: _serviceFee, shippingFee: _shippingFee,
+                        shippingDiscount: _shippingDiscount, voucherDiscount: _voucherDiscount,
+                        notesController: _notesController, proofImagePath: _proofImagePath,
+                        onImagePicked: (p) => setState(() => _proofImagePath = p),
+                        isSubmitting: _isSubmitting, errorMessage: _errorMessage, onSubmit: _handleSubmit,
                       ),
-                    ],
-                    const SizedBox(height: 14),
-                    PurchaseSummaryCard(
-                      itemsTotal: _itemsTotal, serviceFee: _serviceFee, shippingFee: _shippingFee,
-                      isOnline: _purchaseType == 'online',
-                    ),
-                    const SizedBox(height: 12),
-                    TextField(
-                      controller: _notesController,
-                      decoration: const InputDecoration(
-                        labelText: 'Catatan (Opsional)',
-                        hintText: 'Nomor pesanan faktur distributor',
-                        prefixIcon: Icon(Icons.description_outlined, size: 20),
-                      ),
-                    ),
-                    const SizedBox(height: 12),
-                    ProofPhotoPicker(
-                      imagePath: _proofImagePath,
-                      label: _purchaseType == 'online' ? 'Foto Nota Marketplace' : 'Foto Nota Fisik Barang',
-                      hint: 'Ambil foto kamera atau pilih galeri (opsional)',
-                      onImagePicked: (p) => setState(() => _proofImagePath = p),
-                    ),
-                    const SizedBox(height: 16),
-                    PurchaseSubmitButton(
-                      isSubmitting: _isSubmitting,
-                      errorMessage: _errorMessage,
-                      onSubmit: _handleSubmit,
-                    ),
                   ],
                 ),
               ),

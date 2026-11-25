@@ -63,7 +63,7 @@ class _PurchaseSupplierFieldState extends ConsumerState<PurchaseSupplierField> {
           controller: widget.controller,
           decoration: InputDecoration(
             labelText: widget.purchaseType == 'online' ? 'Nama Toko Online' : 'Nama Distributor',
-            hintText: widget.purchaseType == 'online' ? 'Contoh: Toko Murah Jaya' : 'Contoh: PT Wings Surya',
+            hintText: widget.purchaseType == 'online' ? 'Toko Murah Jaya' : 'PT Wings Surya',
             prefixIcon: const Icon(Icons.business_outlined, size: 20),
             suffixIcon: IconButton(
               icon: const Icon(Icons.contacts_outlined, color: AppColors.primary, size: 20),
@@ -81,7 +81,7 @@ class _PurchaseSupplierFieldState extends ConsumerState<PurchaseSupplierField> {
           const SizedBox(height: 5),
           Row(
             children: [
-              const Icon(Icons.auto_awesome, size: 13, color: Color(0xFF0D9488)),
+              const Icon(Icons.info_outline_rounded, size: 13, color: Color(0xFF0D9488)),
               const SizedBox(width: 4),
               Expanded(
                 child: Text(

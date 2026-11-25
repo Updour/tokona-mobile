@@ -70,7 +70,7 @@ class _AddDeviceDialogState extends State<AddDeviceDialog> {
         textCapitalization: TextCapitalization.words,
         decoration: InputDecoration(
           labelText: 'Nama HP Belanja',
-          hintText: 'Contoh: HP 4, HP Shopee Admin',
+          hintText: 'HP 4, HP Shopee Admin',
           border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
         ),
         onSubmitted: (_) => _submit(),

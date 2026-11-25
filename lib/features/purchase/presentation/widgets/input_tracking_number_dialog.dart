@@ -186,7 +186,7 @@ class _InputTrackingNumberDialogState extends State<InputTrackingNumberDialog> {
               controller: _courierController,
               decoration: InputDecoration(
                 labelText: 'Ekspedisi',
-                hintText: 'Misal: J&T Cargo, SPX, JNE, Indah Cargo...',
+                hintText: ' J&T Cargo, SPX, JNE, Indah Cargo...',
                 hintStyle: const TextStyle(fontSize: 12, color: AppColors.textMuted),
                 prefixIcon: const Icon(Icons.local_shipping_outlined, size: 20),
                 suffixIcon: _courierController.text.isNotEmpty
@@ -237,7 +237,7 @@ class _InputTrackingNumberDialogState extends State<InputTrackingNumberDialog> {
               textCapitalization: TextCapitalization.characters,
               decoration: InputDecoration(
                 labelText: 'Nomor Resi / AWB',
-                hintText: 'Contoh: JTC8291038491 / SPXID02918',
+                hintText: 'JTC8291038491 / SPXID02918',
                 hintStyle: const TextStyle(fontSize: 12, color: AppColors.textMuted),
                 prefixIcon: const Icon(Icons.confirmation_number_outlined, size: 20),
                 suffixIcon: _resiController.text.isNotEmpty

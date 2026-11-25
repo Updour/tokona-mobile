@@ -136,6 +136,11 @@ class ReceiptThermalFormatter {
     if (sale.discountAmount > 0) {
       b.writeln(twoColumn('Diskon', '-${currency.format(sale.discountAmount)}', col));
     }
+    if (sale.roundingAmount != 0) {
+      final sign = sale.roundingAmount > 0 ? '+' : '-';
+      final formattedRounding = '$sign${currency.format(sale.roundingAmount.abs())}';
+      b.writeln(twoColumn('Pembulatan', formattedRounding, col));
+    }
     b.writeln(twoColumn('TOTAL', currency.format(sale.finalAmount), col));
     b.writeln(twoColumn('Bayar (${sale.paymentMethod})', currency.format(sale.cashPaid), col));
 

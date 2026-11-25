@@ -181,7 +181,7 @@ class _ProductProcurementHistoryTabState extends ConsumerState<ProductProcuremen
                           child: Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              Text('📦 ${p.trackingNumber}', style: const TextStyle(fontSize: 9.5, color: Color(0xFF0F766E), fontWeight: FontWeight.w700, fontFamily: 'monospace')),
+                              Text(p.trackingNumber ?? '', style: const TextStyle(fontSize: 9.5, color: Color(0xFF0F766E), fontWeight: FontWeight.w700, fontFamily: 'monospace')),
                               const SizedBox(width: 3),
                               const Icon(Icons.copy_rounded, size: 10, color: Color(0xFF0F766E)),
                             ],

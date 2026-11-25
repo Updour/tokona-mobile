@@ -184,7 +184,7 @@ $payload
               child: ElevatedButton.icon(
                 onPressed: () => _downloadQrCode(context, payload),
                 icon: const Icon(Icons.download_rounded, size: 17, color: Colors.white),
-                label: const Text('Download Barcode / Gambar QR', style: TextStyle(fontSize: 12.5, fontWeight: FontWeight.w800, color: Colors.white)),
+                label: const Text('Download QrCode', style: TextStyle(fontSize: 12.5, fontWeight: FontWeight.w800, color: Colors.white)),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppColors.primary,
                   padding: const EdgeInsets.symmetric(vertical: 11),

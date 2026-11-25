@@ -139,7 +139,7 @@ class AboutAppDialog extends StatelessWidget {
       ),
       child: Column(
         children: const [
-          _HighlightItem(icon: Icons.flash_on_rounded, text: 'Offline-First SQLite lokal super cepat'),
+          _HighlightItem(icon: Icons.storage_rounded, text: 'Offline-First SQLite lokal super cepat'),
           SizedBox(height: 6),
           _HighlightItem(icon: Icons.layers_rounded, text: 'Multi-satuan Dus, Lusin, dan Pcs'),
           SizedBox(height: 6),

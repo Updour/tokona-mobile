@@ -1,3 +1,5 @@
+import 'package:tokona/features/settings/domain/models/whatsapp_message_templates.dart';
+
 class AppPreferences {
   // 1. Notifikasi & Pengingat
   final String paylaterName;
@@ -47,6 +49,11 @@ class AppPreferences {
   // 6. Sinkronisasi Cloud
   final int syncIntervalSeconds;
 
+  // 7. Pembulatan Harga Kasir (Round Up / Round Down)
+  final bool posRoundingEnabled;
+  final String posRoundingMode; // 'round_up', 'round_down', 'nearest'
+  final int posRoundingStep; // 100, 500, 1000
+
   const AppPreferences({
     this.paylaterName = 'SPayLater',
     this.paylaterDueDay = 1,
@@ -86,43 +93,37 @@ class AppPreferences {
     this.printerAutoCut = false,
     this.printerMonospaceWhatsApp = true,
     this.syncIntervalSeconds = 30,
+    this.posRoundingEnabled = false,
+    this.posRoundingMode = 'round_up',
+    this.posRoundingStep = 500,
   });
 
-  static const String defaultBookingTemplate =
-      'Halo Kak *{nama}*! 👋\n\n'
-      'Mengingatkan pesanan Anda di *{toko}*:\n'
-      '{daftar_barang}\n\n'
-      '💰 Total: *{total}*\n'
-      '📅 Jadwal: *{jadwal}*\n'
-      '📍 Layanan: {metode}\n\n'
-      'Pesanan sudah siap di toko. Ditunggu kedatangannya ya Kak. Terima kasih! 🙏';
-
-  static const String defaultKasbonTemplate =
-      'Halo Kak *{nama}*! 🙏\n'
-      'Semoga selalu sehat dan lancar rezekinya.\n\n'
-      'Kami dari *{toko}* menginformasikan tagihan nota kasbon:\n'
-      '🧾 No. Nota: *{no_nota}*\n'
-      '📅 Tanggal Belanja: {tanggal}\n'
-      '⏰ Jatuh Tempo: *{jatuh_tempo}*\n'
-      '💰 Total Tagihan: *{total}*\n\n'
-      'Pembayaran bisa tunai di kasir atau transfer. Mohon konfirmasinya ya Kak. Terima kasih! 🙏';
-
-  static const String defaultOrderTemplate =
-      'Halo *{nama}*! 👋\n'
-      'Pesanan dari *{toko}*:\n\n'
-      '📦 Barang: *{barang}*\n'
-      '🔢 Jumlah: *{jumlah} {satuan}*\n'
-      '💵 Harga Satuan: {harga}\n'
-      '💰 Total Beli: *{total}*\n\n'
-      'Mohon konfirmasinya ya. Terima kasih! 🙏';
-
-  static String renderTemplate(String template, Map<String, String> values) {
-    var result = template;
-    values.forEach((key, val) {
-      result = result.replaceAll('{$key}', val);
-    });
-    return result;
+  /// Hitung nilai pembulatan untuk total belanja kasir
+  /// Mengembalikan selisih pembulatan (misal +150 atau -200)
+  double calculateRounding(double amount) {
+    if (!posRoundingEnabled || posRoundingStep <= 0 || amount <= 0) return 0.0;
+    final step = posRoundingStep.toDouble();
+    double rounded = amount;
+    switch (posRoundingMode) {
+      case 'round_up':
+        rounded = (amount / step).ceil() * step;
+        break;
+      case 'round_down':
+        rounded = (amount / step).floor() * step;
+        break;
+      case 'nearest':
+      default:
+        rounded = (amount / step).round() * step;
+        break;
+    }
+    return rounded - amount;
   }
+
+  static const String defaultBookingTemplate = WhatsappMessageTemplates.defaultBookingTemplate;
+  static const String defaultKasbonTemplate = WhatsappMessageTemplates.defaultKasbonTemplate;
+  static const String defaultOrderTemplate = WhatsappMessageTemplates.defaultOrderTemplate;
+  static String renderTemplate(String template, Map<String, String> values) =>
+      WhatsappMessageTemplates.renderTemplate(template, values);
 
   bool isPaylaterWindowActive(DateTime now) {
     final lastDay = DateTime(now.year, now.month + 1, 0).day;
@@ -176,6 +177,9 @@ class AppPreferences {
     bool? printerAutoCut,
     bool? printerMonospaceWhatsApp,
     int? syncIntervalSeconds,
+    bool? posRoundingEnabled,
+    String? posRoundingMode,
+    int? posRoundingStep,
   }) {
     return AppPreferences(
       paylaterName: paylaterName ?? this.paylaterName,
@@ -216,6 +220,9 @@ class AppPreferences {
       printerAutoCut: printerAutoCut ?? this.printerAutoCut,
       printerMonospaceWhatsApp: printerMonospaceWhatsApp ?? this.printerMonospaceWhatsApp,
       syncIntervalSeconds: syncIntervalSeconds ?? this.syncIntervalSeconds,
+      posRoundingEnabled: posRoundingEnabled ?? this.posRoundingEnabled,
+      posRoundingMode: posRoundingMode ?? this.posRoundingMode,
+      posRoundingStep: posRoundingStep ?? this.posRoundingStep,
     );
   }
 
@@ -238,6 +245,9 @@ class AppPreferences {
         'printerFooterSocial': printerFooterSocial, 'printerFeedLines': printerFeedLines,
         'printerAutoCut': printerAutoCut, 'printerMonospaceWhatsApp': printerMonospaceWhatsApp,
         'syncIntervalSeconds': syncIntervalSeconds,
+        'posRoundingEnabled': posRoundingEnabled,
+        'posRoundingMode': posRoundingMode,
+        'posRoundingStep': posRoundingStep,
       };
 
   factory AppPreferences.fromMap(Map<String, dynamic> map) {
@@ -280,6 +290,9 @@ class AppPreferences {
       printerAutoCut: map['printerAutoCut'] as bool? ?? false,
       printerMonospaceWhatsApp: map['printerMonospaceWhatsApp'] as bool? ?? true,
       syncIntervalSeconds: (map['syncIntervalSeconds'] as num? ?? 30).toInt().clamp(10, 86400),
+      posRoundingEnabled: map['posRoundingEnabled'] as bool? ?? false,
+      posRoundingMode: (map['posRoundingMode'] as String?) ?? 'round_up',
+      posRoundingStep: (map['posRoundingStep'] as num? ?? 500).toInt().clamp(1, 10000),
     );
   }
 }

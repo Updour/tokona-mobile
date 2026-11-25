@@ -27,6 +27,11 @@ class PurchaseModel {
   final int installmentMonths;
   final double monthlyInstallment;
   final int paidInstallments;
+  final String? coPartner;
+  final double coProfit;
+  final bool addToStock;
+  final double shippingDiscount;
+  final double voucherDiscount;
   final List<PurchaseItemModel> items;
   final DateTime createdAt;
   final DateTime updatedAt;
@@ -58,6 +63,11 @@ class PurchaseModel {
     this.installmentMonths = 1,
     this.monthlyInstallment = 0.0,
     this.paidInstallments = 0,
+    this.coPartner,
+    this.coProfit = 0.0,
+    this.addToStock = true,
+    this.shippingDiscount = 0.0,
+    this.voucherDiscount = 0.0,
     this.items = const [],
     required this.createdAt,
     required this.updatedAt,
@@ -65,7 +75,10 @@ class PurchaseModel {
   });
 
   bool get isOnline => purchaseType.toLowerCase() == 'online';
+  bool get isCoOrder => purchaseType.toLowerCase() == 'co_order';
   bool get isPreOrder => status == 'pre_order';
+  double get totalDiscount => shippingDiscount + voucherDiscount;
+  double get itemsSubtotal => items.fold<double>(0.0, (acc, item) => acc + item.subtotal);
   bool get isShipping => status == 'shipping';
   bool get isReceived => status == 'received';
   bool get isCancelled => status == 'cancelled';
@@ -108,6 +121,11 @@ class PurchaseModel {
       installmentMonths: (map[DatabaseTables.columnPurchaseInstallmentMonths] as num? ?? 1).toInt(),
       monthlyInstallment: (map[DatabaseTables.columnPurchaseMonthlyInstallment] as num? ?? 0.0).toDouble(),
       paidInstallments: (map[DatabaseTables.columnPurchasePaidInstallments] as num? ?? 0).toInt(),
+      coPartner: map[DatabaseTables.columnPurchaseCoPartner] as String?,
+      coProfit: (map[DatabaseTables.columnPurchaseCoProfit] as num? ?? 0.0).toDouble(),
+      addToStock: (map[DatabaseTables.columnPurchaseAddToStock] as int? ?? 1) == 1,
+      shippingDiscount: (map[DatabaseTables.columnPurchaseShippingDiscount] as num? ?? 0.0).toDouble(),
+      voucherDiscount: (map[DatabaseTables.columnPurchaseVoucherDiscount] as num? ?? 0.0).toDouble(),
       items: items,
       createdAt: DateTime.parse(map[DatabaseTables.columnCreatedAt] as String),
       updatedAt: DateTime.parse(map[DatabaseTables.columnUpdatedAt] as String),
@@ -144,6 +162,11 @@ class PurchaseModel {
       DatabaseTables.columnPurchaseInstallmentMonths: installmentMonths,
       DatabaseTables.columnPurchaseMonthlyInstallment: monthlyInstallment,
       DatabaseTables.columnPurchasePaidInstallments: paidInstallments,
+      DatabaseTables.columnPurchaseCoPartner: coPartner,
+      DatabaseTables.columnPurchaseCoProfit: coProfit,
+      DatabaseTables.columnPurchaseAddToStock: addToStock ? 1 : 0,
+      DatabaseTables.columnPurchaseShippingDiscount: shippingDiscount,
+      DatabaseTables.columnPurchaseVoucherDiscount: voucherDiscount,
       DatabaseTables.columnCreatedAt: createdAt.toIso8601String(),
       DatabaseTables.columnUpdatedAt: updatedAt.toIso8601String(),
       DatabaseTables.columnSyncedAt: syncedAt?.toIso8601String(),
@@ -176,6 +199,11 @@ class PurchaseModel {
     int? installmentMonths,
     double? monthlyInstallment,
     int? paidInstallments,
+    String? coPartner,
+    double? coProfit,
+    bool? addToStock,
+    double? shippingDiscount,
+    double? voucherDiscount,
     List<PurchaseItemModel>? items,
     DateTime? createdAt,
     DateTime? updatedAt,
@@ -207,6 +235,11 @@ class PurchaseModel {
       installmentMonths: installmentMonths ?? this.installmentMonths,
       monthlyInstallment: monthlyInstallment ?? this.monthlyInstallment,
       paidInstallments: paidInstallments ?? this.paidInstallments,
+      coPartner: coPartner ?? this.coPartner,
+      coProfit: coProfit ?? this.coProfit,
+      addToStock: addToStock ?? this.addToStock,
+      shippingDiscount: shippingDiscount ?? this.shippingDiscount,
+      voucherDiscount: voucherDiscount ?? this.voucherDiscount,
       items: items ?? this.items,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,

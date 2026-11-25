@@ -5,13 +5,14 @@ import 'package:tokona/core/theme/app_colors.dart';
 import 'package:tokona/core/theme/app_typography.dart';
 import 'package:tokona/core/utils/currency_formatter.dart';
 import 'package:tokona/features/payment/domain/models/payment_account_model.dart';
-import 'package:tokona/features/payment/presentation/widgets/add_payment_account_dialog.dart';
 import 'package:tokona/features/pos/presentation/widgets/pos_bank_transfer_card.dart';
+import 'package:tokona/features/pos/presentation/widgets/pos_payment_method_selector.dart';
 import 'package:tokona/features/pos/presentation/widgets/pos_quick_cash_pills.dart';
 
 class PosPaymentSection extends StatelessWidget {
   final double subtotal;
   final double discount;
+  final double roundingAmount;
   final double finalAmount;
   final TextEditingController cashController;
   final TextEditingController discountController;
@@ -26,6 +27,7 @@ class PosPaymentSection extends StatelessWidget {
     super.key,
     required this.subtotal,
     required this.discount,
+    this.roundingAmount = 0.0,
     required this.finalAmount,
     required this.cashController,
     required this.discountController,
@@ -93,6 +95,43 @@ class PosPaymentSection extends StatelessWidget {
             ],
           ),
           const Divider(height: 16),
+          if (roundingAmount != 0) ...[
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Row(
+                  children: [
+                    Text('Pembulatan', style: AppTypography.bodySmall.copyWith(fontSize: 12, color: AppColors.textSecondary)),
+                    const SizedBox(width: 5),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1.5),
+                      decoration: BoxDecoration(
+                        color: roundingAmount > 0 ? const Color(0xFFDCFCE7) : const Color(0xFFFEE2E2),
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                      child: Text(
+                        roundingAmount > 0 ? 'Round Up' : 'Round Down',
+                        style: TextStyle(
+                          fontSize: 9.5,
+                          fontWeight: FontWeight.w700,
+                          color: roundingAmount > 0 ? const Color(0xFF15803D) : const Color(0xFFDC2626),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                Text(
+                  '${roundingAmount > 0 ? "+" : ""}${currency.format(roundingAmount)}',
+                  style: TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w700,
+                    color: roundingAmount > 0 ? const Color(0xFF15803D) : const Color(0xFFDC2626),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 6),
+          ],
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
@@ -101,9 +140,13 @@ class PosPaymentSection extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 12),
-          _buildMethodHeader(context),
-          const SizedBox(height: 6),
-          _buildAccountSelector(),
+          PosPaymentMethodSelector(
+            accounts: accounts,
+            selectedAccount: selectedAccount,
+            isKasbonSelected: isKasbonSelected,
+            onAccountSelected: onAccountSelected,
+            onKasbonSelected: onKasbonSelected,
+          ),
           const SizedBox(height: 10),
           if (isKasbonSelected) ...[
             _buildKasbonCard(currency),
@@ -130,90 +173,6 @@ class PosPaymentSection extends StatelessWidget {
           ] else if (selectedAccount != null) ...[
             PosBankTransferCard(account: selectedAccount!, currency: currency),
           ],
-        ],
-      ),
-    );
-  }
-
-  Widget _buildMethodHeader(BuildContext context) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Text('Metode Pembayaran', style: AppTypography.bodySmall.copyWith(fontSize: 11.5, fontWeight: FontWeight.w600)),
-        InkWell(
-          onTap: () async {
-            HapticFeedback.lightImpact();
-            final added = await AddPaymentAccountDialog.show(context);
-            if (added != null) onAccountSelected(added);
-          },
-          borderRadius: BorderRadius.circular(6),
-          child: const Padding(
-            padding: EdgeInsets.symmetric(horizontal: 4, vertical: 2),
-            child: Row(
-              children: [
-                Icon(Icons.add_rounded, size: 13, color: AppColors.primary),
-                SizedBox(width: 2),
-                Text('Tambah Bank', style: TextStyle(fontSize: 10.5, fontWeight: FontWeight.w700, color: AppColors.primary)),
-              ],
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildAccountSelector() {
-    return SingleChildScrollView(
-      scrollDirection: Axis.horizontal,
-      child: Row(
-        children: [
-          ...accounts.map((acc) {
-            final isSelected = !isKasbonSelected && selectedAccount?.id == acc.id;
-            return Padding(
-              padding: const EdgeInsets.only(right: 6),
-              child: ChoiceChip(
-                avatar: Icon(
-                  acc.type == 'cash' ? Icons.money_rounded : (acc.type == 'ewallet' ? Icons.wallet_outlined : Icons.account_balance_outlined),
-                  size: 13,
-                  color: isSelected ? Colors.white : AppColors.primary,
-                ),
-                label: Text(acc.name),
-                selected: isSelected,
-                selectedColor: AppColors.primary,
-                backgroundColor: AppColors.surface,
-                padding: const EdgeInsets.symmetric(horizontal: 4),
-                labelStyle: TextStyle(
-                  fontSize: 11,
-                  fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
-                  color: isSelected ? Colors.white : AppColors.textPrimary,
-                ),
-                onSelected: (_) {
-                  HapticFeedback.selectionClick();
-                  onAccountSelected(acc);
-                },
-              ),
-            );
-          }),
-          Padding(
-            padding: const EdgeInsets.only(right: 6),
-            child: ChoiceChip(
-              avatar: Icon(Icons.handshake_outlined, size: 14, color: isKasbonSelected ? Colors.white : const Color(0xFFD97706)),
-              label: const Text('Kasbon'),
-              selected: isKasbonSelected,
-              selectedColor: const Color(0xFFD97706),
-              backgroundColor: AppColors.surface,
-              padding: const EdgeInsets.symmetric(horizontal: 4),
-              labelStyle: TextStyle(
-                fontSize: 11,
-                fontWeight: isKasbonSelected ? FontWeight.w700 : FontWeight.w500,
-                color: isKasbonSelected ? Colors.white : const Color(0xFFB45309),
-              ),
-              onSelected: (_) {
-                HapticFeedback.selectionClick();
-                onKasbonSelected();
-              },
-            ),
-          ),
         ],
       ),
     );

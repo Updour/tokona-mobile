@@ -149,7 +149,7 @@ class _AddStaffDialogState extends ConsumerState<AddStaffDialog> {
                 DropdownButtonFormField<UserRole>(
                   initialValue: _selectedRole,
                   isExpanded: true,
-                  decoration: _inputDecoration('Peran / Jabatan', Icons.shield_outlined),
+                  decoration: _inputDecoration('Jabatan', Icons.shield_outlined),
                   items: const [
                     DropdownMenuItem(
                       value: UserRole.cashier,
@@ -157,7 +157,7 @@ class _AddStaffDialogState extends ConsumerState<AddStaffDialog> {
                     ),
                     DropdownMenuItem(
                       value: UserRole.manager,
-                      child: Text('Admin / Manajer (Operasional)', overflow: TextOverflow.ellipsis),
+                      child: Text('Admin (Operasional)', overflow: TextOverflow.ellipsis),
                     ),
                   ],
                   onChanged: (val) {
@@ -175,7 +175,7 @@ class _AddStaffDialogState extends ConsumerState<AddStaffDialog> {
                   ),
                   child: _isLoading
                       ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
-                      : const Text('Simpan & Terbitkan Akun', style: TextStyle(color: Colors.white, fontWeight: FontWeight.w700, fontSize: 13)),
+                      : const Text('Simpan', style: TextStyle(color: Colors.white, fontWeight: FontWeight.w700, fontSize: 13)),
                 ),
               ],
             ),

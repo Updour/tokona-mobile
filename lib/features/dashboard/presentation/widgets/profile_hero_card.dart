@@ -37,26 +37,14 @@ class ProfileHeroCard extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Row(
-                      children: [
-                        Flexible(
-                          child: Text(
-                            user?.fullName ?? 'Pengguna',
-                            style: AppTypography.headingSmall.copyWith(
-                              fontSize: 17,
-                              fontWeight: FontWeight.w800,
-                            ),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ),
-                        const SizedBox(width: 6),
-                        Icon(
-                          Icons.verified_rounded,
-                          size: 17,
-                          color: isOwner ? const Color(0xFFF59E0B) : AppColors.primary,
-                        ),
-                      ],
+                    Text(
+                      user?.fullName ?? 'Pengguna',
+                      style: AppTypography.headingSmall.copyWith(
+                        fontSize: 17,
+                        fontWeight: FontWeight.w800,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                     ),
                     const SizedBox(height: 3),
                     Text(

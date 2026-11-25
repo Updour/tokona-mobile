@@ -28,7 +28,7 @@ class _PackagingInfoSheetState extends State<_PackagingInfoSheet> {
   final List<Map<String, String>> _items = const [
     {
       'title': 'Apa itu Satuan Kemasan Bertingkat?',
-      'desc': 'Fitur untuk menjual satu produk dalam berbagai wujud/kemasan tanpa membuat data barang ganda. Contoh: rokok dijual bungkus dan slop, atau mi instan dijual pcs dan kardus/dus.',
+      'desc': 'Fitur untuk menjual satu produk dalam berbagai wujud/kemasan tanpa membuat data barang ganda. rokok dijual bungkus dan slop, atau mi instan dijual pcs dan kardus/dus.',
     },
     {
       'title': 'Bagaimana Pengurangan Stoknya?',

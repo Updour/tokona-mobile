@@ -87,6 +87,7 @@ class SaleController extends StateNotifier<SaleState> {
         customerName: resolvedCustomerName,
         customerPhone: customerPhone?.trim().isNotEmpty == true ? customerPhone!.trim() : null,
         discountAmount: cart.discountAmount,
+        roundingAmount: cart.roundingAmount,
         cashPaid: cashPaid,
         paymentMethod: paymentMethod,
         notes: notes,

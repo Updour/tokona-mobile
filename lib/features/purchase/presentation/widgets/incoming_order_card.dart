@@ -6,7 +6,7 @@ import 'package:tokona/core/theme/app_typography.dart';
 import 'package:tokona/core/utils/currency_formatter.dart';
 import 'package:tokona/core/widgets/app_toast.dart';
 import 'package:tokona/features/purchase/domain/models/purchase_model.dart';
-import 'package:tokona/features/purchase/presentation/widgets/shipment_tracking_sheet.dart';
+import 'package:tokona/features/purchase/presentation/widgets/incoming_order_tracking_tile.dart';
 
 class IncomingOrderCard extends StatelessWidget {
   final PurchaseModel purchase;
@@ -34,10 +34,6 @@ class IncomingOrderCard extends StatelessWidget {
     final raw = purchase.trackingNumber?.trim() ?? '';
     final b = RegExp(r'^\[[^\]]+\]\s*(.*)$').firstMatch(raw);
     return b?.group(1)?.trim() ?? raw;
-  }
-
-  void _track(BuildContext context) {
-    ShipmentTrackingSheet.show(context, waybillNo: _waybillCode, courier: _courierName, onConfirmArrival: onConfirmArrival);
   }
 
   @override
@@ -125,6 +121,36 @@ class IncomingOrderCard extends StatelessWidget {
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
+                if (p.isCoOrder) ...[
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 6.5, vertical: 2),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFFEF3C7),
+                      borderRadius: BorderRadius.circular(6),
+                      border: Border.all(color: const Color(0xFFFDE68A)),
+                    ),
+                    child: Text(
+                      'Co-Order: ${p.coPartner ?? "Mitra"}',
+                      style: const TextStyle(fontSize: 10, fontWeight: FontWeight.w800, color: Color(0xFF92400E)),
+                    ),
+                  ),
+                  if (p.coProfit > 0) ...[
+                    const SizedBox(width: 4),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFF0FDF4),
+                        borderRadius: BorderRadius.circular(6),
+                        border: Border.all(color: const Color(0xFFBBF7D0)),
+                      ),
+                      child: Text(
+                        'Laba +${CurrencyFormatter.format(p.coProfit)}',
+                        style: const TextStyle(fontSize: 9.5, fontWeight: FontWeight.w800, color: Color(0xFF15803D)),
+                      ),
+                    ),
+                  ],
+                  const SizedBox(width: 4),
+                ],
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 6.5, vertical: 2),
                   decoration: BoxDecoration(color: badgeBg, borderRadius: BorderRadius.circular(6)),
@@ -143,7 +169,7 @@ class IncomingOrderCard extends StatelessWidget {
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 5.5, vertical: 2),
                     decoration: BoxDecoration(color: const Color(0xFFF1F5F9), borderRadius: BorderRadius.circular(6)),
-                    child: Text('📱 ${p.deviceTag!}', style: const TextStyle(fontSize: 9.5, fontWeight: FontWeight.w700, color: Color(0xFF475569))),
+                    child: Text(p.deviceTag!, style: const TextStyle(fontSize: 9.5, fontWeight: FontWeight.w700, color: Color(0xFF475569))),
                   ),
                 ],
               ],
@@ -159,62 +185,11 @@ class IncomingOrderCard extends StatelessWidget {
           ),
           const SizedBox(height: 7),
           if (p.trackingNumber != null && p.trackingNumber!.trim().isNotEmpty) ...[
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 4),
-              decoration: BoxDecoration(
-                color: const Color(0xFFF0FDF4),
-                borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: const Color(0xFFBBF7D0)),
-              ),
-              child: Row(
-                children: [
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1.5),
-                    decoration: BoxDecoration(color: const Color(0xFF0284C7), borderRadius: BorderRadius.circular(4)),
-                    child: Text(_courierName, style: const TextStyle(fontSize: 9, fontWeight: FontWeight.w800, color: Colors.white)),
-                  ),
-                  const SizedBox(width: 6),
-                  Expanded(
-                    child: Text(
-                      _waybillCode,
-                      style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: Color(0xFF166534), fontFamily: 'monospace'),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ),
-                  InkWell(
-                    borderRadius: BorderRadius.circular(4),
-                    onTap: () => _track(context),
-                    child: const Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 5, vertical: 2),
-                      child: Text('Lacak', style: TextStyle(fontSize: 10, fontWeight: FontWeight.w700, color: Color(0xFF0284C7))),
-                    ),
-                  ),
-                  const SizedBox(width: 4),
-                  InkWell(
-                    borderRadius: BorderRadius.circular(4),
-                    onTap: () {
-                      Clipboard.setData(ClipboardData(text: _waybillCode));
-                      AppToast.showSuccess(context, 'No. resi disalin');
-                    },
-                    child: const Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 5, vertical: 2),
-                      child: Text('Salin', style: TextStyle(fontSize: 10, fontWeight: FontWeight.w700, color: Color(0xFF15803D))),
-                    ),
-                  ),
-                  if (onEditTracking != null) ...[
-                    const SizedBox(width: 4),
-                    InkWell(
-                      borderRadius: BorderRadius.circular(4),
-                      onTap: onEditTracking,
-                      child: const Padding(
-                        padding: EdgeInsets.symmetric(horizontal: 4, vertical: 2),
-                        child: Icon(Icons.edit_outlined, size: 13, color: Color(0xFF15803D)),
-                      ),
-                    ),
-                  ],
-                ],
-              ),
+            IncomingOrderTrackingTile(
+              courierName: _courierName,
+              waybillCode: _waybillCode,
+              onConfirmArrival: onConfirmArrival,
+              onEditTracking: onEditTracking,
             ),
           ] else if (onEditTracking != null) ...[
             InkWell(

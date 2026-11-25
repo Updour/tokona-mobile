@@ -35,26 +35,14 @@ class ProfileShopeeHeader extends ConsumerWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,
             children: [
-              Row(
-                children: [
-                  Flexible(
-                    child: Text(
-                      user?.fullName ?? 'Pengguna',
-                      style: AppTypography.headingSmall.copyWith(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w800,
-                      ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ),
-                  const SizedBox(width: 4),
-                  Icon(
-                    Icons.verified_rounded,
-                    size: 15,
-                    color: isOwner ? const Color(0xFFF59E0B) : AppColors.primary,
-                  ),
-                ],
+              Text(
+                user?.fullName ?? 'Pengguna',
+                style: AppTypography.headingSmall.copyWith(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w800,
+                ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
               ),
               const SizedBox(height: 1),
               Text(

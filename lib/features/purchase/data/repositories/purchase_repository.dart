@@ -54,13 +54,14 @@ class PurchaseRepository {
         supplierId: dto.supplierId, supplierName: dto.supplierName?.trim().isEmpty == true ? null : dto.supplierName?.trim(),
         purchaseType: dto.purchaseType, platform: dto.platform, deviceTag: dto.deviceTag,
         paymentAccount: dto.paymentAccount, serviceFee: dto.serviceFee, shippingFee: dto.shippingFee,
-        status: dto.status, poDays: dto.poDays,
-        estimatedArrival: dto.estimatedArrival, estimatedArrivalEnd: dto.estimatedArrivalEnd,
-        refundStatus: 'none', totalAmount: dto.itemsSubtotal,
+        status: dto.status, poDays: dto.poDays, estimatedArrival: dto.estimatedArrival,
+        estimatedArrivalEnd: dto.estimatedArrivalEnd, refundStatus: 'none', totalAmount: dto.grandTotal,
         notes: dto.notes?.trim().isEmpty == true ? null : dto.notes?.trim(),
         imagePath: dto.imagePath, trackingNumber: dto.trackingNumber,
         installmentMonths: dto.installmentMonths, monthlyInstallment: dto.monthlyInstallment,
-        items: const [], createdAt: now, updatedAt: now,
+        coPartner: dto.coPartner?.trim().isEmpty == true ? null : dto.coPartner?.trim(),
+        coProfit: dto.coProfit, addToStock: dto.addToStock, shippingDiscount: dto.shippingDiscount,
+        voucherDiscount: dto.voucherDiscount, items: const [], createdAt: now, updatedAt: now,
       );
 
       await purchaseDao.insert(txn, purchaseModel);
@@ -77,7 +78,7 @@ class PurchaseRepository {
         await purchaseItemDao.insert(txn, itemModel);
         itemModels.add(itemModel);
 
-        if (dto.status == 'received') {
+        if (dto.status == 'received' && dto.addToStock) {
           await _updateProductStockAndHpp(
             txn: txn, productId: itemDto.productId,
             addedQtyBase: itemModel.totalBaseQuantity,
@@ -87,10 +88,15 @@ class PurchaseRepository {
         }
       }
 
-      if (dto.paymentAccount != null && dto.paymentAccount!.trim().isNotEmpty) {
+      final isFundedByPartner = dto.purchaseType == 'co_order' &&
+          (dto.paymentAccount == null ||
+              dto.paymentAccount == 'Dana Rekan' ||
+              dto.paymentAccount == 'Non-Kas Toko');
+
+      if (!isFundedByPartner && dto.paymentAccount != null && dto.paymentAccount!.trim().isNotEmpty) {
         await const PaymentAccountDao().adjustBalance(
           txn, storeId: dto.storeId, accountNameOrId: dto.paymentAccount!,
-          deltaAmount: -(dto.itemsSubtotal + dto.serviceFee + dto.shippingFee),
+          deltaAmount: -dto.grandTotal,
         );
       }
       return purchaseModel.copyWith(items: itemModels);
@@ -105,12 +111,14 @@ class PurchaseRepository {
       if (purchase == null) throw StateError('Data pembelian tidak ditemukan');
       if (purchase.status == 'received') return;
 
-      final items = await purchaseItemDao.getByPurchaseId(txn, purchaseId);
-      for (final item in items) {
-        await _updateProductStockAndHpp(
-          txn: txn, productId: item.productId, addedQtyBase: item.totalBaseQuantity,
-          incomingBaseCost: item.baseUnitCost, now: now, deviceTag: purchase.deviceTag,
-        );
+      if (purchase.addToStock) {
+        final items = await purchaseItemDao.getByPurchaseId(txn, purchaseId);
+        for (final item in items) {
+          await _updateProductStockAndHpp(
+            txn: txn, productId: item.productId, addedQtyBase: item.totalBaseQuantity,
+            incomingBaseCost: item.baseUnitCost, now: now, deviceTag: purchase.deviceTag,
+          );
+        }
       }
       final updatedNotes = autoNote != null
           ? (purchase.notes != null && purchase.notes!.isNotEmpty ? '${purchase.notes}\n$autoNote' : autoNote)
@@ -211,12 +219,10 @@ class PurchaseRepository {
   }
 
   Future<List<PurchaseModel>> _hydrateItems(Database db, List<PurchaseModel> purchases) async {
-    final fullList = <PurchaseModel>[];
-    for (final p in purchases) {
-      final items = await purchaseItemDao.getByPurchaseId(db, p.id);
-      fullList.add(p.copyWith(items: items));
-    }
-    return fullList;
+    if (purchases.isEmpty) return const [];
+    final purchaseIds = purchases.map((p) => p.id).toList();
+    final itemsMap = await purchaseItemDao.getByPurchaseIds(db, purchaseIds);
+    return purchases.map((p) => p.copyWith(items: itemsMap[p.id] ?? const [])).toList();
   }
 
   Future<void> _updateProductStockAndHpp({
@@ -261,10 +267,8 @@ class PurchaseRepository {
     }
 
     await txn.update(DatabaseTables.products, updateData, where: '${DatabaseTables.columnId} = ?', whereArgs: [productId]);
-
     await const StockMutationDao().insert(
-      txn,
-      StockMutationModel(
+      txn, StockMutationModel(
         id: IdGenerator.generateId(prefix: 'MUT'), storeId: currentProduct.storeId,
         productId: productId, productName: currentProduct.name, type: 'in',
         quantity: addedQtyBase, previousStock: currentStock, currentStock: newStock,

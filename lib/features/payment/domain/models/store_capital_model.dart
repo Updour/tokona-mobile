@@ -34,7 +34,7 @@ class StoreCapitalModel {
       case 'MODAL_AWAL':
         return 'Modal Awal';
       case 'TARIK_MODAL':
-        return 'Tarik Modal (Prive)';
+        return 'Tarik Kas (Prive)';
       case 'TAMBAH_MODAL':
       default:
         return 'Tambahan Modal';

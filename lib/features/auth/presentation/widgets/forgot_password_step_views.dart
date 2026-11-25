@@ -67,14 +67,14 @@ class ForgotPasswordStep1 extends StatelessWidget {
         AuthTextField(
           controller: usernameController,
           label: 'Nama Pengguna',
-          hint: 'Contoh: kasir / owner',
+          hint: 'kasir / owner',
           prefixIcon: Icons.person_outline_rounded,
         ),
         const SizedBox(height: 12),
         AuthTextField(
           controller: emailPhoneController,
           label: 'Email / WhatsApp Pemilik',
-          hint: 'Contoh: toko@gmail.com / 0812xxx',
+          hint: 'toko@gmail.com / 0812xxx',
           prefixIcon: Icons.alternate_email_rounded,
         ),
         const SizedBox(height: 16),

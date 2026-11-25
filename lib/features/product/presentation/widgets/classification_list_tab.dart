@@ -32,7 +32,7 @@ class ClassificationListTab extends ConsumerWidget {
           controller: controller,
           autofocus: true,
           decoration: InputDecoration(
-            hintText: isCategory ? 'Contoh: Makanan, Minuman' : 'Contoh: Titipan, Konsinyasi',
+            hintText: isCategory ? 'Makanan, Minuman' : 'Titipan, Konsinyasi',
             border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
           ),
         ),

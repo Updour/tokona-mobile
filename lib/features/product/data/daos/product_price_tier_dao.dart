@@ -27,6 +27,29 @@ class ProductPriceTierDao {
     return results.map((e) => ProductPriceTierModel.fromMap(e)).toList();
   }
 
+  /// Batch query untuk mengambil tingkatan harga grosir banyak produk sekaligus
+  Future<Map<String, List<ProductPriceTierModel>>> getTiersByProductIds(List<String> productIds) async {
+    if (productIds.isEmpty) return {};
+    final db = _getDatabase();
+    final map = <String, List<ProductPriceTierModel>>{};
+    const chunkSize = 500;
+    for (var i = 0; i < productIds.length; i += chunkSize) {
+      final chunk = productIds.sublist(i, (i + chunkSize > productIds.length) ? productIds.length : i + chunkSize);
+      final placeholders = List.filled(chunk.length, '?').join(',');
+      final results = await db.query(
+        DatabaseTables.productPriceTiers,
+        where: '${DatabaseTables.columnTierProductId} IN ($placeholders)',
+        whereArgs: chunk,
+        orderBy: '${DatabaseTables.columnTierMinQuantity} ASC',
+      );
+      for (final row in results) {
+        final tier = ProductPriceTierModel.fromMap(row);
+        map.putIfAbsent(tier.productId, () => []).add(tier);
+      }
+    }
+    return map;
+  }
+
   Future<void> deleteTiersByProductId(String productId, {Transaction? txn}) async {
     final executor = txn ?? _getDatabase();
     await executor.delete(

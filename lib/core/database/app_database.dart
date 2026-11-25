@@ -23,7 +23,7 @@ import 'package:tokona/features/supplier/data/schemas/supplier_schema.dart';
 
 class AppDatabase {
   static const String databaseName = 'tokona_pos.db';
-  static const int databaseVersion = 19;
+  static const int databaseVersion = 22;
 
   static final AppDatabase instance = AppDatabase._internal();
   AppDatabase._internal();
@@ -66,6 +66,7 @@ class AppDatabase {
         await StockMutationSchema.create(db);
         await StoreCapitalSchema.create(db);
         await CustomerReceivablePaymentSchema.create(db);
+        await _createPerformanceIndexes(db);
       },
       onUpgrade: (db, oldVersion, newVersion) async {
         if (oldVersion < 2) {
@@ -117,9 +118,19 @@ class AppDatabase {
         if (oldVersion < 19) {
           await _addColumnIfNotExists(db, DatabaseTables.sales, DatabaseTables.columnSaleCustomerPhone, 'TEXT');
         }
+        if (oldVersion < 20) {
+          await _createPerformanceIndexes(db);
+        }
+        if (oldVersion < 21) {
+          await _addColumnIfNotExists(db, DatabaseTables.sales, DatabaseTables.columnSaleRoundingAmount, 'REAL DEFAULT 0.0');
+          await _addColumnIfNotExists(db, DatabaseTables.purchases, DatabaseTables.columnPurchaseCoPartner, 'TEXT');
+          await _addColumnIfNotExists(db, DatabaseTables.purchases, DatabaseTables.columnPurchaseCoProfit, 'REAL DEFAULT 0.0');
+          await _addColumnIfNotExists(db, DatabaseTables.purchases, DatabaseTables.columnPurchaseAddToStock, 'INTEGER DEFAULT 1');
+        }
       },
       onOpen: (db) async {
         await _ensurePurchaseColumnsExist(db);
+        await _createPerformanceIndexes(db);
       },
     );
   }
@@ -166,12 +177,80 @@ class AppDatabase {
     await _addColumnIfNotExists(db, DatabaseTables.purchases, DatabaseTables.columnPurchaseInstallmentMonths, 'INTEGER DEFAULT 1');
     await _addColumnIfNotExists(db, DatabaseTables.purchases, DatabaseTables.columnPurchaseMonthlyInstallment, 'REAL DEFAULT 0.0');
     await _addColumnIfNotExists(db, DatabaseTables.purchases, DatabaseTables.columnPurchasePaidInstallments, 'INTEGER DEFAULT 0');
+    await _addColumnIfNotExists(db, DatabaseTables.purchases, DatabaseTables.columnPurchaseCoPartner, 'TEXT');
+    await _addColumnIfNotExists(db, DatabaseTables.purchases, DatabaseTables.columnPurchaseCoProfit, 'REAL DEFAULT 0.0');
+    await _addColumnIfNotExists(db, DatabaseTables.purchases, DatabaseTables.columnPurchaseAddToStock, 'INTEGER DEFAULT 1');
+    await _addColumnIfNotExists(db, DatabaseTables.purchases, DatabaseTables.columnPurchaseShippingDiscount, 'REAL DEFAULT 0.0');
+    await _addColumnIfNotExists(db, DatabaseTables.purchases, DatabaseTables.columnPurchaseVoucherDiscount, 'REAL DEFAULT 0.0');
     await _addColumnIfNotExists(db, DatabaseTables.sales, DatabaseTables.columnSaleCustomerId, 'TEXT');
     await _addColumnIfNotExists(db, DatabaseTables.sales, DatabaseTables.columnSaleCustomerPhone, 'TEXT');
     await _addColumnIfNotExists(db, DatabaseTables.sales, DatabaseTables.columnSaleStatus, "TEXT DEFAULT 'COMPLETED'");
     await _addColumnIfNotExists(db, DatabaseTables.sales, DatabaseTables.columnSaleDueDate, 'TEXT');
     await _addColumnIfNotExists(db, DatabaseTables.sales, DatabaseTables.columnSaleImagePath, 'TEXT');
+    await _addColumnIfNotExists(db, DatabaseTables.sales, DatabaseTables.columnSaleRoundingAmount, 'REAL DEFAULT 0.0');
     await _addColumnIfNotExists(db, DatabaseTables.products, DatabaseTables.columnProductDeviceTag, 'TEXT');
+  }
+
+  Future<void> _createPerformanceIndexes(DatabaseExecutor db) async {
+    try {
+      // 1. Indeks Performa Transaksi Penjualan (Sorting Cepat, Filter Status, Pencarian Kontak)
+      await db.execute(
+        'CREATE INDEX IF NOT EXISTS idx_sales_store_created ON ${DatabaseTables.sales} (${DatabaseTables.columnSaleStoreId}, ${DatabaseTables.columnCreatedAt} DESC)',
+      );
+      await db.execute(
+        'CREATE INDEX IF NOT EXISTS idx_sales_store_status_created ON ${DatabaseTables.sales} (${DatabaseTables.columnSaleStoreId}, ${DatabaseTables.columnSaleStatus}, ${DatabaseTables.columnCreatedAt} DESC)',
+      );
+      await db.execute(
+        'CREATE INDEX IF NOT EXISTS idx_sales_store_payment ON ${DatabaseTables.sales} (${DatabaseTables.columnSaleStoreId}, ${DatabaseTables.columnSalePaymentMethod})',
+      );
+      await db.execute(
+        'CREATE INDEX IF NOT EXISTS idx_sales_customer_phone ON ${DatabaseTables.sales} (${DatabaseTables.columnSaleCustomerPhone})',
+      );
+      await db.execute(
+        'CREATE INDEX IF NOT EXISTS idx_sales_customer_name ON ${DatabaseTables.sales} (${DatabaseTables.columnSaleCustomerName})',
+      );
+
+      // 2. Indeks Performa Katalog Produk (Pencarian Nama Cepat, Kategori, Sorting Stok)
+      await db.execute(
+        'CREATE INDEX IF NOT EXISTS idx_products_store_name ON ${DatabaseTables.products} (${DatabaseTables.columnProductStoreId}, ${DatabaseTables.columnProductName} COLLATE NOCASE)',
+      );
+      await db.execute(
+        'CREATE INDEX IF NOT EXISTS idx_products_store_category ON ${DatabaseTables.products} (${DatabaseTables.columnProductStoreId}, ${DatabaseTables.columnProductCategory})',
+      );
+      await db.execute(
+        'CREATE INDEX IF NOT EXISTS idx_products_store_created ON ${DatabaseTables.products} (${DatabaseTables.columnProductStoreId}, ${DatabaseTables.columnCreatedAt} DESC)',
+      );
+      await db.execute(
+        'CREATE INDEX IF NOT EXISTS idx_products_store_device ON ${DatabaseTables.products} (${DatabaseTables.columnProductStoreId}, ${DatabaseTables.columnProductDeviceTag})',
+      );
+      await db.execute(
+        'CREATE INDEX IF NOT EXISTS idx_products_store_stock ON ${DatabaseTables.products} (${DatabaseTables.columnProductStoreId}, ${DatabaseTables.columnProductStockBase})',
+      );
+
+      // 3. Indeks Performa Pembelian & PO (Sorting Tanggal, Status Pengiriman, Tracking)
+      await db.execute(
+        'CREATE INDEX IF NOT EXISTS idx_purchases_store_created ON ${DatabaseTables.purchases} (${DatabaseTables.columnPurchaseStoreId}, ${DatabaseTables.columnCreatedAt} DESC)',
+      );
+      await db.execute(
+        'CREATE INDEX IF NOT EXISTS idx_purchases_store_status ON ${DatabaseTables.purchases} (${DatabaseTables.columnPurchaseStoreId}, ${DatabaseTables.columnPurchaseStatus})',
+      );
+      await db.execute(
+        'CREATE INDEX IF NOT EXISTS idx_purchases_store_refund ON ${DatabaseTables.purchases} (${DatabaseTables.columnPurchaseStoreId}, ${DatabaseTables.columnPurchaseRefundStatus})',
+      );
+
+      // 4. Indeks Performa Pelanggan (Pencarian Kontak & Piutang)
+      await db.execute(
+        'CREATE INDEX IF NOT EXISTS idx_customers_store_name ON ${DatabaseTables.customers} (${DatabaseTables.columnCustomerStoreId}, ${DatabaseTables.columnCustomerName} COLLATE NOCASE)',
+      );
+      await db.execute(
+        'CREATE INDEX IF NOT EXISTS idx_customers_store_phone ON ${DatabaseTables.customers} (${DatabaseTables.columnCustomerStoreId}, ${DatabaseTables.columnCustomerPhone})',
+      );
+      await db.execute(
+        'CREATE INDEX IF NOT EXISTS idx_customers_store_receivable ON ${DatabaseTables.customers} (${DatabaseTables.columnCustomerStoreId}, ${DatabaseTables.columnCustomerReceivableBalance} DESC)',
+      );
+    } catch (_) {
+      // Ignored if table is not yet created
+    }
   }
 
   Future<void> _addColumnIfNotExists(Database db, String table, String column, String type) async {

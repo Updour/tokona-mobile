@@ -15,6 +15,7 @@ import 'package:tokona/features/purchase/domain/models/purchase_model.dart';
 import 'package:tokona/features/purchase/presentation/controllers/purchase_controller.dart';
 import 'package:tokona/features/purchase/presentation/widgets/edit_purchase_items_sheet.dart';
 import 'package:tokona/features/purchase/presentation/widgets/purchase_detail_item_tile.dart';
+import 'package:tokona/features/purchase/presentation/widgets/purchase_detail_proof_card.dart';
 import 'package:tokona/features/purchase/presentation/widgets/purchase_financial_summary_card.dart';
 import 'package:tokona/features/purchase/presentation/widgets/purchase_tracking_section.dart';
 
@@ -36,11 +37,15 @@ class PurchaseDetailSheet extends ConsumerWidget {
   }
 
   Future<void> _handleConfirmArrival(BuildContext context, WidgetRef ref) async {
+    final isCo = purchase.isCoOrder;
+    final message = isCo && !purchase.addToStock
+        ? 'Paket nota ${purchase.invoiceNumber} sudah tiba di rekan (${purchase.coPartner ?? "Mitra"})? Catatan: Stok toko tidak bertambah sesuai pengaturan Co-Order.'
+        : 'Paket nota ${purchase.invoiceNumber} sudah tiba? Stok barang otomatis bertambah.';
     final confirmed = await AppDialog.showConfirmation(
       context,
       title: 'Konfirmasi Barang Tiba',
-      message: 'Paket nota ${purchase.invoiceNumber} sudah tiba? Stok barang otomatis bertambah.',
-      confirmText: 'Ya, Terima Barang',
+      message: message,
+      confirmText: 'Ya, Selesaikan',
       icon: Icons.inventory_2_outlined,
     );
     if (confirmed == true && context.mounted) {
@@ -51,7 +56,10 @@ class PurchaseDetailSheet extends ConsumerWidget {
         ref.read(productListProvider.notifier).loadProducts(sId);
         ref.read(purchaseControllerProvider.notifier).loadPurchases(sId);
       }
-      AppToast.showSuccess(context, 'Stok barang berhasil ditambahkan');
+      final successMsg = isCo && !purchase.addToStock
+          ? 'Pesanan Co-Order mitra berhasil diselesaikan'
+          : 'Stok barang berhasil ditambahkan';
+      AppToast.showSuccess(context, successMsg);
       Navigator.of(context).pop();
     }
   }
@@ -127,7 +135,7 @@ class PurchaseDetailSheet extends ConsumerWidget {
                     const SizedBox(height: 16),
                     _buildNotesCard(),
                   ],
-                  _buildProofPhoto(context),
+                  PurchaseDetailProofCard(imagePath: purchase.imagePath),
                 ],
               ),
             ),
@@ -176,10 +184,25 @@ class PurchaseDetailSheet extends ConsumerWidget {
           const SizedBox(height: 7),
           _buildInfoRow('Nama Supplier', purchase.supplierName ?? 'Tanpa Nama Supplier'),
           const SizedBox(height: 7),
-          _buildInfoRow('Saluran Pembelian', purchase.isOnline ? 'Online (${purchase.platform ?? "Marketplace"})' : 'Toko Fisik / Offline'),
+          _buildInfoRow(
+            'Saluran Pembelian',
+            purchase.isCoOrder
+                ? 'Co-Order Mitra (${purchase.coPartner ?? "Rekan"})'
+                : (purchase.isOnline ? 'Online (${purchase.platform ?? "Marketplace"})' : 'Toko Fisik / Offline'),
+          ),
+          if (purchase.isCoOrder) ...[
+            const SizedBox(height: 7),
+            _buildInfoRow('Nama Rekan', purchase.coPartner ?? '-'),
+            if (purchase.coProfit > 0) ...[
+              const SizedBox(height: 7),
+              _buildInfoRow('Laba Bersih Rekan', '+${CurrencyFormatter.format(purchase.coProfit)}'),
+            ],
+            const SizedBox(height: 7),
+            _buildInfoRow('Stok Fisik Toko', purchase.addToStock ? 'Masuk Stok Toko' : 'Langsung Rekan (Stok Bebas)'),
+          ],
           if (purchase.deviceTag != null && purchase.deviceTag!.isNotEmpty) ...[
             const SizedBox(height: 7),
-            _buildInfoRow('Device Belanja', '📱 ${purchase.deviceTag!}'),
+            _buildInfoRow('Device Belanja', purchase.deviceTag!),
           ],
           if (purchase.paymentAccount != null && purchase.paymentAccount!.trim().isNotEmpty) ...[
             const SizedBox(height: 7),
@@ -203,7 +226,7 @@ class PurchaseDetailSheet extends ConsumerWidget {
           ],
           if (purchase.isAutoReceived) ...[
             const SizedBox(height: 7),
-            _buildInfoRow('Penerimaan', '🤖 Otomatis by Sistem'),
+            _buildInfoRow('Penerimaan', 'Otomatis (Sistem)'),
           ],
         ],
       ),
@@ -257,41 +280,6 @@ class PurchaseDetailSheet extends ConsumerWidget {
           const Text('Catatan Pembelian:', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: AppColors.textMuted)),
           const SizedBox(height: 4),
           Text(purchase.notes!, style: AppTypography.bodySmall.copyWith(color: AppColors.textPrimary)),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildProofPhoto(BuildContext context) {
-    if (purchase.imagePath == null || purchase.imagePath!.trim().isEmpty) return const SizedBox.shrink();
-    final file = File(purchase.imagePath!);
-    if (!file.existsSync()) return const SizedBox.shrink();
-
-    return Container(
-      margin: const EdgeInsets.only(top: 14),
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(color: AppColors.surface, borderRadius: BorderRadius.circular(12), border: Border.all(color: AppColors.border)),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Row(children: [
-            Icon(Icons.photo_camera_back_outlined, size: 16, color: AppColors.primary),
-            SizedBox(width: 6),
-            Text('Foto Faktur', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 12.5)),
-          ]),
-          const SizedBox(height: 10),
-          GestureDetector(
-            onTap: () => showDialog(
-              context: context,
-              builder: (ctx) => Dialog(
-                backgroundColor: Colors.transparent,
-                child: InteractiveViewer(child: ClipRRect(borderRadius: BorderRadius.circular(12), child: Image.file(file))),
-              ),
-            ),
-            child: ClipRRect(borderRadius: BorderRadius.circular(10), child: Image.file(file, height: 160, width: double.infinity, fit: BoxFit.cover)),
-          ),
-          const SizedBox(height: 6),
-          const Text('Ketuk untuk perbesar', style: TextStyle(fontSize: 10, color: AppColors.textMuted)),
         ],
       ),
     );

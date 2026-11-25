@@ -127,7 +127,7 @@ class _AuthHeaderWidgetState extends State<AuthHeaderWidget> with SingleTickerPr
           child: const Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(Icons.bolt_rounded, size: 13, color: Color(0xFF0D9488)),
+              Icon(Icons.storefront_outlined, size: 13, color: Color(0xFF0D9488)),
               SizedBox(width: 4),
               Text(
                 'Aplikasi Kasir Ritel & Manajemen Toko',

@@ -9,7 +9,13 @@ import 'package:tokona/features/auth/presentation/controllers/auth_controller.da
 import 'package:tokona/features/payment/domain/models/store_capital_model.dart';
 import 'package:tokona/features/payment/presentation/controllers/payment_account_controller.dart';
 import 'package:tokona/features/payment/presentation/controllers/store_capital_controller.dart';
-import 'package:tokona/features/payment/presentation/widgets/store_capital_date_tile.dart';
+import 'package:tokona/features/payment/presentation/widgets/store_capital_account_picker.dart';
+import 'package:tokona/features/payment/presentation/widgets/store_capital_extra_fields.dart';
+import 'package:tokona/features/payment/presentation/widgets/store_capital_header.dart';
+import 'package:tokona/features/payment/presentation/widgets/store_capital_live_projection_card.dart';
+import 'package:tokona/features/payment/presentation/widgets/store_capital_menu_balance_card.dart';
+import 'package:tokona/features/payment/presentation/widgets/store_capital_preset_chips.dart';
+import 'package:tokona/features/payment/presentation/widgets/store_capital_submit_button.dart';
 import 'package:tokona/features/payment/presentation/widgets/store_capital_type_selector.dart';
 
 class AddStoreCapitalBottomSheet extends ConsumerStatefulWidget {
@@ -51,6 +57,13 @@ class _AddStoreCapitalBottomSheetState extends ConsumerState<AddStoreCapitalBott
     super.initState();
     _selectedType = widget.initialType;
     _amountController.addListener(_onAmountChanged);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final storeId = ref.read(authProvider).currentStore?.id;
+      if (storeId != null) {
+        ref.read(paymentAccountListProvider.notifier).loadAccounts(storeId);
+        ref.read(storeCapitalControllerProvider.notifier).loadCapitals(storeId);
+      }
+    });
   }
 
   void _onAmountChanged() {
@@ -83,6 +96,15 @@ class _AddStoreCapitalBottomSheetState extends ConsumerState<AddStoreCapitalBott
     final storeId = ref.read(authProvider).currentStore?.id;
     if (storeId == null) return;
 
+    if (_isWithdrawal && _selectedAccountId != null) {
+      final accounts = ref.read(paymentAccountListProvider);
+      final acc = accounts.where((a) => a.id == _selectedAccountId).firstOrNull;
+      if (acc != null && acc.currentBalance < rawAmount) {
+        AppToast.showError(context, 'Saldo kas di ${acc.name} tidak mencukupi untuk penarikan ini');
+        return;
+      }
+    }
+
     setState(() => _isSubmitting = true);
     try {
       final now = DateTime.now();
@@ -102,7 +124,7 @@ class _AddStoreCapitalBottomSheetState extends ConsumerState<AddStoreCapitalBott
 
       final ok = await ref.read(storeCapitalControllerProvider.notifier).addCapital(capital);
       if (ok && mounted) {
-        final actionText = _isWithdrawal ? 'Penarikan modal' : 'Catatan modal';
+        final actionText = _isWithdrawal ? 'Penarikan kas' : 'Catatan modal';
         AppToast.showSuccess(context, '$actionText berhasil disimpan');
         Navigator.of(context).pop();
       }
@@ -114,178 +136,151 @@ class _AddStoreCapitalBottomSheetState extends ConsumerState<AddStoreCapitalBott
   @override
   Widget build(BuildContext context) {
     final accounts = ref.watch(paymentAccountListProvider);
+    final totalStoreBalance = ref.watch(totalStoreBalanceProvider);
+    final capitalState = ref.watch(storeCapitalControllerProvider);
+    final store = ref.watch(authProvider).currentStore;
+
+    if (accounts.isEmpty && store != null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        ref.read(paymentAccountListProvider.notifier).loadAccounts(store.id);
+      });
+    }
+
+    if (_selectedAccountId == null && accounts.isNotEmpty) {
+      final primary = accounts.where((a) => a.currentBalance > 0).firstOrNull ?? accounts.first;
+      _selectedAccountId = primary.id;
+      _selectedAccountName = primary.name;
+    }
+
     final title = _isWithdrawal
-        ? 'Tarik Modal Toko (Prive)'
+        ? 'Tarik Kas Toko (Prive)'
         : _selectedType == 'MODAL_AWAL'
             ? 'Catat Modal Awal'
             : 'Tambah Modal Toko';
 
     final btnLabel = _isWithdrawal
-        ? 'Simpan Penarikan Modal'
+        ? 'Simpan Penarikan Kas'
         : _selectedType == 'MODAL_AWAL'
             ? 'Simpan Modal Awal'
             : 'Simpan Tambahan Modal';
 
+    final selectedAcc = accounts.where((a) => a.id == _selectedAccountId).firstOrNull;
+    final currentAccBalance = selectedAcc?.currentBalance ?? totalStoreBalance;
+    final targetName = selectedAcc != null ? selectedAcc.name : 'Kas Toko (Global)';
+    final rawAmount = CurrencyFormatter.parse(_amountController.text);
+    final isOverdrawn = _isWithdrawal && selectedAcc != null && (currentAccBalance - rawAmount < 0);
+
     return SafeArea(
       top: false,
-      child: Container(
-        decoration: const BoxDecoration(
-          color: AppColors.surface,
-          borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-        ),
-        padding: EdgeInsets.fromLTRB(20, 14, 20, MediaQuery.of(context).viewInsets.bottom + 20),
-        child: SingleChildScrollView(
+      child: AnimatedPadding(
+        padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
+        duration: const Duration(milliseconds: 180),
+        curve: Curves.easeOutQuad,
+        child: Container(
+          constraints: BoxConstraints(maxHeight: MediaQuery.of(context).size.height * 0.90),
+          decoration: const BoxDecoration(
+            color: AppColors.surface,
+            borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+          ),
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
             mainAxisSize: MainAxisSize.min,
             children: [
-              Center(
-                child: Container(
-                  width: 40,
-                  height: 4,
-                  decoration: BoxDecoration(color: AppColors.border, borderRadius: BorderRadius.circular(2)),
-                ),
+              StoreCapitalHeader(
+                title: title,
+                isWithdrawal: _isWithdrawal,
+                onClose: () => Navigator.of(context).pop(),
               ),
-              const SizedBox(height: 12),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(title, style: AppTypography.headingSmall.copyWith(fontSize: 16), maxLines: 1, overflow: TextOverflow.ellipsis),
-                        Text(
-                          _isWithdrawal
-                              ? 'Tarik dana modal / prive untuk keperluan pribadi'
-                              : 'Kelola suntikan dana operasional dan modal toko',
-                          style: AppTypography.bodySmall.copyWith(fontSize: 11),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  IconButton(
-                    icon: const Icon(Icons.close_rounded, color: AppColors.textMuted),
-                    onPressed: () => Navigator.of(context).pop(),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 12),
-              StoreCapitalTypeSelector(
-                selectedType: _selectedType,
-                onTypeSelected: (type) => setState(() => _selectedType = type),
-              ),
-              if (_isWithdrawal) ...[
-                const SizedBox(height: 10),
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFFEF2F2),
-                    borderRadius: BorderRadius.circular(10),
-                    border: Border.all(color: const Color(0xFFFCA5A5)),
-                  ),
-                  child: const Row(
+              const Divider(height: 14, color: Color(0xFFF1F5F9)),
+              Flexible(
+                child: SingleChildScrollView(
+                  physics: const BouncingScrollPhysics(),
+                  padding: const EdgeInsets.fromLTRB(20, 4, 20, 20),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      Icon(Icons.info_outline_rounded, size: 16, color: AppColors.error),
-                      SizedBox(width: 8),
-                      Expanded(
-                        child: Text(
-                          'Prive akan memotong nilai modal usaha dan mengurangi saldo kas toko.',
-                          style: TextStyle(fontSize: 11, color: Color(0xFF991B1B)),
+                      StoreCapitalTypeSelector(
+                        selectedType: _selectedType,
+                        onTypeSelected: (type) => setState(() => _selectedType = type),
+                      ),
+                      const SizedBox(height: 10),
+                      StoreCapitalMenuBalanceCard(
+                        type: _selectedType,
+                        totalStoreBalance: totalStoreBalance,
+                        capitalState: capitalState,
+                        selectedAcc: selectedAcc,
+                      ),
+                      const SizedBox(height: 14),
+                      Text(
+                        _isWithdrawal ? 'Pilih Rekening / Sumber Kas yang Ditarik:' : 'Pilih Rekening Kas Tujuan:',
+                        style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: AppColors.textPrimary),
+                      ),
+                      const SizedBox(height: 8),
+                      StoreCapitalAccountPicker(
+                        accounts: accounts,
+                        selectedAccountId: _selectedAccountId,
+                        isWithdrawal: _isWithdrawal,
+                        onAccountSelected: (acc) {
+                          setState(() {
+                            _selectedAccountId = acc?.id;
+                            _selectedAccountName = acc?.name;
+                          });
+                        },
+                      ),
+                      const SizedBox(height: 12),
+                      TextField(
+                        controller: _amountController,
+                        keyboardType: TextInputType.number,
+                        autofocus: true,
+                        inputFormatters: [CurrencyTextInputFormatter()],
+                        decoration: InputDecoration(
+                          labelText: _isWithdrawal ? 'Nominal Penarikan (Rp) *' : 'Nominal Modal (Rp) *',
+                          hintText: '0',
+                          prefixText: 'Rp ',
+                          helperText: _isFormValid ? null : 'Nominal wajib diisi dan harus lebih dari Rp 0',
+                          helperStyle: TextStyle(
+                            fontSize: 11,
+                            color: _isFormValid ? AppColors.textMuted : AppColors.error,
+                          ),
                         ),
+                      ),
+                      const SizedBox(height: 8),
+                      StoreCapitalPresetChips(
+                        isWithdrawal: _isWithdrawal,
+                        currentAccBalance: currentAccBalance,
+                        onAmountSelected: (amt) {
+                          _amountController.text = CurrencyFormatter.formatNumber(amt);
+                        },
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.only(top: 10),
+                        child: StoreCapitalLiveProjectionCard(
+                          type: _selectedType,
+                          targetName: targetName,
+                          currentAccBalance: currentAccBalance,
+                          rawAmount: rawAmount,
+                          capitalState: capitalState,
+                          isOverdrawn: isOverdrawn,
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      StoreCapitalExtraFields(
+                        isWithdrawal: _isWithdrawal,
+                        selectedDate: _selectedDate,
+                        onPickDate: _pickDate,
+                        sourceController: _sourceController,
+                        notesController: _notesController,
+                      ),
+                      const SizedBox(height: 20),
+                      StoreCapitalSubmitButton(
+                        isFormValid: _isFormValid,
+                        isOverdrawn: isOverdrawn,
+                        isSubmitting: _isSubmitting,
+                        isWithdrawal: _isWithdrawal,
+                        btnLabel: btnLabel,
+                        onSubmit: _handleSubmit,
                       ),
                     ],
                   ),
-                ),
-              ],
-              const SizedBox(height: 14),
-              TextField(
-                controller: _amountController,
-                keyboardType: TextInputType.number,
-                autofocus: true,
-                inputFormatters: [CurrencyTextInputFormatter()],
-                decoration: InputDecoration(
-                  labelText: _isWithdrawal ? 'Nominal Penarikan (Rp) *' : 'Nominal Modal (Rp) *',
-                  hintText: '0',
-                  prefixText: 'Rp ',
-                  helperText: _isFormValid ? null : 'Nominal wajib diisi dan harus lebih dari Rp 0',
-                  helperStyle: TextStyle(
-                    fontSize: 11,
-                    color: _isFormValid ? AppColors.textMuted : AppColors.error,
-                  ),
-                ),
-              ),
-              const SizedBox(height: 12),
-              StoreCapitalDateTile(
-                selectedDate: _selectedDate,
-                isWithdrawal: _isWithdrawal,
-                onTap: _pickDate,
-              ),
-              const SizedBox(height: 12),
-              if (accounts.isNotEmpty) ...[
-                DropdownButtonFormField<String>(
-                  value: _selectedAccountId,
-                  decoration: InputDecoration(
-                    labelText: _isWithdrawal ? 'Tarik dari Rekening / Kas' : 'Masuk ke Rekening / Kas',
-                    prefixIcon: const Icon(Icons.account_balance_wallet_outlined, size: 20),
-                  ),
-                  items: [
-                    const DropdownMenuItem(value: null, child: Text('Tanpa Hubungkan Rekening')),
-                    ...accounts.map(
-                      (acc) => DropdownMenuItem(
-                        value: acc.id,
-                        child: Text(
-                          acc.accountNumber != null && acc.accountNumber!.isNotEmpty
-                              ? '${acc.name} (${acc.accountNumber})'
-                              : acc.name,
-                        ),
-                      ),
-                    ),
-                  ],
-                  onChanged: (val) {
-                    setState(() {
-                      _selectedAccountId = val;
-                      _selectedAccountName = accounts.where((a) => a.id == val).firstOrNull?.name;
-                    });
-                  },
-                ),
-                const SizedBox(height: 12),
-              ],
-              TextField(
-                controller: _sourceController,
-                decoration: InputDecoration(
-                  labelText: _isWithdrawal ? 'Penerima (Opsional)' : 'Sumber Dana (Opsional)',
-                  hintText: _isWithdrawal ? 'Nama Pemilik' : 'Dana Pribadi / Pinjaman Bank',
-                  prefixIcon: const Icon(Icons.source_outlined, size: 20),
-                ),
-              ),
-              const SizedBox(height: 12),
-              TextField(
-                controller: _notesController,
-                decoration: InputDecoration(
-                  labelText: 'Catatan (Opsional)',
-                  hintText: _isWithdrawal ? 'Keperluan pribadi' : 'Untuk tambahan stok barang',
-                  prefixIcon: const Icon(Icons.notes_rounded, size: 20),
-                ),
-              ),
-              const SizedBox(height: 20),
-              SizedBox(
-                height: 48,
-                child: ElevatedButton(
-                  onPressed: _isFormValid && !_isSubmitting ? _handleSubmit : null,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: _isWithdrawal ? AppColors.error : AppColors.primary,
-                    foregroundColor: Colors.white,
-                    disabledBackgroundColor: const Color(0xFFE2E8F0),
-                    disabledForegroundColor: const Color(0xFF94A3B8),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-                  ),
-                  child: _isSubmitting
-                      ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
-                      : Text(btnLabel, style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 14)),
                 ),
               ),
             ],

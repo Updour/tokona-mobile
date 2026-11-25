@@ -64,12 +64,12 @@ class WhatsAppReminderService {
     b.writeln(ReceiptThermalFormatter.centerMultiLine('Harap simpan struk saat pengambilan', col));
 
     final msg = StringBuffer();
-    msg.writeln('Halo Kak *$customer*! 👋');
+    msg.writeln('Halo Kak *$customer*!');
     msg.writeln('Berikut rincian jadwal pengambilan pesanan Anda di *$storeName*:');
     msg.writeln('```');
     msg.writeln(b.toString().trim());
     msg.writeln('```');
-    msg.writeln('📍 Pesanan Anda sudah siap di toko. Ditunggu kedatangannya ya Kak. Terima kasih! 🙏');
+    msg.writeln('Pesanan Anda sudah siap di toko. Ditunggu kedatangannya ya Kak. Terima kasih!');
     return msg.toString();
   }
 

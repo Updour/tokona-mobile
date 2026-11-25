@@ -174,7 +174,7 @@ class _StoreEditBottomSheetState extends ConsumerState<StoreEditBottomSheet> {
                 controller: _nameController,
                 textCapitalization: TextCapitalization.words,
                 decoration: _buildInputDecoration(
-                  hint: 'Contoh: Toko Bangun Kerja Jaya',
+                  hint: 'Toko Bangun Kerja Jaya',
                   prefixIcon: Icons.store_rounded,
                 ),
                 validator: (val) {
@@ -207,7 +207,7 @@ class _StoreEditBottomSheetState extends ConsumerState<StoreEditBottomSheet> {
                 controller: _phoneController,
                 keyboardType: TextInputType.phone,
                 decoration: _buildInputDecoration(
-                  hint: 'Contoh: 081234567890',
+                  hint: '081234567890',
                   prefixIcon: Icons.phone_android_rounded,
                 ),
               ),

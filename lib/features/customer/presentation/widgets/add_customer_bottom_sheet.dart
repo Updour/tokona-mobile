@@ -218,7 +218,7 @@ class _AddCustomerBottomSheetState extends State<AddCustomerBottomSheet> {
                 textCapitalization: TextCapitalization.words,
                 decoration: InputDecoration(
                   labelText: 'Nama Pelanggan *',
-                  hintText: 'Contoh: Bu Siti, Toko Sejahtera',
+                  hintText: 'Bu Siti, Toko Sejahtera',
                   prefixIcon: const Icon(Icons.person_rounded, size: 20),
                   helperText: _nameController.text.trim().isEmpty ? 'Nama wajib diisi' : null,
                   helperStyle: TextStyle(fontSize: 11, color: _nameController.text.trim().isEmpty ? AppColors.error : AppColors.textMuted),
@@ -244,8 +244,8 @@ class _AddCustomerBottomSheetState extends State<AddCustomerBottomSheet> {
                 controller: _addressController,
                 textCapitalization: TextCapitalization.sentences,
                 decoration: const InputDecoration(
-                  labelText: 'Alamat / RT / Lokasi (Opsional)',
-                  hintText: 'Contoh: RT 03/04 No. 12',
+                  labelText: 'Alamat (Opsional)',
+                  hintText: 'RT 03/04 No. 12',
                   prefixIcon: Icon(Icons.location_on_outlined, size: 20),
                 ),
               ),
@@ -268,8 +268,8 @@ class _AddCustomerBottomSheetState extends State<AddCustomerBottomSheet> {
                 controller: _notesController,
                 maxLines: 2,
                 decoration: const InputDecoration(
-                  labelText: 'Catatan Khusus (Opsional)',
-                  hintText: 'Contoh: Langganan beras, bayar tiap akhir bulan',
+                  labelText: 'Catatan (Opsional)',
+                  hintText: 'Langganan beras, bayar tiap akhir bulan',
                   prefixIcon: Icon(Icons.edit_note_rounded, size: 20),
                 ),
               ),

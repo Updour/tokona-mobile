@@ -49,7 +49,7 @@ class ThermalPrinterFooterTab extends StatelessWidget {
           controller: footerController,
           decoration: const InputDecoration(
             labelText: 'Pesan Terima Kasih Utama *',
-            hintText: 'Contoh: Terima kasih atas kunjungan Anda!',
+            hintText: 'Terima kasih atas kunjungan Anda!',
             prefixIcon: Icon(Icons.favorite_outline_rounded, size: 20),
           ),
           onChanged: (_) => onChanged(),
@@ -59,7 +59,7 @@ class ThermalPrinterFooterTab extends StatelessWidget {
           controller: policyController,
           decoration: const InputDecoration(
             labelText: 'Kebijakan Toko / Garansi (Opsional)',
-            hintText: 'Contoh: Barang yang dibeli tidak dapat ditukar',
+            hintText: 'Barang yang dibeli tidak dapat ditukar',
             prefixIcon: Icon(Icons.verified_user_outlined, size: 20),
           ),
           maxLines: 2,
@@ -70,7 +70,7 @@ class ThermalPrinterFooterTab extends StatelessWidget {
           controller: socialController,
           decoration: const InputDecoration(
             labelText: 'Media Sosial / Website Toko (Opsional)',
-            hintText: 'Contoh: IG: @tokona.id • WA: 0812-xxx',
+            hintText: 'IG: @tokona.id • WA: 0812-xxx',
             prefixIcon: Icon(Icons.language_rounded, size: 20),
           ),
           onChanged: (_) => onChanged(),

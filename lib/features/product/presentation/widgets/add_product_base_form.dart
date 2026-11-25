@@ -105,7 +105,7 @@ class AddProductBaseForm extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             children: [
               IconButton(
-                icon: const Icon(Icons.auto_fix_high_outlined, color: AppColors.primary, size: 20),
+                icon: const Icon(Icons.refresh_rounded, color: AppColors.primary, size: 20),
                 tooltip: 'Buat SKU Otomatis',
                 onPressed: () {
                   skuController.text = SkuGenerator.generate(nameController.text);

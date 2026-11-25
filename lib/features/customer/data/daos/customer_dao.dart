@@ -51,6 +51,8 @@ class CustomerDao {
     String storeId, {
     String? type,
     String? searchQuery,
+    int? limit,
+    int? offset,
   }) async {
     final db = _getDatabase();
     final whereClauses = <String>['${DatabaseTables.columnCustomerStoreId} = ?'];
@@ -78,6 +80,8 @@ class CustomerDao {
       where: whereClauses.join(' AND '),
       whereArgs: whereArgs,
       orderBy: '${DatabaseTables.columnCustomerName} ASC',
+      limit: limit,
+      offset: offset,
     );
 
     return results.map(CustomerModel.fromMap).toList();

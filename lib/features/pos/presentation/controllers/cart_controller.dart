@@ -3,13 +3,31 @@ import 'package:tokona/features/pos/domain/models/cart_item_model.dart';
 import 'package:tokona/features/pos/domain/models/cart_state.dart';
 import 'package:tokona/features/product/domain/models/product_model.dart';
 import 'package:tokona/features/product/domain/models/product_unit_model.dart';
+import 'package:tokona/features/settings/presentation/controllers/app_preferences_controller.dart';
 
 final cartProvider = StateNotifierProvider<CartController, CartState>((ref) {
-  return CartController();
+  return CartController(ref);
 });
 
 class CartController extends StateNotifier<CartState> {
-  CartController() : super(const CartState());
+  final Ref? _ref;
+
+  CartController([this._ref]) : super(const CartState());
+
+  double _resolveRounding(double rawAmount) {
+    if (_ref == null) return 0.0;
+    final prefs = _ref.read(appPreferencesProvider);
+    return prefs.calculateRounding(rawAmount);
+  }
+
+  void _setState(CartState newState) {
+    final rounding = _resolveRounding(newState.rawFinalAmount);
+    state = newState.copyWith(roundingAmount: rounding);
+  }
+
+  void refreshRounding() {
+    _setState(state);
+  }
 
   bool addToCart(ProductModel product, {ProductUnitModel? unit, double qty = 1.0}) {
     final factor = unit?.conversionFactor ?? 1.0;
@@ -33,14 +51,14 @@ class CartController extends StateNotifier<CartState> {
       final updatedItem = currentItem.copyWith(quantity: currentItem.quantity + qty);
       final newItems = List<CartItemModel>.from(state.items);
       newItems[existingIndex] = updatedItem;
-      state = state.copyWith(items: newItems);
+      _setState(state.copyWith(items: newItems));
     } else {
       final newItem = CartItemModel(
         product: product,
         selectedUnit: unit,
         quantity: qty,
       );
-      state = state.copyWith(items: [...state.items, newItem]);
+      _setState(state.copyWith(items: [...state.items, newItem]));
     }
     return true;
   }
@@ -59,7 +77,7 @@ class CartController extends StateNotifier<CartState> {
       final updatedItem = currentItem.copyWith(quantity: remaining);
       final newItems = List<CartItemModel>.from(state.items);
       newItems[existingIndex] = updatedItem;
-      state = state.copyWith(items: newItems);
+      _setState(state.copyWith(items: newItems));
     }
   }
 
@@ -95,7 +113,7 @@ class CartController extends StateNotifier<CartState> {
 
     final newItems = List<CartItemModel>.from(state.items);
     newItems[index] = newItems[index].copyWith(quantity: newQty);
-    state = state.copyWith(items: newItems);
+    _setState(state.copyWith(items: newItems));
     return true;
   }
 
@@ -107,27 +125,27 @@ class CartController extends StateNotifier<CartState> {
       selectedUnit: newUnit,
       clearUnit: newUnit == null,
     );
-    state = state.copyWith(items: newItems);
+    _setState(state.copyWith(items: newItems));
   }
 
   void removeItem(int index) {
     if (index < 0 || index >= state.items.length) return;
     final newItems = List<CartItemModel>.from(state.items)..removeAt(index);
-    state = state.copyWith(items: newItems);
+    _setState(state.copyWith(items: newItems));
   }
 
   void setDiscount(double discount) {
-    state = state.copyWith(discountAmount: discount < 0 ? 0 : discount);
+    _setState(state.copyWith(discountAmount: discount < 0 ? 0 : discount));
   }
 
   void setCustomerName(String? name, [String? phone]) {
     final cleanName = name?.trim().isEmpty == true ? null : name?.trim();
     final cleanPhone = phone?.trim().isEmpty == true ? null : phone?.trim();
-    state = state.copyWith(
+    _setState(state.copyWith(
       customerName: cleanName,
       customerPhone: cleanPhone,
       clearCustomer: cleanName == null && cleanPhone == null,
-    );
+    ));
   }
 
   void clearCart() {
@@ -140,12 +158,12 @@ class CartController extends StateNotifier<CartState> {
     String? customerName,
     String? customerPhone,
   }) {
-    state = CartState(
+    _setState(CartState(
       items: List.from(items),
       discountAmount: discountAmount,
       customerName: customerName,
       customerPhone: customerPhone,
-    );
+    ));
   }
 
   String? scanBarcodeToCart(String barcode, List<ProductModel> products) {

@@ -84,7 +84,7 @@ class _WaDynamicOrderCalcCardState extends State<WaDynamicOrderCalcCard> {
             style: const TextStyle(fontSize: 12),
             decoration: InputDecoration(
               labelText: 'Nama Barang',
-              hintText: 'Contoh: Beras 5kg / Minyak Goreng',
+              hintText: 'Beras 5kg / Minyak Goreng',
               isDense: true,
               filled: true,
               fillColor: Colors.white,
@@ -167,7 +167,7 @@ class _WaDynamicOrderCalcCardState extends State<WaDynamicOrderCalcCard> {
               ),
               ElevatedButton.icon(
                 onPressed: _apply,
-                icon: const Icon(Icons.auto_fix_high_rounded, size: 14, color: Colors.white),
+                icon: const Icon(Icons.check_rounded, size: 14, color: Colors.white),
                 label: const Text('Terapkan ke Pesan', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: Colors.white)),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFF059669),

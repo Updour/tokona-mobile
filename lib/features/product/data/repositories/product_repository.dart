@@ -181,6 +181,8 @@ class ProductRepository {
     double? minPrice,
     double? maxPrice,
     ProductSortBy sortBy = ProductSortBy.nameAsc,
+    int? limit,
+    int? offset,
   }) async {
     await initialize();
 
@@ -195,16 +197,23 @@ class ProductRepository {
       minPrice: minPrice,
       maxPrice: maxPrice,
       sortBy: sortBy,
+      limit: limit,
+      offset: offset,
     );
 
-    final List<ProductModel> fullProducts = [];
-    for (final product in baseProducts) {
-      final units = await _productUnitDao.getUnitsByProductId(product.id);
-      final tiers = await _productPriceTierDao.getTiersByProductId(product.id);
-      fullProducts.add(product.copyWith(units: units, priceTiers: tiers));
-    }
+    if (baseProducts.isEmpty) return const [];
 
-    return fullProducts;
+    // Mengambil units & tiers secara batch dalam 2 query (bukan looping N+1 query)
+    final productIds = baseProducts.map((p) => p.id).toList();
+    final unitsMap = await _productUnitDao.getUnitsByProductIds(productIds);
+    final tiersMap = await _productPriceTierDao.getTiersByProductIds(productIds);
+
+    return baseProducts.map((p) {
+      return p.copyWith(
+        units: unitsMap[p.id] ?? const [],
+        priceTiers: tiersMap[p.id] ?? const [],
+      );
+    }).toList();
   }
 
   Future<List<DeviceStockSummary>> getDeviceSummaries(String storeId) async {

@@ -4,6 +4,7 @@ import 'package:tokona/core/theme/app_colors.dart';
 import 'package:tokona/core/theme/app_typography.dart';
 import 'package:tokona/core/utils/currency_formatter.dart';
 import 'package:tokona/features/purchase/domain/models/purchase_model.dart';
+import 'package:tokona/features/purchase/presentation/widgets/purchase_history_status_badge.dart';
 
 class PurchaseHistoryCard extends StatelessWidget {
   final PurchaseModel purchase;
@@ -82,7 +83,7 @@ class PurchaseHistoryCard extends StatelessWidget {
                     ],
                   ),
                 ),
-                _buildStatusBadge(),
+                PurchaseHistoryStatusBadge(purchase: purchase),
               ],
             ),
             const SizedBox(height: 8),
@@ -111,7 +112,7 @@ class PurchaseHistoryCard extends StatelessWidget {
                       border: Border.all(color: isReceived ? const Color(0xFFCBD5E1) : const Color(0xFF6366F1).withValues(alpha: 0.3)),
                     ),
                     child: Text(
-                      '📱 ${purchase.deviceTag!}',
+                      purchase.deviceTag!,
                       style: TextStyle(
                         fontSize: 9.5,
                         fontWeight: FontWeight.w700,
@@ -171,9 +172,28 @@ class PurchaseHistoryCard extends StatelessWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                _buildChannelBadge(),
+                PurchaseHistoryChannelBadge(purchase: purchase),
                 Row(
                   children: [
+                    if (purchase.isCoOrder && purchase.coProfit > 0) ...[
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 5.5, vertical: 2),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFF0FDF4),
+                          borderRadius: BorderRadius.circular(4),
+                          border: Border.all(color: const Color(0xFFBBF7D0)),
+                        ),
+                        child: Text(
+                          'Laba +${CurrencyFormatter.format(purchase.coProfit)}',
+                          style: const TextStyle(
+                            fontSize: 10,
+                            fontWeight: FontWeight.w800,
+                            color: Color(0xFF15803D),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 6),
+                    ],
                     Text(
                       CurrencyFormatter.format(purchase.grandTotal),
                       style: const TextStyle(
@@ -203,87 +223,4 @@ class PurchaseHistoryCard extends StatelessWidget {
     }
     return '$name ($qty ${firstItem.unitName}) + ${purchase.items.length - 1} lainnya';
   }
-
-  Widget _buildStatusBadge() {
-    Color bg;
-    Color fg;
-    String label;
-
-    switch (purchase.status) {
-      case 'received':
-        bg = const Color(0xFFDCFCE7);
-        fg = const Color(0xFF15803D);
-        label = purchase.isAutoReceived ? 'Diterima Sistem' : 'Diterima';
-        break;
-      case 'pre_order':
-        bg = const Color(0xFFFEF3C7);
-        fg = const Color(0xFFB45309);
-        label = 'PO Berjalan';
-        break;
-      case 'shipping':
-        bg = const Color(0xFFE0F2FE);
-        fg = const Color(0xFF0369A1);
-        label = 'Pengiriman';
-        break;
-      case 'cancelled':
-        bg = const Color(0xFFFEE2E2);
-        fg = const Color(0xFFB91C1C);
-        label = 'Dibatalkan';
-        break;
-      default:
-        bg = AppColors.surfaceInput;
-        fg = AppColors.textMuted;
-        label = purchase.status;
-    }
-
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-      decoration: BoxDecoration(
-        color: bg,
-        borderRadius: BorderRadius.circular(6),
-      ),
-      child: Text(
-        label,
-        style: TextStyle(
-          fontSize: 11,
-          fontWeight: FontWeight.w700,
-          color: fg,
-        ),
-      ),
-    );
-  }
-
-  Widget _buildChannelBadge() {
-    final isOnline = purchase.isOnline;
-    final isReceived = purchase.status == 'received';
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-      decoration: BoxDecoration(
-        color: isReceived
-            ? const Color(0xFFF1F5F9)
-            : (isOnline ? const Color(0xFFEDE9FE) : AppColors.surfaceInput),
-        borderRadius: BorderRadius.circular(6),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(
-            isOnline ? Icons.shopping_bag_outlined : Icons.store_outlined,
-            size: 12,
-            color: isReceived ? const Color(0xFF94A3B8) : (isOnline ? const Color(0xFF7C3AED) : AppColors.textMuted),
-          ),
-          const SizedBox(width: 4),
-          Text(
-            isOnline ? (purchase.platform ?? 'Online') : 'Toko Fisik',
-            style: TextStyle(
-              fontSize: 10,
-              fontWeight: FontWeight.w600,
-              color: isReceived ? const Color(0xFF64748B) : (isOnline ? const Color(0xFF6D28D9) : AppColors.textSecondary),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
 }
-

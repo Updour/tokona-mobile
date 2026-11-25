@@ -65,7 +65,7 @@ class _AddPaymentAccountDialogState extends State<AddPaymentAccountDialog> {
         textCapitalization: TextCapitalization.words,
         decoration: InputDecoration(
           labelText: 'Nama Bank / E-Wallet',
-          hintText: 'Contoh: Bank BCA, SeaBank, ShopeePay, Mandiri, BRI',
+          hintText: 'Bank BCA, SeaBank, ShopeePay, Mandiri, BRI',
           border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
         ),
         onSubmitted: (_) => _submit(),

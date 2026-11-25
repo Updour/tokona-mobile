@@ -88,6 +88,8 @@ class ProductDao {
     double? minPrice,
     double? maxPrice,
     ProductSortBy sortBy = ProductSortBy.nameAsc,
+    int? limit,
+    int? offset,
   }) async {
     final db = _getDatabase();
     final List<String> whereClauses = ['${DatabaseTables.columnProductStoreId} = ?'];
@@ -190,6 +192,8 @@ class ProductDao {
       where: whereClauses.join(' AND '),
       whereArgs: whereArgs,
       orderBy: orderByClause,
+      limit: limit,
+      offset: offset,
     );
 
     return results.map((e) => ProductModel.fromMap(e)).toList();

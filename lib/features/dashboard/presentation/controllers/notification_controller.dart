@@ -98,7 +98,7 @@ final notificationListProvider = Provider<List<AppNotificationItem>>((ref) {
           // Waktu telah tiba dan belum dikirim
           items.add(AppNotificationItem(
             id: 'booking_alarm_${h.id}',
-            title: '⏰ Waktunya Kirim WA: ${h.customerName} ($timeStr)',
+            title: 'Waktunya Kirim WA: ${h.customerName} ($timeStr)',
             body: 'Jadwal pengambilan jam $timeStr telah tiba! Ketuk untuk kirim pengingat WhatsApp ke ${h.customerPhone ?? "pelanggan"}.',
             type: AppNotificationType.bookingReady,
             createdAt: planTime,
@@ -108,7 +108,7 @@ final notificationListProvider = Provider<List<AppNotificationItem>>((ref) {
           // Pengingat sebelum jadwal sesuai pengaturan dinamis
           items.add(AppNotificationItem(
             id: 'booking_soon_${h.id}',
-            title: '🔔 Pengingat $diffMinutes Menit Lagi (Jam $timeStr): ${h.customerName}',
+            title: 'Pengingat $diffMinutes Menit Lagi (Jam $timeStr): ${h.customerName}',
             body: 'Pesanan ${h.deliveryMethodLabel} (${CurrencyFormatter.format(h.finalAmount)}). Siapkan barang & pesan WA.',
             type: AppNotificationType.bookingReady,
             createdAt: planTime,
@@ -150,7 +150,7 @@ final notificationListProvider = Provider<List<AppNotificationItem>>((ref) {
     if (pur.isReceived && (isJtNote || ((pur.isAutoReceived || hasTracking) && eventTime.isAfter(recentCutoff)))) {
       items.add(AppNotificationItem(
         id: 'jt_delivered_${pur.id}',
-        title: '📦 Paket Tiba: ${pur.supplierName ?? pur.invoiceNumber}',
+        title: 'Paket Tiba: ${pur.supplierName ?? pur.invoiceNumber}',
         body: isJtNote
             ? 'Paket J&T Cargo terkonfirmasi diterima kurir. Stok barang telah masuk ke toko.'
             : 'Pesanan (${pur.trackingNumber ?? pur.invoiceNumber}) telah diterima & stok masuk ke toko.',
@@ -175,7 +175,7 @@ final notificationListProvider = Provider<List<AppNotificationItem>>((ref) {
 
     items.add(AppNotificationItem(
       id: 'paylater_bill_${now.year}_${now.month}',
-      title: '💳 Tagihan $plName: $formattedNominal',
+      title: 'Tagihan $plName: $formattedNominal',
       body: isPaylaterBillingWindow
           ? 'Jatuh tempo tgl $dueDay. Siapkan dana $formattedNominal.'
           : 'Total tagihan belanja $formattedNominal (Jatuh tempo tgl $dueDay).',
@@ -189,7 +189,7 @@ final notificationListProvider = Provider<List<AppNotificationItem>>((ref) {
       if (now.hour >= prefs.paylaterRemindHour) {
         LocalPushNotificationService.instance.showPaylaterNotification(
           id: notifId,
-          title: '💳 Tagihan $plName: $formattedNominal',
+          title: 'Tagihan $plName: $formattedNominal',
           body: 'Jatuh tempo tgl $dueDay. Segera lunasi $formattedNominal.',
           payload: 'paylater',
         );

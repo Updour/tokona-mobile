@@ -55,8 +55,8 @@ class _LoginFormWidgetState extends State<LoginFormWidget> {
         children: [
           AuthTextField(
             controller: _usernameController,
-            label: 'Nama Pemilik / Username / No. WA',
-            hint: 'Contoh: Rohman atau 081234567890',
+            label: 'Nama Pengguna / Nomor HP',
+            hint: 'Rohman / 081234567890',
             prefixIcon: Icons.person_outline_rounded,
             validator: (value) {
               if (value == null || value.trim().isEmpty) {

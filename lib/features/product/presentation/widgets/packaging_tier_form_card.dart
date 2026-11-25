@@ -43,14 +43,14 @@ class _PackagingTierFormCardState extends State<PackagingTierFormCard> {
     final barcode = _barcodeController.text.trim();
 
     if (name.isEmpty) {
-      AppToast.showWarning(context, 'Nama kemasan (misal: Dus / Slop / Pack) wajib diisi');
+      AppToast.showWarning(context, 'Nama kemasan ( Dus / Slop / Pack) wajib diisi');
       return;
     }
 
     if (factor <= 1) {
       AppToast.showWarning(
         context,
-        'Isi isi kemasan (konversi) harus lebih dari 1. Contoh: 1 Dus berisi 40 Pcs, masukkan 40.',
+        'Isi isi kemasan (konversi) harus lebih dari 1. 1 Dus berisi 40 Pcs, masukkan 40.',
       );
       return;
     }

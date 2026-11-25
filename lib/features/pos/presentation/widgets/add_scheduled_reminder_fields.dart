@@ -109,7 +109,7 @@ class AddScheduledReminderFields extends StatelessWidget {
           controller: nameController,
           decoration: InputDecoration(
             labelText: 'Nama Pelanggan *',
-            hintText: 'Contoh: Bu Sri / Pak Anton',
+            hintText: 'Bu Sri / Pak Anton',
             prefixIcon: const Icon(Icons.person_rounded, size: 20),
             border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
             contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
@@ -240,7 +240,7 @@ class AddScheduledReminderFields extends StatelessWidget {
           maxLines: 2,
           decoration: InputDecoration(
             labelText: 'Catatan Pesanan (Otomatis dari Produk)',
-            hintText: 'Contoh: 2 dus mie instan + 1 bal rokok',
+            hintText: '2 dus mie instan + 1 bal rokok',
             prefixIcon: const Icon(Icons.notes_rounded, size: 20),
             border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
             contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),

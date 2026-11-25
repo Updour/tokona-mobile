@@ -62,39 +62,18 @@ class _RegisterFormWidgetState extends State<RegisterFormWidget> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
-            margin: const EdgeInsets.only(bottom: 14),
-            decoration: BoxDecoration(
-              color: const Color(0xFFF0FDFA),
-              borderRadius: BorderRadius.circular(10),
-              border: Border.all(color: const Color(0xFFCCFBF1)),
-            ),
-            child: const Row(
-              children: [
-                Icon(Icons.flash_on_rounded, size: 15, color: Color(0xFF0D9488)),
-                SizedBox(width: 8),
-                Expanded(
-                  child: Text(
-                    'Pendaftaran Cepat (1 Langkah). Nama pemilik otomatis menjadi akun login Anda.',
-                    style: TextStyle(fontSize: 11, color: Color(0xFF0F766E), fontWeight: FontWeight.w600, height: 1.3),
-                  ),
-                ),
-              ],
-            ),
-          ),
           AuthTextField(
             controller: _storeNameController,
             label: 'Nama Toko',
-            hint: 'Contoh: Toko Berkah Mandiri',
+            hint: 'Toko Berkah Mandiri',
             prefixIcon: Icons.store_rounded,
             validator: (v) => (v == null || v.trim().isEmpty) ? 'Nama toko wajib diisi' : null,
           ),
           const SizedBox(height: 12),
           AuthTextField(
             controller: _ownerNameController,
-            label: 'Nama Pemilik Toko',
-            hint: 'Contoh: Rohman (otomatis jadi akun login)',
+            label: 'Nama Pengguna',
+            hint: 'Rohman (otomatis jadi akun login)',
             prefixIcon: Icons.badge_outlined,
             validator: (v) => (v == null || v.trim().isEmpty) ? 'Nama pemilik wajib diisi' : null,
           ),

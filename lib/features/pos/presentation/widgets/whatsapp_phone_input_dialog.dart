@@ -77,7 +77,7 @@ class _WhatsAppPhoneInputDialogState extends State<WhatsAppPhoneInputDialog> {
             keyboardType: TextInputType.phone,
             autofocus: true,
             decoration: const InputDecoration(
-              hintText: 'Contoh: 081234567890',
+              hintText: '081234567890',
               prefixIcon: Icon(Icons.phone_rounded, size: 20),
             ),
           ),

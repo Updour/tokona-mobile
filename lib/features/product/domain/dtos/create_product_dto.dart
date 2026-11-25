@@ -43,7 +43,7 @@ class CreateProductDto {
       return 'Nama barang minimal 3 huruf';
     }
     if (baseUnit.trim().isEmpty) {
-      return 'Satuan dasar wajib diisi (misal: Pcs)';
+      return 'Satuan dasar wajib diisi ( Pcs)';
     }
     if (baseCostPrice < 0) {
       return 'Harga pokok (HPP) tidak boleh negatif';

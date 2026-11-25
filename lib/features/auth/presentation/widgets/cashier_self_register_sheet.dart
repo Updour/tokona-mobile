@@ -152,7 +152,7 @@ class _CashierSelfRegisterSheetState extends ConsumerState<CashierSelfRegisterSh
                 textInputAction: TextInputAction.next,
                 decoration: InputDecoration(
                   labelText: 'Nama Lengkap Kasir',
-                  hintText: 'Contoh: Siti Aisyah',
+                  hintText: 'Siti Aisyah',
                   prefixIcon: const Icon(Icons.badge_outlined, size: 20),
                   filled: true,
                   fillColor: Colors.white,
@@ -167,7 +167,7 @@ class _CashierSelfRegisterSheetState extends ConsumerState<CashierSelfRegisterSh
                 inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'[a-zA-Z0-9_]'))],
                 decoration: InputDecoration(
                   labelText: 'Username (untuk login)',
-                  hintText: 'Contoh: kasir_siti',
+                  hintText: 'kasir_siti',
                   prefixIcon: const Icon(Icons.alternate_email_rounded, size: 20),
                   filled: true,
                   fillColor: Colors.white,

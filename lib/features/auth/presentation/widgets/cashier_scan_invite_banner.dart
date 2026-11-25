@@ -14,7 +14,7 @@ class CashierScanInviteBanner extends ConsumerWidget {
     HapticFeedback.selectionClick();
     final scannedCode = await CameraBarcodeScanner.scan(
       context,
-      title: 'Scan QR Undangan / Pairing Toko',
+      title: 'Scan QR Toko',
     );
     if (scannedCode == null || scannedCode.trim().isEmpty) return;
 
@@ -48,59 +48,40 @@ class CashierScanInviteBanner extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 16),
-      decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          colors: [Color(0xFF0F766E), Color(0xFF0D9488)],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: const Color(0xFF0D9488).withValues(alpha: 0.25),
-            blurRadius: 10,
-            offset: const Offset(0, 3),
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: () => _handleScan(context, ref),
+        borderRadius: BorderRadius.circular(12),
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+          decoration: BoxDecoration(
+            color: const Color(0xFFF0FDFA),
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: const Color(0xFF99F6E4), width: 1.1),
+            boxShadow: [
+              BoxShadow(
+                color: const Color(0xFF0F766E).withValues(alpha: 0.08),
+                blurRadius: 6,
+                offset: const Offset(0, 1.5),
+              ),
+            ],
           ),
-        ],
-      ),
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          onTap: () => _handleScan(context, ref),
-          borderRadius: BorderRadius.circular(16),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 11),
-            child: Row(
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    color: Colors.white.withValues(alpha: 0.2),
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  child: const Icon(Icons.qr_code_scanner_rounded, color: Colors.white, size: 22),
+          child: const Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(Icons.qr_code_scanner_rounded, size: 16, color: Color(0xFF0F766E)),
+              SizedBox(width: 5),
+              Text(
+                'Scan QR',
+                style: TextStyle(
+                  fontSize: 11.5,
+                  fontWeight: FontWeight.w800,
+                  color: Color(0xFF0F766E),
+                  letterSpacing: -0.1,
                 ),
-                const SizedBox(width: 12),
-                const Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Kasir / Karyawan Baru?',
-                        style: TextStyle(color: Colors.white, fontWeight: FontWeight.w800, fontSize: 13),
-                      ),
-                      Text(
-                        'Scan QR Toko untuk buat akun & langsung masuk',
-                        style: TextStyle(color: Color(0xFFCCFBF1), fontSize: 10.5),
-                      ),
-                    ],
-                  ),
-                ),
-                const Icon(Icons.arrow_forward_ios_rounded, color: Colors.white, size: 14),
-              ],
-            ),
+              ),
+            ],
           ),
         ),
       ),

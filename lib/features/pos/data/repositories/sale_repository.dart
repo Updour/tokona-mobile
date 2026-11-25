@@ -53,6 +53,7 @@ class SaleRepository {
         customerPhone: dto.customerPhone?.trim().isEmpty == true ? null : dto.customerPhone?.trim(),
         totalAmount: dto.totalAmount,
         discountAmount: dto.discountAmount,
+        roundingAmount: dto.roundingAmount,
         finalAmount: dto.finalAmount,
         cashPaid: dto.cashPaid,
         changeAmount: dto.changeAmount,
@@ -182,12 +183,13 @@ class SaleRepository {
       endDate: endDate,
       limit: limit,
     );
-    final List<SaleModel> populated = [];
-    for (final header in headers) {
-      final items = await saleItemDao.getBySaleId(db, header.id);
-      populated.add(header.copyWith(items: items));
-    }
-    return populated;
+    if (headers.isEmpty) return const [];
+
+    // Batch query items untuk semua transaksi sekaligus (menghindari N+1 query)
+    final saleIds = headers.map((h) => h.id).toList();
+    final itemsMap = await saleItemDao.getBySaleIds(db, saleIds);
+
+    return headers.map((h) => h.copyWith(items: itemsMap[h.id] ?? const [])).toList();
   }
 
   Future<SaleModel?> getSaleById(String saleId) async {

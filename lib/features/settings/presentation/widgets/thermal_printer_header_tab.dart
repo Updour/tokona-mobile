@@ -83,7 +83,7 @@ class ThermalPrinterHeaderTab extends StatelessWidget {
           controller: subtitleController,
           decoration: const InputDecoration(
             labelText: 'Slogan / Sub-header Toko (Opsional)',
-            hintText: 'Contoh: Pusat Grosir & Retail Sembako',
+            hintText: 'Pusat Grosir & Retail Sembako',
             prefixIcon: Icon(Icons.subtitles_outlined, size: 20),
           ),
           onChanged: (_) => onChanged(),
@@ -137,7 +137,7 @@ class ThermalPrinterHeaderTab extends StatelessWidget {
           controller: customHeaderController,
           decoration: const InputDecoration(
             labelText: 'Catatan Pembuka / Banner (Opsional)',
-            hintText: 'Contoh: Selamat Datang & Selamat Berbelanja!',
+            hintText: 'Selamat Datang & Selamat Berbelanja!',
             prefixIcon: Icon(Icons.info_outline_rounded, size: 20),
           ),
           onChanged: (_) => onChanged(),

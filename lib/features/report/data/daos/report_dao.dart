@@ -56,6 +56,7 @@ class ReportDao {
       FROM ${DatabaseTables.purchases}
       WHERE ${DatabaseTables.columnPurchaseStoreId} = ?
         AND ${DatabaseTables.columnPurchaseStatus} != 'cancelled'
+        AND ${DatabaseTables.columnPurchaseType} != 'co_order'
         AND ${DatabaseTables.columnCreatedAt} >= ?
         AND ${DatabaseTables.columnCreatedAt} <= ?
       ''',
@@ -77,7 +78,21 @@ class ReportDao {
 
     final totalPendingRefund = (refundResult.first['pending_refund'] as num?)?.toDouble() ?? 0.0;
 
-    final grossProfit = totalRevenue - totalCogs;
+    final coProfitResult = await db.rawQuery(
+      '''
+      SELECT COALESCE(SUM(${DatabaseTables.columnPurchaseCoProfit}), 0.0) as total_co_profit
+      FROM ${DatabaseTables.purchases}
+      WHERE ${DatabaseTables.columnPurchaseStoreId} = ?
+        AND ${DatabaseTables.columnPurchaseStatus} != 'cancelled'
+        AND ${DatabaseTables.columnPurchaseType} = 'co_order'
+        AND ${DatabaseTables.columnCreatedAt} >= ?
+        AND ${DatabaseTables.columnCreatedAt} <= ?
+      ''',
+      [storeId, startIso, endIso],
+    );
+    final totalCoProfit = (coProfitResult.first['total_co_profit'] as num?)?.toDouble() ?? 0.0;
+
+    final grossProfit = totalRevenue - totalCogs + totalCoProfit;
     final profitMargin = totalRevenue > 0 ? (grossProfit / totalRevenue) * 100 : 0.0;
     final averageBasket = txCount > 0 ? totalRevenue / txCount : 0.0;
 

@@ -243,7 +243,7 @@ class BerandaBookingMonitorCard extends ConsumerWidget {
                 ),
                 const SizedBox(height: 2),
                 Text(
-                  '📅 $dateStr • ${order.totalItemCount} item • ${CurrencyFormatter.format(order.finalAmount)}',
+                  '$dateStr • ${order.totalItemCount} item • ${CurrencyFormatter.format(order.finalAmount)}',
                   style: const TextStyle(fontSize: 10.5, color: AppColors.textSecondary, fontWeight: FontWeight.w500),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,

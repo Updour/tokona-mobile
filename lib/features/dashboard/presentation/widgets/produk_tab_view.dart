@@ -231,7 +231,7 @@ class _ProdukTabViewState extends ConsumerState<ProdukTabView> {
                     const Icon(Icons.tune_rounded, size: 14, color: AppColors.primary),
                     const SizedBox(width: 6),
                     Text(
-                      'Filter aktif ($activeFilterCount)${productState.selectedDeviceTag != null ? ' • 📱 ${productState.selectedDeviceTag}' : ''}',
+                      'Filter aktif ($activeFilterCount)${productState.selectedDeviceTag != null ? ' • ${productState.selectedDeviceTag}' : ''}',
                       style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: AppColors.primary),
                     ),
                     const Spacer(),

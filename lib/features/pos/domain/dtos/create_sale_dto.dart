@@ -1,3 +1,4 @@
+import 'dart:math';
 import 'package:tokona/features/pos/domain/dtos/create_sale_item_dto.dart';
 
 class CreateSaleDto {
@@ -7,6 +8,7 @@ class CreateSaleDto {
   final String? customerName;
   final String? customerPhone;
   final double discountAmount;
+  final double roundingAmount;
   final double cashPaid;
   final String paymentMethod;
   final String? notes;
@@ -21,6 +23,7 @@ class CreateSaleDto {
     this.customerName,
     this.customerPhone,
     this.discountAmount = 0.0,
+    this.roundingAmount = 0.0,
     required this.cashPaid,
     this.paymentMethod = 'CASH',
     this.notes,
@@ -30,7 +33,8 @@ class CreateSaleDto {
   });
 
   double get totalAmount => items.fold(0.0, (acc, item) => acc + item.subtotal);
-  double get finalAmount => (totalAmount - discountAmount) < 0 ? 0 : (totalAmount - discountAmount);
+  double get rawFinalAmount => (totalAmount - discountAmount) < 0 ? 0 : (totalAmount - discountAmount);
+  double get finalAmount => max(0.0, rawFinalAmount + roundingAmount);
   double get changeAmount => (cashPaid - finalAmount) < 0 ? 0 : (cashPaid - finalAmount);
 
   String? validate() {

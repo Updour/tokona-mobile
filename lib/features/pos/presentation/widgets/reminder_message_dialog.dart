@@ -180,7 +180,7 @@ class _ReminderMessageDialogState extends ConsumerState<ReminderMessageDialog> {
                 keyboardType: TextInputType.phone,
                 decoration: InputDecoration(
                   labelText: 'Nomor Handphone',
-                  hintText: 'Contoh: 08123456789 atau 628123456789',
+                  hintText: '08123456789 atau 628123456789',
                   prefixIcon: const Icon(Icons.phone_rounded, size: 18, color: Color(0xFF059669)),
                   suffixIcon: IconButton(
                     onPressed: _pickContactPhone,

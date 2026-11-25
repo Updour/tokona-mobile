@@ -42,7 +42,7 @@ class PosQuickCashPills extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.only(right: 6),
             child: ActionChip(
-              avatar: const Icon(Icons.flash_on_rounded, size: 13, color: Color(0xFF047857)),
+              avatar: const Icon(Icons.payments_outlined, size: 13, color: Color(0xFF047857)),
               label: Text(
                 'Uang Pas (${currency.format(finalAmount)})',
                 style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w800, color: Color(0xFF047857)),

@@ -63,7 +63,7 @@ class JtCargoSyncService {
             final supName = order.supplierName ?? 'Supplier';
             LocalPushNotificationService.instance.showDeliveryNotification(
               id: notifId,
-              title: '📦 Paket J&T Cargo Diterima!',
+              title: 'Paket J&T Cargo Diterima!',
               body: prefs.autoReceiveOnDelivered
                   ? 'Paket $supName (Resi: $waybill) berhasil diantar. Stok toko telah bertambah.'
                   : 'Paket $supName (Resi: $waybill) sudah tiba. Silakan cek fisik & konfirmasi terima.',

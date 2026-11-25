@@ -178,7 +178,7 @@ class _StockAdjustmentSheetState extends ConsumerState<StockAdjustmentSheet> {
               AuthTextField(
                 controller: _notesController,
                 label: 'Catatan (Opsional)',
-                hint: 'Contoh: Kemasan sobek saat bongkar muat',
+                hint: 'Kemasan sobek saat bongkar muat',
                 prefixIcon: Icons.notes_rounded,
               ),
               const SizedBox(height: 20),

@@ -21,6 +21,11 @@ class CreatePurchaseDto {
   final String? trackingNumber;
   final int installmentMonths;
   final double monthlyInstallment;
+  final String? coPartner;
+  final double coProfit;
+  final bool addToStock;
+  final double shippingDiscount;
+  final double voucherDiscount;
   final List<CreatePurchaseItemDto> items;
 
   const CreatePurchaseDto({
@@ -44,6 +49,11 @@ class CreatePurchaseDto {
     this.trackingNumber,
     this.installmentMonths = 1,
     this.monthlyInstallment = 0.0,
+    this.coPartner,
+    this.coProfit = 0.0,
+    this.addToStock = true,
+    this.shippingDiscount = 0.0,
+    this.voucherDiscount = 0.0,
     required this.items,
   });
 
@@ -53,8 +63,10 @@ class CreatePurchaseDto {
 
   double get totalAmount => itemsSubtotal;
 
+  double get totalDiscount => shippingDiscount + voucherDiscount;
+
   double get grandTotal {
-    return itemsSubtotal + serviceFee + shippingFee;
+    return (itemsSubtotal + serviceFee + shippingFee - shippingDiscount - voucherDiscount).clamp(0.0, double.infinity);
   }
 
   String? validate() {

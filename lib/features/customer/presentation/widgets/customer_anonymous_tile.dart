@@ -52,7 +52,7 @@ class CustomerAnonymousTile extends StatelessWidget {
                     ),
                   ),
                   Text(
-                    'Transaksi kasir harian biasa / anonim',
+                    'Transaksi kasir harian biasa',
                     style: AppTypography.bodySmall.copyWith(fontSize: 11, color: AppColors.textMuted),
                   ),
                 ],
