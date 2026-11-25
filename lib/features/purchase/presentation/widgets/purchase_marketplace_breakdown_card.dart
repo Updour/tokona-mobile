@@ -35,176 +35,233 @@ class _PurchaseMarketplaceBreakdownCardState extends State<PurchaseMarketplaceBr
     }
   }
 
+  double get _shippingFee => CurrencyFormatter.parse(widget.shippingFeeController.text);
+  double get _shippingDiscount => CurrencyFormatter.parse(widget.shippingDiscountController.text);
+  double get _voucherDiscount => CurrencyFormatter.parse(widget.voucherDiscountController.text);
+  double get _serviceFee => CurrencyFormatter.parse(widget.serviceFeeController.text);
+
+  double get _netShipping => (_shippingFee - _shippingDiscount).clamp(0.0, double.infinity);
+  double get _totalDiscount => _shippingDiscount + _voucherDiscount;
+
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.all(12),
+      padding: const EdgeInsets.all(13),
       decoration: BoxDecoration(
         color: const Color(0xFFF8FAFC),
-        borderRadius: BorderRadius.circular(14),
+        borderRadius: BorderRadius.circular(16),
         border: Border.all(color: const Color(0xFFE2E8F0)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Row(
-                children: [
-                  Icon(Icons.receipt_long_outlined, size: 16, color: AppColors.primary),
-                  SizedBox(width: 6),
-                  Text(
-                    'Rincian Biaya & Diskon Marketplace',
-                    style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: AppColors.textPrimary),
-                  ),
-                ],
+              Container(
+                padding: const EdgeInsets.all(6),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFEFF6FF),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: const Icon(Icons.local_shipping_outlined, size: 16, color: Color(0xFF2563EB)),
               ),
-              Row(
-                children: [
-                  Text(
-                    _isDetailMode ? 'Mode Rinci' : 'Ringkas',
-                    style: TextStyle(
-                      fontSize: 11,
-                      fontWeight: FontWeight.w600,
-                      color: _isDetailMode ? AppColors.primary : AppColors.textMuted,
+              const SizedBox(width: 8),
+              const Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Rincian Biaya & Diskon Marketplace',
+                      style: TextStyle(fontSize: 12.5, fontWeight: FontWeight.w700, color: AppColors.textPrimary),
+                    ),
+                    Text(
+                      'Ongkir, layanan & voucher pengadaan',
+                      style: TextStyle(fontSize: 10.5, color: AppColors.textMuted),
+                    ),
+                  ],
+                ),
+              ),
+              InkWell(
+                onTap: () {
+                  setState(() => _isDetailMode = !_isDetailMode);
+                  if (!_isDetailMode) {
+                    widget.shippingDiscountController.clear();
+                    widget.voucherDiscountController.clear();
+                    widget.onChanged();
+                  }
+                },
+                borderRadius: BorderRadius.circular(20),
+                child: AnimatedContainer(
+                  duration: const Duration(milliseconds: 200),
+                  padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 5),
+                  decoration: BoxDecoration(
+                    color: _isDetailMode ? const Color(0xFFDCFCE7) : const Color(0xFFF1F5F9),
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(
+                      color: _isDetailMode ? const Color(0xFF86EFAC) : const Color(0xFFCBD5E1),
                     ),
                   ),
-                  const SizedBox(width: 4),
-                  Switch.adaptive(
-                    value: _isDetailMode,
-                    activeThumbColor: AppColors.primary,
-                    materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                    onChanged: (val) {
-                      setState(() => _isDetailMode = val);
-                      if (!val) {
-                        widget.shippingDiscountController.clear();
-                        widget.voucherDiscountController.clear();
-                        widget.onChanged();
-                      }
-                    },
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        _isDetailMode ? Icons.check_circle_rounded : Icons.add_circle_outline_rounded,
+                        size: 13,
+                        color: _isDetailMode ? const Color(0xFF15803D) : AppColors.textSecondary,
+                      ),
+                      const SizedBox(width: 4),
+                      Text(
+                        _isDetailMode ? 'Ada Diskon' : '+ Diskon/Voucher',
+                        style: TextStyle(
+                          fontSize: 10.5,
+                          fontWeight: FontWeight.w700,
+                          color: _isDetailMode ? const Color(0xFF15803D) : AppColors.textSecondary,
+                        ),
+                      ),
+                    ],
                   ),
-                ],
+                ),
               ),
             ],
           ),
-          const SizedBox(height: 10),
-          if (!_isDetailMode)
-            Row(
-              children: [
-                Expanded(
-                  child: TextField(
-                    controller: widget.shippingFeeController,
-                    keyboardType: TextInputType.number,
-                    inputFormatters: [CurrencyTextInputFormatter()],
-                    onChanged: (_) => widget.onChanged(),
-                    style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
-                    decoration: const InputDecoration(
-                      labelText: 'Ongkos Kirim',
-                      prefixText: 'Rp',
-                      hintText: '0',
-                      isDense: true,
-                      contentPadding: EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-                    ),
-                  ),
+          const SizedBox(height: 12),
+
+          // Baris 1: Biaya Utama (Ongkir & Layanan)
+          Row(
+            children: [
+              Expanded(
+                child: _buildInputField(
+                  controller: widget.shippingFeeController,
+                  label: _isDetailMode ? 'Subtotal Ongkir' : 'Ongkos Kirim',
+                  prefix: 'Rp',
+                  color: AppColors.textPrimary,
                 ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: TextField(
-                    controller: widget.serviceFeeController,
-                    keyboardType: TextInputType.number,
-                    inputFormatters: [CurrencyTextInputFormatter()],
-                    onChanged: (_) => widget.onChanged(),
-                    style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
-                    decoration: const InputDecoration(
-                      labelText: 'Biaya Layanan',
-                      prefixText: 'Rp',
-                      hintText: '0',
-                      isDense: true,
-                      contentPadding: EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-                    ),
-                  ),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: _buildInputField(
+                  controller: widget.serviceFeeController,
+                  label: 'Biaya Layanan',
+                  prefix: 'Rp',
+                  color: AppColors.textPrimary,
                 ),
-              ],
-            )
-          else ...[
-            Row(
-              children: [
-                Expanded(
-                  child: TextField(
-                    controller: widget.shippingFeeController,
-                    keyboardType: TextInputType.number,
-                    inputFormatters: [CurrencyTextInputFormatter()],
-                    onChanged: (_) => widget.onChanged(),
-                    style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
-                    decoration: const InputDecoration(
-                      labelText: 'Subtotal Pengiriman',
-                      prefixText: 'Rp',
-                      hintText: '108.500',
-                      isDense: true,
-                      contentPadding: EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-                    ),
+              ),
+            ],
+          ),
+
+          // Baris 2: Bagian Diskon & Potongan (Bila mode detail aktif)
+          if (_isDetailMode) ...[
+            const SizedBox(height: 10),
+            Container(
+              padding: const EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                color: const Color(0xFFF0FDF4),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: const Color(0xFFBBF7D0)),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Row(
+                    children: [
+                      Icon(Icons.discount_outlined, size: 13, color: Color(0xFF15803D)),
+                      SizedBox(width: 5),
+                      Text(
+                        'Potongan Diskon & Voucher Shopee',
+                        style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: Color(0xFF15803D)),
+                      ),
+                    ],
                   ),
-                ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: TextField(
-                    controller: widget.shippingDiscountController,
-                    keyboardType: TextInputType.number,
-                    inputFormatters: [CurrencyTextInputFormatter()],
-                    onChanged: (_) => widget.onChanged(),
-                    style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
-                    decoration: const InputDecoration(
-                      labelText: 'Diskon Pengiriman',
-                      prefixText: '-Rp',
-                      hintText: '108.500',
-                      isDense: true,
-                      contentPadding: EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-                    ),
+                  const SizedBox(height: 8),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: _buildInputField(
+                          controller: widget.shippingDiscountController,
+                          label: 'Diskon Ongkir',
+                          prefix: '-Rp',
+                          color: const Color(0xFF15803D),
+                          fillColor: Colors.white,
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: _buildInputField(
+                          controller: widget.voucherDiscountController,
+                          label: 'Voucher Toko/Shopee',
+                          prefix: '-Rp',
+                          color: const Color(0xFF15803D),
+                          fillColor: Colors.white,
+                        ),
+                      ),
+                    ],
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
+          ],
+
+          // Footer Live Summary jika ada diskon atau ongkir diisi
+          if (_shippingFee > 0 || _totalDiscount > 0) ...[
             const SizedBox(height: 8),
-            Row(
-              children: [
-                Expanded(
-                  child: TextField(
-                    controller: widget.voucherDiscountController,
-                    keyboardType: TextInputType.number,
-                    inputFormatters: [CurrencyTextInputFormatter()],
-                    onChanged: (_) => widget.onChanged(),
-                    style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
-                    decoration: const InputDecoration(
-                      labelText: 'Voucher Digunakan',
-                      prefixText: '-Rp',
-                      hintText: '396.000',
-                      isDense: true,
-                      contentPadding: EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-                    ),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: const Color(0xFFE2E8F0)),
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    'Ongkir Bersih: ${CurrencyFormatter.format(_netShipping)}',
+                    style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: Color(0xFF0F766E)),
                   ),
-                ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: TextField(
-                    controller: widget.serviceFeeController,
-                    keyboardType: TextInputType.number,
-                    inputFormatters: [CurrencyTextInputFormatter()],
-                    onChanged: (_) => widget.onChanged(),
-                    style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
-                    decoration: const InputDecoration(
-                      labelText: 'Biaya Layanan',
-                      prefixText: 'Rp',
-                      hintText: '4.000',
-                      isDense: true,
-                      contentPadding: EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                  if (_totalDiscount > 0)
+                    Text(
+                      'Hemat: -${CurrencyFormatter.format(_totalDiscount)}',
+                      style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w800, color: Color(0xFF15803D)),
                     ),
-                  ),
-                ),
-              ],
+                ],
+              ),
             ),
           ],
         ],
+      ),
+    );
+  }
+
+  Widget _buildInputField({
+    required TextEditingController controller,
+    required String label,
+    required String prefix,
+    required Color color,
+    Color? fillColor,
+  }) {
+    return TextField(
+      controller: controller,
+      keyboardType: TextInputType.number,
+      inputFormatters: [CurrencyTextInputFormatter()],
+      onChanged: (_) {
+        setState(() {});
+        widget.onChanged();
+      },
+      style: TextStyle(fontSize: 12.5, fontWeight: FontWeight.w700, color: color),
+      decoration: InputDecoration(
+        labelText: label,
+        labelStyle: const TextStyle(fontSize: 11, color: AppColors.textSecondary),
+        prefixText: prefix,
+        prefixStyle: TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: color),
+        hintText: '0',
+        hintStyle: const TextStyle(fontSize: 12, color: Color(0xFFCBD5E1)),
+        isDense: true,
+        filled: fillColor != null,
+        fillColor: fillColor,
+        contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 9),
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: const BorderSide(color: Color(0xFFCBD5E1))),
+        enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: const BorderSide(color: Color(0xFFCBD5E1))),
+        focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: const BorderSide(color: AppColors.primary, width: 1.5)),
       ),
     );
   }
