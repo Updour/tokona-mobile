@@ -149,7 +149,7 @@ class _PackagingTierFormCardState extends State<PackagingTierFormCard> {
                       inputFormatters: [CurrencyTextInputFormatter()],
                       onChanged: (_) => setState(() {}),
                       decoration: const InputDecoration(
-                        prefixText: 'Rp ',
+                        prefixText: 'Rp',
                         hintText: '0',
                         isDense: true,
                         contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 11),

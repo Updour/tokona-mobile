@@ -116,7 +116,7 @@ class _PriceTierFormCardState extends State<PriceTierFormCard> {
                       inputFormatters: [CurrencyTextInputFormatter()],
                       onChanged: (_) => setState(() {}),
                       decoration: const InputDecoration(
-                        prefixText: 'Rp ',
+                        prefixText: 'Rp',
                         hintText: '0',
                         isDense: true,
                         contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 11),

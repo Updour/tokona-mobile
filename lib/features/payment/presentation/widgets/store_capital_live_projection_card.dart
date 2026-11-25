@@ -72,7 +72,7 @@ class StoreCapitalLiveProjectionCard extends StatelessWidget {
               children: [
                 const Text('Nominal Ditarik (Prive):', style: TextStyle(fontSize: 11.5, color: AppColors.error)),
                 Text(
-                  rawAmount > 0 ? '- ${CurrencyFormatter.format(rawAmount)}' : 'Rp 0',
+                  rawAmount > 0 ? '- ${CurrencyFormatter.format(rawAmount)}' : 'Rp0',
                   style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w800, color: AppColors.error),
                 ),
               ],
@@ -161,7 +161,7 @@ class StoreCapitalLiveProjectionCard extends StatelessWidget {
               children: [
                 const Text('Tambahan Modal Masuk:', style: TextStyle(fontSize: 11.5, color: Color(0xFF059669))),
                 Text(
-                  rawAmount > 0 ? '+ ${CurrencyFormatter.format(rawAmount)}' : 'Rp 0',
+                  rawAmount > 0 ? '+ ${CurrencyFormatter.format(rawAmount)}' : 'Rp0',
                   style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w800, color: Color(0xFF059669)),
                 ),
               ],
@@ -235,7 +235,7 @@ class StoreCapitalLiveProjectionCard extends StatelessWidget {
               children: [
                 const Text('Modal Awal Baru:', style: TextStyle(fontSize: 11.5, color: Color(0xFF2563EB))),
                 Text(
-                  rawAmount > 0 ? '+ ${CurrencyFormatter.format(rawAmount)}' : 'Rp 0',
+                  rawAmount > 0 ? '+ ${CurrencyFormatter.format(rawAmount)}' : 'Rp0',
                   style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w800, color: Color(0xFF2563EB)),
                 ),
               ],

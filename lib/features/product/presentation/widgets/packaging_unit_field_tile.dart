@@ -52,7 +52,7 @@ class PackagingUnitFieldTile extends StatelessWidget {
                 ),
                 const SizedBox(height: 2),
                 Text(
-                  'HPP: Rp ${unit.costPrice.toStringAsFixed(0)} • Jual: Rp ${unit.sellingPrice.toStringAsFixed(0)}',
+                  'HPP: Rp${unit.costPrice.toStringAsFixed(0)} • Jual: Rp${unit.sellingPrice.toStringAsFixed(0)}',
                   style: AppTypography.bodySmall.copyWith(
                     color: AppColors.textSecondary,
                     fontSize: 11,

@@ -235,7 +235,7 @@ class _AddStoreCapitalBottomSheetState extends ConsumerState<AddStoreCapitalBott
                         decoration: InputDecoration(
                           labelText: _isWithdrawal ? 'Nominal Penarikan (Rp) *' : 'Nominal Modal (Rp) *',
                           hintText: '0',
-                          prefixText: 'Rp ',
+                          prefixText: 'Rp',
                           helperText: _isFormValid ? null : 'Nominal wajib diisi dan harus lebih dari Rp 0',
                           helperStyle: TextStyle(
                             fontSize: 11,

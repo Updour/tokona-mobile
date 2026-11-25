@@ -167,7 +167,7 @@ class _EditPurchaseItemDialogState extends State<EditPurchaseItemDialog> {
                 decoration: _inputDecoration(
                   hint: '0',
                   prefixIcon: Icons.payments_outlined,
-                  prefixText: 'Rp ',
+                  prefixText: 'Rp',
                 ),
               ),
               const SizedBox(height: 14),

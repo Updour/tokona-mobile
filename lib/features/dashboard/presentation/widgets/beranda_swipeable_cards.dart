@@ -56,7 +56,7 @@ class _BerandaSwipeableCardsState extends ConsumerState<BerandaSwipeableCards> {
     final customerState = ref.watch(customerListProvider);
     final settlementState = ref.watch(paylaterSettlementProvider);
 
-    final currency = NumberFormat.currency(locale: 'id_ID', symbol: 'Rp ', decimalDigits: 0);
+    final currency = NumberFormat.currency(locale: 'id_ID', symbol: 'Rp', decimalDigits: 0);
     final kasbonSales = saleState.sales.where((s) => s.isKasbon && !s.isVoided).toList();
     final salesKasbonAmount = kasbonSales.fold(0.0, (acc, s) => acc + s.finalAmount);
     final customersKasbonAmount = customerState.customers.fold<double>(0.0, (acc, c) => acc + c.receivableBalance);

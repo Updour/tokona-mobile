@@ -201,7 +201,7 @@ class PurchaseCoOrderForm extends StatelessWidget {
                   decoration: InputDecoration(
                     labelText: 'Modal Checkout $platform *',
                     hintText: '4.821',
-                    prefixText: 'Rp ',
+                    prefixText: 'Rp',
                     isDense: true,
                     contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
                     helperText: coQty > 1 && coTotalCost > 0
@@ -226,7 +226,7 @@ class PurchaseCoOrderForm extends StatelessWidget {
                   decoration: const InputDecoration(
                     labelText: 'Jual ke Rekan/Pcs',
                     hintText: '172',
-                    prefixText: 'Rp ',
+                    prefixText: 'Rp',
                     isDense: true,
                     contentPadding: EdgeInsets.symmetric(horizontal: 10, vertical: 8),
                   ),
@@ -243,7 +243,7 @@ class PurchaseCoOrderForm extends StatelessWidget {
                   decoration: const InputDecoration(
                     labelText: 'Total Uang Diterima',
                     hintText: '5.160',
-                    prefixText: 'Rp ',
+                    prefixText: 'Rp',
                     isDense: true,
                     contentPadding: EdgeInsets.symmetric(horizontal: 10, vertical: 8),
                   ),

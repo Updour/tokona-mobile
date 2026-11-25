@@ -79,7 +79,7 @@ class PosRoundingLiveSimulator extends StatelessWidget {
                   decoration: const InputDecoration(
                     labelText: 'Coba Ketik Total Belanja (Rp)',
                     isDense: true,
-                    prefixText: 'Rp ',
+                    prefixText: 'Rp',
                     contentPadding: EdgeInsets.symmetric(horizontal: 10, vertical: 8),
                   ),
                 ),

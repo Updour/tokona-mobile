@@ -15,7 +15,7 @@ class ReportExportService {
     String? storeAddress,
     String? storePhone,
   }) {
-    final currency = NumberFormat.currency(locale: 'id_ID', symbol: 'Rp ', decimalDigits: 0);
+    final currency = NumberFormat.currency(locale: 'id_ID', symbol: 'Rp', decimalDigits: 0);
     final dateFormat = DateFormat('dd/MM/yyyy HH:mm');
     final buffer = StringBuffer();
 
@@ -82,7 +82,7 @@ class ReportExportService {
     required ReportState report,
     required List<SaleModel> sales,
   }) {
-    final currency = NumberFormat.currency(locale: 'id_ID', symbol: 'Rp ', decimalDigits: 0);
+    final currency = NumberFormat.currency(locale: 'id_ID', symbol: 'Rp', decimalDigits: 0);
     final dateFormat = DateFormat('dd/MM/yyyy HH:mm');
     const divider = '────────────────────────';
     final buffer = StringBuffer();

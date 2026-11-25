@@ -107,7 +107,7 @@ class SaleController extends StateNotifier<SaleState> {
         userRole: 'cashier',
         actionType: AuditActionType.transaction,
         title: 'Penjualan #${sale.invoiceNumber} (${paymentMethod.toUpperCase()})',
-        description: 'Input: $itemSummary • Total: Rp ${sale.finalAmount.toStringAsFixed(0)}',
+        description: 'Input: $itemSummary • Total: Rp${sale.finalAmount.toStringAsFixed(0)}',
       );
 
       _ref.read(cartProvider.notifier).clearCart();

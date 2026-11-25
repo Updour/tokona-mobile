@@ -163,7 +163,7 @@ class _PurchaseProductSelectorState extends State<PurchaseProductSelector> {
                     keyboardType: TextInputType.number,
                     inputFormatters: [CurrencyTextInputFormatter()],
                     onChanged: (_) => setState(() {}),
-                    decoration: const InputDecoration(labelText: 'Harga Beli Satuan', prefixText: 'Rp ', hintText: '0', isDense: true),
+                    decoration: const InputDecoration(labelText: 'Harga Beli Satuan', prefixText: 'Rp', hintText: '0', isDense: true),
                   ),
                 ),
               ],

@@ -170,7 +170,7 @@ class _PayKasbonBottomSheetState extends ConsumerState<PayKasbonBottomSheet> {
                 keyboardType: TextInputType.number,
                 autofocus: true,
                 inputFormatters: [CurrencyTextInputFormatter()],
-                decoration: InputDecoration(labelText: 'Nominal Bayar (Rp) *', hintText: '0', prefixText: 'Rp ', errorText: errorText, prefixIcon: const Icon(Icons.payments_outlined, size: 20)),
+                decoration: InputDecoration(labelText: 'Nominal Bayar (Rp) *', hintText: '0', prefixText: 'Rp', errorText: errorText, prefixIcon: const Icon(Icons.payments_outlined, size: 20)),
               ),
               const SizedBox(height: 12),
               InkWell(

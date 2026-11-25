@@ -233,7 +233,7 @@ class _ProductFilterBottomSheetState extends State<ProductFilterBottomSheet> {
   InputDecoration _decor(String hint) {
     const b = OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(10)), borderSide: BorderSide(color: AppColors.border, width: 0.6));
     return InputDecoration(
-      hintText: hint, prefixText: 'Rp ',
+      hintText: hint, prefixText: 'Rp',
       prefixStyle: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.textSecondary),
       hintStyle: const TextStyle(fontSize: 12, color: AppColors.textMuted),
       isDense: true, filled: true, fillColor: AppColors.surfaceElevated,

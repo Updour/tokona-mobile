@@ -92,7 +92,7 @@ class PurchaseInstallmentCard extends StatelessWidget {
                         onChanged: (_) => onChanged(),
                         style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w800, color: AppColors.textPrimary),
                         decoration: InputDecoration(
-                          prefixText: 'Rp ',
+                          prefixText: 'Rp',
                           prefixStyle: const TextStyle(fontSize: 13, fontWeight: FontWeight.w700),
                           filled: true,
                           fillColor: Colors.white,

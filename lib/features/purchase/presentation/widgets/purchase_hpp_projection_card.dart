@@ -20,7 +20,7 @@ class PurchaseHppProjectionCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final currency = NumberFormat.currency(locale: 'id_ID', symbol: 'Rp ', decimalDigits: 0);
+    final currency = NumberFormat.currency(locale: 'id_ID', symbol: 'Rp', decimalDigits: 0);
     final factor = selectedUnit?.conversionFactor ?? 1.0;
     final addedBase = quantity * factor;
     final incomingBaseCost = factor > 0 ? unitCost / factor : unitCost;

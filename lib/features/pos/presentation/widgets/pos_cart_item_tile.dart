@@ -24,7 +24,7 @@ class PosCartItemTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final currency = NumberFormat.currency(locale: 'id_ID', symbol: 'Rp ', decimalDigits: 0);
+    final currency = NumberFormat.currency(locale: 'id_ID', symbol: 'Rp', decimalDigits: 0);
     final p = item.product;
     final hasEnoughStock = item.hasEnoughStock;
 

@@ -41,7 +41,7 @@ class PosPaymentSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final currency = NumberFormat.currency(locale: 'id_ID', symbol: 'Rp ', decimalDigits: 0);
+    final currency = NumberFormat.currency(locale: 'id_ID', symbol: 'Rp', decimalDigits: 0);
     final cashPaid = CurrencyFormatter.parse(cashController.text);
     final change = cashPaid - finalAmount;
     final isEnough = cashPaid >= finalAmount;
@@ -159,7 +159,7 @@ class PosPaymentSection extends StatelessWidget {
               inputFormatters: [CurrencyTextInputFormatter()],
               style: AppTypography.headingSmall.copyWith(fontSize: 16, fontWeight: FontWeight.w800),
               decoration: const InputDecoration(
-                prefixText: 'Rp ',
+                prefixText: 'Rp',
                 hintText: '0',
                 prefixIcon: Icon(Icons.payments_outlined, size: 18),
                 isDense: true,

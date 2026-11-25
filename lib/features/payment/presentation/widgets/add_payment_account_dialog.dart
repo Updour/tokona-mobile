@@ -219,7 +219,7 @@ class _AddPaymentAccountDialogState extends ConsumerState<AddPaymentAccountDialo
               decoration: InputDecoration(
                 labelText: 'Saldo Awal (Rp)',
                 hintText: '0',
-                prefixText: 'Rp ',
+                prefixText: 'Rp',
                 border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
               ),
             ),
@@ -232,7 +232,7 @@ class _AddPaymentAccountDialogState extends ConsumerState<AddPaymentAccountDialo
                 decoration: InputDecoration(
                   labelText: 'Reset Saldo Saat Ini (Rp)',
                   hintText: '0',
-                  prefixText: 'Rp ',
+                  prefixText: 'Rp',
                   helperText: 'Ubah ke 0 atau nominal baru untuk mereset saldo yang minus',
                   helperStyle: const TextStyle(color: Color(0xFF0F766E), fontSize: 11),
                   border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),

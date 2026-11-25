@@ -22,7 +22,7 @@ class ProductQuickInfoSheet extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final currency = NumberFormat.currency(locale: 'id_ID', symbol: 'Rp ', decimalDigits: 0);
+    final currency = NumberFormat.currency(locale: 'id_ID', symbol: 'Rp', decimalDigits: 0);
 
     return Container(
       padding: const EdgeInsets.all(20),

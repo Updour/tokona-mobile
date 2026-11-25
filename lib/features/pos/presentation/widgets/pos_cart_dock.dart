@@ -18,7 +18,7 @@ class PosCartDock extends StatelessWidget {
   Widget build(BuildContext context) {
     if (cart.isEmpty) return const SizedBox.shrink();
 
-    final currency = NumberFormat.currency(locale: 'id_ID', symbol: 'Rp ', decimalDigits: 0);
+    final currency = NumberFormat.currency(locale: 'id_ID', symbol: 'Rp', decimalDigits: 0);
 
     return Container(
       margin: const EdgeInsets.fromLTRB(16, 0, 16, 12),

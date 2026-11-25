@@ -6,14 +6,14 @@ class CurrencyFormatter {
 
   static final NumberFormat _formatter = NumberFormat.currency(
     locale: 'id_ID',
-    symbol: 'Rp ',
+    symbol: 'Rp',
     decimalDigits: 0,
   );
 
   static final NumberFormat _numberOnlyFormatter = NumberFormat.decimalPattern('id_ID');
 
   static String format(num value) {
-    return _formatter.format(value);
+    return _formatter.format(value).replaceAll('Rp ', 'Rp').replaceAll('Rp\u00A0', 'Rp');
   }
 
   static String formatNumber(num value) {

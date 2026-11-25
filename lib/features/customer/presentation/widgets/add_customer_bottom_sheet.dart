@@ -256,7 +256,7 @@ class _AddCustomerBottomSheetState extends State<AddCustomerBottomSheet> {
                 inputFormatters: [CurrencyTextInputFormatter()],
                 decoration: InputDecoration(
                   labelText: _isEdit ? 'Saldo Kasbon (Piutang)' : 'Saldo Kasbon Awal (Jika Ada)',
-                  prefixText: 'Rp ',
+                  prefixText: 'Rp',
                   hintText: '0',
                   prefixIcon: const Icon(Icons.account_balance_wallet_outlined, size: 20),
                   helperText: 'Catatan hutang belanja pelanggan yang belum lunas',

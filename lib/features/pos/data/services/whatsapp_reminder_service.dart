@@ -28,7 +28,7 @@ class WhatsAppReminderService {
     final col = width.clamp(28, 48);
     final divider = '-' * col;
     final doubleDivider = '=' * col;
-    final currency = NumberFormat.currency(locale: 'id_ID', symbol: 'Rp ', decimalDigits: 0);
+    final currency = NumberFormat.currency(locale: 'id_ID', symbol: 'Rp', decimalDigits: 0);
 
     final b = StringBuffer();
     b.writeln(ReceiptThermalFormatter.centerMultiLine('JADWAL AMBIL PESANAN', col));

@@ -108,7 +108,7 @@ class ProductController extends StateNotifier<ProductListState> {
         userRole: user?.role.label ?? 'Admin',
         actionType: AuditActionType.product,
         title: 'Tambah Produk: ${dto.name}',
-        description: 'Kategori: ${dto.category ?? "-"} • Stok: ${dto.initialStock} • Jual: Rp ${dto.baseSellingPrice.toInt()}',
+        description: 'Kategori: ${dto.category ?? "-"} • Stok: ${dto.initialStock} • Jual: Rp${dto.baseSellingPrice.toInt()}',
       );
       state = state.copyWith(
         searchQuery: null,
@@ -193,7 +193,7 @@ class ProductController extends StateNotifier<ProductListState> {
         userRole: user?.role.label ?? 'Admin',
         actionType: AuditActionType.product,
         title: 'Ubah Harga Produk (ID: $productId)',
-        description: 'HPP: Rp ${baseCostPrice.toInt()} • Jual: Rp ${baseSellingPrice.toInt()}',
+        description: 'HPP: Rp${baseCostPrice.toInt()} • Jual: Rp${baseSellingPrice.toInt()}',
       );
       state = state.copyWith(
         isLoading: false,

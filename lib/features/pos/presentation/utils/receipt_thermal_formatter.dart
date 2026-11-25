@@ -30,7 +30,7 @@ class ReceiptThermalFormatter {
 
     final divider = '-' * col;
     final doubleDivider = '=' * col;
-    final currency = NumberFormat.currency(locale: 'id_ID', symbol: 'Rp ', decimalDigits: 0);
+    final currency = NumberFormat.currency(locale: 'id_ID', symbol: 'Rp', decimalDigits: 0);
     final dateFormat = DateFormat('dd/MM/yyyy HH:mm');
     final dueDateShortFormat = DateFormat('dd/MM/yyyy');
 

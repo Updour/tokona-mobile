@@ -110,7 +110,7 @@ class _ReportExportBottomSheetState extends ConsumerState<ReportExportBottomShee
   @override
   Widget build(BuildContext context) {
     final reportState = ref.watch(reportControllerProvider);
-    final currency = NumberFormat.currency(locale: 'id_ID', symbol: 'Rp ', decimalDigits: 0);
+    final currency = NumberFormat.currency(locale: 'id_ID', symbol: 'Rp', decimalDigits: 0);
 
     return Container(
       decoration: const BoxDecoration(

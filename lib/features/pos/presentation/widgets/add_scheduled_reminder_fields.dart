@@ -253,7 +253,7 @@ class AddScheduledReminderFields extends StatelessWidget {
           inputFormatters: [CurrencyTextInputFormatter()],
           decoration: InputDecoration(
             labelText: 'Perkiraan Total Bayar (Rp)',
-            prefixText: 'Rp ',
+            prefixText: 'Rp',
             hintText: '0',
             prefixIcon: const Icon(Icons.payments_outlined, size: 20),
             border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),

@@ -34,7 +34,7 @@ class _PosProductCardState extends State<PosProductCard> {
 
   @override
   Widget build(BuildContext context) {
-    final currency = NumberFormat.currency(locale: 'id_ID', symbol: 'Rp ', decimalDigits: 0);
+    final currency = NumberFormat.currency(locale: 'id_ID', symbol: 'Rp', decimalDigits: 0);
     final p = widget.product;
     final isBase = _selectedUnit == null;
     final activePrice = isBase ? p.baseSellingPrice : _selectedUnit!.sellingPrice;

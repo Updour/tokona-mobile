@@ -101,7 +101,7 @@ class _PurchaseMarketplaceBreakdownCardState extends State<PurchaseMarketplaceBr
                     style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
                     decoration: const InputDecoration(
                       labelText: 'Ongkos Kirim',
-                      prefixText: 'Rp ',
+                      prefixText: 'Rp',
                       hintText: '0',
                       isDense: true,
                       contentPadding: EdgeInsets.symmetric(horizontal: 10, vertical: 8),
@@ -118,7 +118,7 @@ class _PurchaseMarketplaceBreakdownCardState extends State<PurchaseMarketplaceBr
                     style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
                     decoration: const InputDecoration(
                       labelText: 'Biaya Layanan',
-                      prefixText: 'Rp ',
+                      prefixText: 'Rp',
                       hintText: '0',
                       isDense: true,
                       contentPadding: EdgeInsets.symmetric(horizontal: 10, vertical: 8),
@@ -139,7 +139,7 @@ class _PurchaseMarketplaceBreakdownCardState extends State<PurchaseMarketplaceBr
                     style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
                     decoration: const InputDecoration(
                       labelText: 'Subtotal Pengiriman',
-                      prefixText: 'Rp ',
+                      prefixText: 'Rp',
                       hintText: '108.500',
                       isDense: true,
                       contentPadding: EdgeInsets.symmetric(horizontal: 10, vertical: 8),
@@ -156,7 +156,7 @@ class _PurchaseMarketplaceBreakdownCardState extends State<PurchaseMarketplaceBr
                     style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
                     decoration: const InputDecoration(
                       labelText: 'Diskon Pengiriman',
-                      prefixText: '- Rp ',
+                      prefixText: '-Rp',
                       hintText: '108.500',
                       isDense: true,
                       contentPadding: EdgeInsets.symmetric(horizontal: 10, vertical: 8),
@@ -177,7 +177,7 @@ class _PurchaseMarketplaceBreakdownCardState extends State<PurchaseMarketplaceBr
                     style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
                     decoration: const InputDecoration(
                       labelText: 'Voucher Digunakan',
-                      prefixText: '- Rp ',
+                      prefixText: '-Rp',
                       hintText: '396.000',
                       isDense: true,
                       contentPadding: EdgeInsets.symmetric(horizontal: 10, vertical: 8),
@@ -194,7 +194,7 @@ class _PurchaseMarketplaceBreakdownCardState extends State<PurchaseMarketplaceBr
                     style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
                     decoration: const InputDecoration(
                       labelText: 'Biaya Layanan',
-                      prefixText: 'Rp ',
+                      prefixText: 'Rp',
                       hintText: '4.000',
                       isDense: true,
                       contentPadding: EdgeInsets.symmetric(horizontal: 10, vertical: 8),

@@ -42,7 +42,7 @@ class PosRoundingStepSelector extends StatelessWidget {
                     ),
                   ),
                   child: Text(
-                    'Rp ${CurrencyFormatter.formatNumber(s)}',
+                    'Rp${CurrencyFormatter.formatNumber(s)}',
                     style: TextStyle(
                       fontSize: 12.5,
                       fontWeight: isSelected ? FontWeight.w900 : FontWeight.w600,

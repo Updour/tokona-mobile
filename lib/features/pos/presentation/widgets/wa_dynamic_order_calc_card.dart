@@ -139,7 +139,7 @@ class _WaDynamicOrderCalcCardState extends State<WaDynamicOrderCalcCard> {
                   style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700),
                   decoration: InputDecoration(
                     labelText: 'Harga',
-                    prefixText: 'Rp ',
+                    prefixText: 'Rp',
                     isDense: true,
                     filled: true,
                     fillColor: Colors.white,

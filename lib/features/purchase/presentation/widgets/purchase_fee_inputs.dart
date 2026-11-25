@@ -25,7 +25,7 @@ class PurchaseFeeInputs extends StatelessWidget {
             onChanged: (_) => onChanged(),
             decoration: const InputDecoration(
               labelText: 'Biaya Layanan',
-              prefixText: 'Rp ',
+              prefixText: 'Rp',
               hintText: '0',
               isDense: true,
               contentPadding: EdgeInsets.symmetric(horizontal: 10, vertical: 10),
@@ -41,7 +41,7 @@ class PurchaseFeeInputs extends StatelessWidget {
             onChanged: (_) => onChanged(),
             decoration: const InputDecoration(
               labelText: 'Ongkir (Opsi)',
-              prefixText: 'Rp ',
+              prefixText: 'Rp',
               hintText: '0',
               isDense: true,
               contentPadding: EdgeInsets.symmetric(horizontal: 10, vertical: 10),
