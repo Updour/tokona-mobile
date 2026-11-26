@@ -172,8 +172,8 @@ class _ProdukTabViewState extends ConsumerState<ProdukTabView> {
       },
       color: AppColors.primary,
       child: ListView(
-        physics: const AlwaysScrollableScrollPhysics(),
-        padding: const EdgeInsets.fromLTRB(10, 6, 10, 24),
+        physics: const AlwaysScrollableScrollPhysics(parent: BouncingScrollPhysics()),
+        padding: const EdgeInsets.fromLTRB(16, 10, 16, 40),
         children: [
           const StoreProfileIncompleteBanner(),
           ProductMinimalHeader(

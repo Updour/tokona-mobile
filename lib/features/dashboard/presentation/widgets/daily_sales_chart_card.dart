@@ -40,13 +40,12 @@ class _DailySalesChartCardState extends ConsumerState<DailySalesChartCard> {
     final purchaseState = ref.watch(purchaseControllerProvider);
 
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
         color: AppColors.surface,
-        borderRadius: BorderRadius.circular(22),
-        border: Border.all(color: AppColors.border.withValues(alpha: 0.55), width: 0.6),
+        borderRadius: BorderRadius.circular(24),
         boxShadow: [
-          BoxShadow(color: const Color(0xFF0F172A).withValues(alpha: 0.04), blurRadius: 18, offset: const Offset(0, 5)),
+          BoxShadow(color: const Color(0xFF0F172A).withValues(alpha: 0.055), blurRadius: 22, offset: const Offset(0, 8)),
         ],
       ),
       child: Column(

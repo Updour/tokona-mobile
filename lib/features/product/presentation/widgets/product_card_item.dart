@@ -45,18 +45,16 @@ class ProductCardItem extends ConsumerWidget {
       margin: const EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(
         color: AppColors.surface,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AppColors.border.withValues(alpha: 0.55), width: 0.6),
+        borderRadius: BorderRadius.circular(20),
         boxShadow: [
-          BoxShadow(color: const Color(0xFF0F172A).withValues(alpha: 0.04), blurRadius: 14, offset: const Offset(0, 4)),
-          BoxShadow(color: const Color(0xFF0F172A).withValues(alpha: 0.02), blurRadius: 5, offset: const Offset(0, 2)),
+          BoxShadow(color: const Color(0xFF0F172A).withValues(alpha: 0.055), blurRadius: 18, offset: const Offset(0, 6)),
         ],
       ),
       child: Material(
         color: Colors.transparent,
         child: InkWell(
           onTap: onTap,
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(20),
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 13),
             child: Column(

@@ -110,8 +110,8 @@ class ProductMinimalHeader extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text('Katalog Produk', style: AppTypography.headingSmall.copyWith(fontSize: 16)),
-              Text('$productCount barang terdaftar', style: AppTypography.bodySmall.copyWith(fontSize: 11)),
+              Text('Produk', style: AppTypography.headingSmall.copyWith(fontSize: 18, fontWeight: FontWeight.w800)),
+              Text('$productCount barang', style: AppTypography.bodySmall.copyWith(fontSize: 11.5)),
             ],
           ),
         ),
@@ -191,13 +191,12 @@ class ProductMinimalHeader extends StatelessWidget {
       height: 38,
       decoration: BoxDecoration(
         color: AppColors.surface,
-        borderRadius: BorderRadius.circular(11),
-        border: Border.all(color: AppColors.border.withValues(alpha: 0.55), width: 0.6),
+        borderRadius: BorderRadius.circular(13),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.02),
-            blurRadius: 5,
-            offset: const Offset(0, 2),
+            color: const Color(0xFF0F172A).withValues(alpha: 0.05),
+            blurRadius: 10,
+            offset: const Offset(0, 3),
           ),
         ],
       ),
