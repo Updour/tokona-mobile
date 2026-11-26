@@ -10,6 +10,7 @@ class AppTheme {
   static ThemeData get lightTheme {
     return ThemeData(
       useMaterial3: true,
+      fontFamily: 'PlusJakartaSans',
       splashFactory: InkSparkle.splashFactory,
       splashColor: AppColors.primary.withValues(alpha: 0.07),
       highlightColor: AppColors.primary.withValues(alpha: 0.03),
