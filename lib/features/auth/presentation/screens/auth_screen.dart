@@ -114,18 +114,10 @@ class _AuthScreenState extends ConsumerState<AuthScreen> with SingleTickerProvid
                                 Container(
                                   decoration: BoxDecoration(
                                     color: Colors.white,
-                                    borderRadius: BorderRadius.circular(28),
+                                    borderRadius: BorderRadius.circular(30),
                                     boxShadow: [
-                                      BoxShadow(
-                                        color: const Color(0xFF0F172A).withValues(alpha: 0.06),
-                                        blurRadius: 36,
-                                        offset: const Offset(0, 14),
-                                      ),
-                                      BoxShadow(
-                                        color: const Color(0xFF0D9488).withValues(alpha: 0.03),
-                                        blurRadius: 12,
-                                        offset: const Offset(0, 2),
-                                      ),
+                                      BoxShadow(color: const Color(0xFF0F172A).withValues(alpha: 0.08), blurRadius: 42, offset: const Offset(0, 18)),
+                                      BoxShadow(color: const Color(0xFF0D9488).withValues(alpha: 0.08), blurRadius: 20, offset: const Offset(0, 6)),
                                     ],
                                   ),
                                   padding: const EdgeInsets.fromLTRB(24, 24, 24, 24),
@@ -136,23 +128,23 @@ class _AuthScreenState extends ConsumerState<AuthScreen> with SingleTickerProvid
                                         crossAxisAlignment: CrossAxisAlignment.start,
                                         children: [
                                           Text(
-                                            isRegisterMode ? 'Buka Toko Baru' : 'Selamat Datang',
+                                            isRegisterMode ? 'Buat Akun Baru' : 'Selamat Datang',
                                             style: const TextStyle(
-                                              fontSize: 19,
+                                              fontSize: 20,
                                               fontWeight: FontWeight.w800,
                                               color: AppColors.textPrimary,
-                                              letterSpacing: -0.4,
+                                              letterSpacing: -0.5,
                                             ),
                                           ),
-                                          const SizedBox(height: 3),
+                                          const SizedBox(height: 4),
                                           Text(
                                             isRegisterMode
-                                                ? 'Siapkan kasir digitalmu dalam hitungan detik'
+                                                ? 'Cukup 3 langkah cepat, sisanya bisa nanti'
                                                 : 'Masuk untuk mulai kelola tokomu hari ini',
                                             style: const TextStyle(
                                               fontSize: 12.5,
                                               color: Color(0xFF64748B),
-                                              fontWeight: FontWeight.w400,
+                                              fontWeight: FontWeight.w500,
                                             ),
                                           ),
                                         ],
@@ -206,11 +198,20 @@ class _AuthScreenState extends ConsumerState<AuthScreen> with SingleTickerProvid
   Widget _buildAmbientBackground() {
     return Positioned.fill(
       child: IgnorePointer(
-        child: Stack(
-          children: [
-            Positioned(top: -120, left: -100, child: _glowCircle(340, const Color(0xFF0D9488), 0.14)),
-            Positioned(bottom: -140, right: -100, child: _glowCircle(360, const Color(0xFF0EA5E9), 0.10)),
-          ],
+        child: DecoratedBox(
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+              colors: [Color(0xFFECFDF5), Color(0xFFF8FAFC), Color(0xFFEFF6FF)],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+          ),
+          child: Stack(
+            children: [
+              Positioned(top: -110, left: -90, child: _glowCircle(360, const Color(0xFF0D9488), 0.18)),
+              Positioned(bottom: -130, right: -90, child: _glowCircle(380, const Color(0xFF06B6D4), 0.14)),
+            ],
+          ),
         ),
       ),
     );
@@ -240,7 +241,7 @@ class _AuthScreenState extends ConsumerState<AuthScreen> with SingleTickerProvid
             }),
           ),
           Expanded(
-            child: _buildSelectorTab('Daftar Toko', Icons.add_business_rounded, isRegisterMode, () {
+            child: _buildSelectorTab('Daftar', Icons.person_add_alt_1_rounded, isRegisterMode, () {
               HapticFeedback.selectionClick();
               setState(() => _isRegisterModeOverride = true);
             }),
@@ -262,7 +263,7 @@ class _AuthScreenState extends ConsumerState<AuthScreen> with SingleTickerProvid
           color: isSelected ? Colors.white : Colors.transparent,
           borderRadius: BorderRadius.circular(11),
           boxShadow: isSelected
-              ? [BoxShadow(color: Colors.black.withValues(alpha: 0.06), blurRadius: 8, offset: const Offset(0, 2))]
+              ? [BoxShadow(color: const Color(0xFF0F172A).withValues(alpha: 0.08), blurRadius: 12, offset: const Offset(0, 4))]
               : null,
         ),
         child: Row(
@@ -290,10 +291,7 @@ class _AuthScreenState extends ConsumerState<AuthScreen> with SingleTickerProvid
       children: [
         Icon(Icons.verified_user_outlined, size: 13, color: Color(0xFF10B981)),
         SizedBox(width: 6),
-        Text(
-          'Tokona POS • Aman & Bisa Dipakai Offline',
-          style: TextStyle(fontSize: 11.5, color: Color(0xFF94A3B8), fontWeight: FontWeight.w500),
-        ),
+        Text('Tokona POS • Aman & Bisa Dipakai Offline', style: TextStyle(fontSize: 11.5, color: Color(0xFF94A3B8), fontWeight: FontWeight.w500)),
       ],
     );
   }

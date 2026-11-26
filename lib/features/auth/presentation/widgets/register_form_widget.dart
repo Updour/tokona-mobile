@@ -22,7 +22,6 @@ class RegisterFormWidget extends StatefulWidget {
 
 class _RegisterFormWidgetState extends State<RegisterFormWidget> {
   final _formKey = GlobalKey<FormState>();
-  final _storeNameController = TextEditingController();
   final _ownerNameController = TextEditingController();
   final _phoneController = TextEditingController();
   final _passwordController = TextEditingController();
@@ -31,7 +30,6 @@ class _RegisterFormWidgetState extends State<RegisterFormWidget> {
 
   @override
   void dispose() {
-    _storeNameController.dispose();
     _ownerNameController.dispose();
     _phoneController.dispose();
     _passwordController.dispose();
@@ -46,7 +44,7 @@ class _RegisterFormWidgetState extends State<RegisterFormWidget> {
       final sanitizedPhone = rawPhone.isNotEmpty ? WhatsAppService.sanitizePhoneNumber(rawPhone) : null;
 
       final dto = RegisterDto(
-        storeName: _storeNameController.text.trim(),
+        storeName: 'Toko $rawOwner',
         ownerFullName: rawOwner,
         storePhone: sanitizedPhone,
         password: _passwordController.text,
@@ -63,40 +61,34 @@ class _RegisterFormWidgetState extends State<RegisterFormWidget> {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           AuthTextField(
-            controller: _storeNameController,
-            label: 'Nama Toko',
-            hint: 'Contoh: Warung Maju Jaya',
-            prefixIcon: Icons.store_rounded,
-            validator: (v) => (v == null || v.trim().isEmpty) ? 'Nama toko jangan dikosongkan ya' : null,
-          ),
-          const SizedBox(height: 14),
-          AuthTextField(
             controller: _ownerNameController,
-            label: 'Nama Pemilik (Untuk Login)',
+            label: 'Nama Pengguna',
             hint: 'Contoh: Budi Santoso',
-            prefixIcon: Icons.badge_outlined,
-            validator: (v) => (v == null || v.trim().isEmpty) ? 'Nama pemilik wajib diisi' : null,
+            prefixIcon: Icons.person_outline_rounded,
+            textCapitalization: TextCapitalization.words,
+            validator: (v) => (v == null || v.trim().isEmpty) ? 'Nama pengguna wajib diisi ya' : null,
           ),
-          const SizedBox(height: 14),
+          const SizedBox(height: 16),
           AuthTextField(
             controller: _phoneController,
-            label: 'No. WhatsApp Aktif',
+            label: 'No. HP / WhatsApp',
             hint: 'Contoh: 081234567890',
             prefixIcon: Icons.phone_android_rounded,
             keyboardType: TextInputType.phone,
             validator: (v) {
-              if (v != null && v.trim().isNotEmpty) {
-                if (!WhatsAppService.isValidWhatsAppNumber(v.trim())) {
-                  return 'Format nomor WA belum pas (minimal 10 digit)';
-                }
+              if (v == null || v.trim().isEmpty) {
+                return 'No. HP / WhatsApp wajib diisi ya';
+              }
+              if (!WhatsAppService.isValidWhatsAppNumber(v.trim())) {
+                return 'Format nomor belum pas (minimal 10 digit)';
               }
               return null;
             },
           ),
-          const SizedBox(height: 14),
+          const SizedBox(height: 16),
           AuthTextField(
             controller: _passwordController,
-            label: 'Buat Password',
+            label: 'Password',
             hint: 'Minimal 6 karakter',
             prefixIcon: Icons.lock_outline_rounded,
             isPassword: true,
@@ -109,29 +101,42 @@ class _RegisterFormWidgetState extends State<RegisterFormWidget> {
               return null;
             },
           ),
-          const SizedBox(height: 20),
+          const SizedBox(height: 12),
+          const Row(
+            children: [
+              Icon(Icons.info_outline_rounded, size: 14, color: Color(0xFF0D9488)),
+              SizedBox(width: 6),
+              Expanded(
+                child: Text(
+                  'Nama toko & alamat bisa dilengkapi setelah masuk',
+                  style: TextStyle(fontSize: 11.5, color: Color(0xFF64748B), fontWeight: FontWeight.w500),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 18),
           AnimatedScale(
             scale: _isButtonPressed ? 0.97 : 1.0,
-            duration: const Duration(milliseconds: 100),
+            duration: const Duration(milliseconds: 110),
             child: Container(
-              height: 48,
+              height: 52,
               decoration: BoxDecoration(
                 gradient: widget.isLoading
                     ? null
                     : const LinearGradient(
-                        colors: [Color(0xFF0F766E), Color(0xFF0D9488)],
+                        colors: [Color(0xFF0F766E), Color(0xFF0D9488), Color(0xFF06B6D4)],
                         begin: Alignment.topLeft,
                         end: Alignment.bottomRight,
                       ),
                 color: widget.isLoading ? const Color(0xFFCBD5E1) : null,
-                borderRadius: BorderRadius.circular(14),
+                borderRadius: BorderRadius.circular(16),
                 boxShadow: widget.isLoading
                     ? null
                     : [
                         BoxShadow(
-                          color: const Color(0xFF0D9488).withValues(alpha: 0.35),
-                          blurRadius: 16,
-                          offset: const Offset(0, 6),
+                          color: const Color(0xFF0D9488).withValues(alpha: 0.32),
+                          blurRadius: 20,
+                          offset: const Offset(0, 8),
                         ),
                       ],
               ),
@@ -146,7 +151,7 @@ class _RegisterFormWidgetState extends State<RegisterFormWidget> {
                           _submit();
                         },
                   onTapCancel: () => setState(() => _isButtonPressed = false),
-                  borderRadius: BorderRadius.circular(14),
+                  borderRadius: BorderRadius.circular(16),
                   child: Center(
                     child: widget.isLoading
                         ? const Row(
@@ -159,14 +164,14 @@ class _RegisterFormWidgetState extends State<RegisterFormWidget> {
                               ),
                               SizedBox(width: 10),
                               Text(
-                                'Lagi nyiapin tokomu...',
-                                style: TextStyle(color: Colors.white, fontWeight: FontWeight.w700, fontSize: 13.5),
+                                'Lagi nyiapin akunmu...',
+                                style: TextStyle(color: Colors.white, fontWeight: FontWeight.w700, fontSize: 14),
                               ),
                             ],
                           )
                         : const Text(
-                            'Mulai Buka Toko',
-                            style: TextStyle(color: Colors.white, fontWeight: FontWeight.w800, fontSize: 14.5),
+                            'Daftar Sekarang',
+                            style: TextStyle(color: Colors.white, fontWeight: FontWeight.w800, fontSize: 15, letterSpacing: 0.2),
                           ),
                   ),
                 ),
@@ -178,23 +183,19 @@ class _RegisterFormWidgetState extends State<RegisterFormWidget> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               const Text(
-                'Sudah punya akun toko?',
+                'Sudah punya akun?',
                 style: TextStyle(fontSize: 12.5, color: Color(0xFF64748B)),
               ),
               TextButton(
                 onPressed: widget.isLoading ? null : widget.onSwitchToLogin,
                 style: TextButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
                   minimumSize: Size.zero,
                   tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                 ),
                 child: const Text(
                   'Masuk di Sini',
-                  style: TextStyle(
-                    fontSize: 12.5,
-                    fontWeight: FontWeight.w800,
-                    color: Color(0xFF0D9488),
-                  ),
+                  style: TextStyle(fontSize: 12.5, fontWeight: FontWeight.w800, color: Color(0xFF0D9488)),
                 ),
               ),
             ],

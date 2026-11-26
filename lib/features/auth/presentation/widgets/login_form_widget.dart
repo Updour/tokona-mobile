@@ -109,26 +109,26 @@ class _LoginFormWidgetState extends State<LoginFormWidget> {
           const SizedBox(height: 16),
           AnimatedScale(
             scale: _isButtonPressed ? 0.97 : 1.0,
-            duration: const Duration(milliseconds: 100),
+            duration: const Duration(milliseconds: 110),
             child: Container(
-              height: 50,
+              height: 52,
               decoration: BoxDecoration(
                 gradient: widget.isLoading
                     ? null
                     : const LinearGradient(
-                        colors: [Color(0xFF0F766E), Color(0xFF0D9488)],
+                        colors: [Color(0xFF0F766E), Color(0xFF0D9488), Color(0xFF06B6D4)],
                         begin: Alignment.topLeft,
                         end: Alignment.bottomRight,
                       ),
                 color: widget.isLoading ? const Color(0xFFCBD5E1) : null,
-                borderRadius: BorderRadius.circular(14),
+                borderRadius: BorderRadius.circular(16),
                 boxShadow: widget.isLoading
                     ? null
                     : [
                         BoxShadow(
-                          color: const Color(0xFF0D9488).withValues(alpha: 0.28),
-                          blurRadius: 16,
-                          offset: const Offset(0, 6),
+                          color: const Color(0xFF0D9488).withValues(alpha: 0.32),
+                          blurRadius: 20,
+                          offset: const Offset(0, 8),
                         ),
                       ],
               ),
@@ -143,7 +143,7 @@ class _LoginFormWidgetState extends State<LoginFormWidget> {
                           _submit();
                         },
                   onTapCancel: () => setState(() => _isButtonPressed = false),
-                  borderRadius: BorderRadius.circular(14),
+                  borderRadius: BorderRadius.circular(16),
                   child: Center(
                     child: widget.isLoading
                         ? const Row(
@@ -157,13 +157,13 @@ class _LoginFormWidgetState extends State<LoginFormWidget> {
                               SizedBox(width: 10),
                               Text(
                                 'Sebentar, lagi dicek...',
-                                style: TextStyle(color: Colors.white, fontWeight: FontWeight.w700, fontSize: 13.5),
+                                style: TextStyle(color: Colors.white, fontWeight: FontWeight.w700, fontSize: 14),
                               ),
                             ],
                           )
                         : const Text(
                             'Masuk Sekarang',
-                            style: TextStyle(color: Colors.white, fontWeight: FontWeight.w800, fontSize: 14.5),
+                            style: TextStyle(color: Colors.white, fontWeight: FontWeight.w800, fontSize: 15, letterSpacing: 0.2),
                           ),
                   ),
                 ),
