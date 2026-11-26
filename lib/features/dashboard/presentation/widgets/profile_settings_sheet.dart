@@ -11,6 +11,7 @@ import 'package:tokona/features/dashboard/presentation/widgets/store_edit_bottom
 import 'package:tokona/features/product/presentation/widgets/category_type_sheet.dart';
 import 'package:tokona/features/product/presentation/widgets/packaging_info_dialog.dart';
 import 'package:tokona/features/settings/presentation/widgets/app_lock_settings_sheet.dart';
+import 'package:tokona/features/settings/presentation/widgets/appearance_settings_sheet.dart';
 import 'package:tokona/features/settings/presentation/widgets/audit_log_sheet.dart';
 import 'package:tokona/features/settings/presentation/widgets/rbac_management_sheet.dart';
 import 'package:tokona/features/settings/presentation/widgets/thermal_printer_settings_sheet.dart';
@@ -96,17 +97,21 @@ class ProfileSettingsSheet extends ConsumerWidget {
                 _buildSettingTile(
                   icon: Icons.storefront_rounded,
                   color: AppColors.primary,
-                  title: 'Informasi Toko',
+                  title: 'Info Toko',
                   subtitle: '${store?.name ?? "Toko"} • Edit nama & alamat',
                   trailing: Container(
                     padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                     decoration: BoxDecoration(color: AppColors.primaryContainer, borderRadius: BorderRadius.circular(8)),
                     child: const Text('Ubah', style: TextStyle(fontSize: 10.5, fontWeight: FontWeight.w800, color: AppColors.primaryDark)),
                   ),
-                  onTap: () {
-                    Navigator.of(context).pop();
-                    StoreEditBottomSheet.show(context, store: store);
-                  },
+                  onTap: () { Navigator.of(context).pop(); StoreEditBottomSheet.show(context, store: store); },
+                ),
+                _buildSettingTile(
+                  icon: Icons.palette_rounded,
+                  color: const Color(0xFF8B5CF6),
+                  title: 'Tema & Tampilan',
+                  subtitle: 'Mode siang/malam, gradien & font',
+                  onTap: () { Navigator.of(context).pop(); AppearanceSettingsSheet.show(context); },
                 ),
                 if (user?.isOwner ?? false) ...[
                   _buildSettingTile(
