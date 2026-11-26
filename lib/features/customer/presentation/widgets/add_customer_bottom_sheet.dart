@@ -286,7 +286,7 @@ class _AddCustomerBottomSheetState extends State<AddCustomerBottomSheet> {
                 ),
                 child: _isSubmitting
                     ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2.2, color: Colors.white))
-                    : Text(_isEdit ? 'Simpan Perubahan' : 'Daftarkan Pelanggan', style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 14)),
+                    : const Text('Simpan', style: TextStyle(fontWeight: FontWeight.w800, fontSize: 14.5)),
               ),
             ],
           ),

@@ -254,7 +254,7 @@ class _AddPaymentAccountDialogState extends ConsumerState<AddPaymentAccountDialo
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
           ),
           child: Text(
-            isEditing ? 'Perbarui' : 'Simpan Akun',
+            'Simpan',
             style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w700),
           ),
         ),

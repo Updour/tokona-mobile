@@ -263,7 +263,7 @@ class _EditPurchaseItemsSheetState extends ConsumerState<EditPurchaseItemsSheet>
                     icon: _isSubmitting
                         ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
                         : const Icon(Icons.check_circle_outline_rounded, size: 18),
-                    label: Text(_isSubmitting ? 'Menyimpan...' : 'Simpan Perubahan', style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 13)),
+                    label: Text(_isSubmitting ? 'Menyimpan...' : 'Simpan', style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 13.5)),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: AppColors.primary,
                       foregroundColor: Colors.white,

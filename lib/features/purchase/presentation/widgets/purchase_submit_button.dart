@@ -51,7 +51,7 @@ class PurchaseSubmitButton extends StatelessWidget {
           ),
           child: isSubmitting
               ? const SizedBox(height: 20, width: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
-              : const Text('SIMPAN PEMBELIAN', style: TextStyle(color: Colors.white, fontWeight: FontWeight.w700)),
+              : const Text('Simpan', style: TextStyle(color: Colors.white, fontWeight: FontWeight.w800, fontSize: 14.5)),
         ),
       ],
     );

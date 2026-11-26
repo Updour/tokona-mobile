@@ -194,7 +194,7 @@ class _EditProductBottomSheetState extends State<EditProductBottomSheet> {
                       children: [
                         Text('Edit Master Produk', style: AppTypography.headingSmall.copyWith(fontSize: 16), maxLines: 1, overflow: TextOverflow.ellipsis),
                         const SizedBox(height: 2),
-                        Text('Perbarui harga, stok, nama, atau kemasan', style: AppTypography.bodySmall.copyWith(fontSize: 11), maxLines: 1, overflow: TextOverflow.ellipsis),
+                        Text('Ubah info, harga & stok', style: AppTypography.bodySmall.copyWith(fontSize: 11), maxLines: 1, overflow: TextOverflow.ellipsis),
                       ],
                     ),
                   ),
@@ -282,7 +282,7 @@ class _EditProductBottomSheetState extends State<EditProductBottomSheet> {
                       ),
                       child: _isSubmitting
                           ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2, valueColor: AlwaysStoppedAnimation<Color>(Colors.white)))
-                          : const Text('SIMPAN PERUBAHAN', style: TextStyle(fontWeight: FontWeight.w700)),
+                          : const Text('Simpan', style: TextStyle(fontWeight: FontWeight.w800, fontSize: 14.5)),
                     ),
                   ),
                 ],

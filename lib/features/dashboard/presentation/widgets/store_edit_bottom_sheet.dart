@@ -246,18 +246,17 @@ class _StoreEditBottomSheetState extends ConsumerState<StoreEditBottomSheet> {
               const SizedBox(height: 22),
               SizedBox(
                 width: double.infinity,
-                height: 48,
-                child: ElevatedButton.icon(
+                height: 50,
+                child: ElevatedButton(
                   onPressed: _isSaving ? null : _handleSave,
-                  icon: _isSaving
-                      ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
-                      : const Icon(Icons.save_rounded, size: 18),
-                  label: Text(_isSaving ? 'Menyimpan...' : 'Simpan', style: const TextStyle(fontWeight: FontWeight.w700)),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppColors.primary,
                     foregroundColor: Colors.white,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
                   ),
+                  child: _isSaving
+                      ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
+                      : const Text('Simpan', style: TextStyle(fontWeight: FontWeight.w800, fontSize: 14.5)),
                 ),
               ),
             ],

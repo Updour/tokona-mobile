@@ -179,7 +179,7 @@ class _PurchaseProductSelectorState extends State<PurchaseProductSelector> {
             ElevatedButton.icon(
               onPressed: _handleAdd,
               icon: const Icon(Icons.add_shopping_cart_rounded, size: 17),
-              label: const Text('Tambahkan ke Daftar Belanja', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 13)),
+              label: const Text('Tambah', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 13)),
               style: ElevatedButton.styleFrom(
                 minimumSize: const Size.fromHeight(42),
                 backgroundColor: AppColors.primary,

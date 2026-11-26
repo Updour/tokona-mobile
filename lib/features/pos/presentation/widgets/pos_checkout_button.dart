@@ -38,7 +38,7 @@ class PosCheckoutButton extends StatelessWidget {
         child: isProcessing
             ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
             : Text(
-                isKasbon ? 'SIMPAN PENJUALAN TEMPO' : 'PROSES TRANSAKSI',
+                isKasbon ? 'Simpan Kasbon' : 'Bayar Sekarang',
                 style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w700),
               ),
       ),

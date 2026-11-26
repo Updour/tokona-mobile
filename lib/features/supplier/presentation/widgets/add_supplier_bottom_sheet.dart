@@ -227,7 +227,7 @@ class _AddSupplierBottomSheetState extends State<AddSupplierBottomSheet> {
                 ),
                 child: _isSubmitting
                     ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
-                    : Text(isEdit ? 'SIMPAN PERUBAHAN' : 'TAMBAH SUPPLIER', style: const TextStyle(fontWeight: FontWeight.w700)),
+                    : const Text('Simpan', style: TextStyle(fontWeight: FontWeight.w800, fontSize: 14.5)),
               ),
             ],
           ),

@@ -284,7 +284,7 @@ class _AddProductBottomSheetState extends ConsumerState<AddProductBottomSheet> {
                                   valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
                                 ),
                               )
-                            : const Text('Simpan Produk', style: TextStyle(fontWeight: FontWeight.w800, fontSize: 14.5)),
+                            : const Text('Simpan', style: TextStyle(fontWeight: FontWeight.w800, fontSize: 14.5)),
                       ),
                     ),
                   ),
