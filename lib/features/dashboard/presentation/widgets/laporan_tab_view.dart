@@ -114,7 +114,7 @@ class _LaporanTabViewState extends ConsumerState<LaporanTabView> {
       child: Column(
         children: [
           Padding(
-            padding: const EdgeInsets.fromLTRB(10, 10, 10, 0),
+            padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
             child: Column(
               children: [
                 ReportMinimalHeader(

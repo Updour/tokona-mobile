@@ -58,21 +58,20 @@ class _PosProductCardState extends State<PosProductCard> {
                   widget.onAddToCart(p, _selectedUnit);
                 },
           onTapCancel: isOutOfStock ? null : () => setState(() => _isPressed = false),
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(20),
           child: AnimatedContainer(
             duration: const Duration(milliseconds: 180),
             decoration: BoxDecoration(
               color: AppColors.surface,
-              borderRadius: BorderRadius.circular(16),
-              border: Border.all(
-                color: isInCart ? AppColors.primary : AppColors.border,
-                width: isInCart ? 1.6 : 1.0,
-              ),
+              borderRadius: BorderRadius.circular(20),
+              border: isInCart ? Border.all(color: AppColors.primary, width: 1.6) : null,
               boxShadow: [
                 BoxShadow(
-                  color: isInCart ? AppColors.primary.withValues(alpha: 0.12) : Colors.black.withValues(alpha: 0.03),
-                  blurRadius: isInCart ? 10 : 6,
-                  offset: const Offset(0, 3),
+                  color: isInCart
+                      ? AppColors.primary.withValues(alpha: 0.16)
+                      : const Color(0xFF0F172A).withValues(alpha: 0.055),
+                  blurRadius: isInCart ? 16 : 16,
+                  offset: const Offset(0, 5),
                 ),
               ],
             ),

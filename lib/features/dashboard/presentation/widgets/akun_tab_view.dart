@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:tokona/core/theme/app_colors.dart';
 import 'package:tokona/core/widgets/app_dialog.dart';
 import 'package:tokona/core/widgets/app_loading_overlay.dart';
+import 'package:tokona/core/widgets/modern_animations.dart';
 import 'package:tokona/features/auth/domain/models/store_model.dart';
 import 'package:tokona/features/auth/domain/models/user_model.dart';
 import 'package:tokona/features/auth/presentation/controllers/auth_controller.dart';
@@ -26,9 +27,9 @@ class AkunTabView extends ConsumerWidget {
   Future<void> _handleLogout(BuildContext context, WidgetRef ref) async {
     final confirmed = await AppDialog.showConfirmation(
       context,
-      title: 'Keluar dari Akun',
-      message: 'Apakah Anda yakin ingin keluar? Anda perlu login kembali untuk mengakses kasir dan data toko.',
-      confirmText: 'Ya, Keluar',
+      title: 'Keluar Akun',
+      message: 'Yakin mau keluar dari akun ini?',
+      confirmText: 'Keluar',
       cancelText: 'Batal',
       isDestructive: true,
       icon: Icons.logout_rounded,
@@ -37,10 +38,10 @@ class AkunTabView extends ConsumerWidget {
       if (context.mounted) {
         await AppLoadingOverlay.show(
           context,
-          title: 'Mengamankan Sesi Kasir...',
-          subtitle: 'Menyimpan data transaksi lokal & membersihkan sesi perangkat.',
+          title: 'Mengamankan data...',
+          subtitle: 'Menyimpan sesi lokal & keluar akun.',
           icon: Icons.lock_clock_rounded,
-          duration: const Duration(milliseconds: 2000),
+          duration: const Duration(milliseconds: 1600),
         );
       }
       ref.read(authProvider.notifier).logout();
@@ -51,31 +52,26 @@ class AkunTabView extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     return ListView(
       physics: const BouncingScrollPhysics(),
-      padding: const EdgeInsets.fromLTRB(10, 12, 10, 40),
+      padding: const EdgeInsets.fromLTRB(16, 12, 16, 48),
       children: [
-        ProfileShopeeHeader(store: store, user: user),
-        const SizedBox(height: 14),
-        const StoreProfileIncompleteBanner(),
-        const ProfileShopeeQuickBar(),
+        FadeSlideIn(child: ProfileShopeeHeader(store: store, user: user)),
         const SizedBox(height: 16),
-        const ProfileStaffManagementCard(),
+        const StoreProfileIncompleteBanner(),
+        const FadeSlideIn(delay: Duration(milliseconds: 60), child: ProfileShopeeQuickBar()),
+        const SizedBox(height: 16),
+        const FadeSlideIn(delay: Duration(milliseconds: 110), child: ProfileStaffManagementCard()),
         const DynamicSettingsMenuCard(),
         const ProfileMenuSection(),
         const SizedBox(height: 24),
-        OutlinedButton.icon(
+        TextButton.icon(
           onPressed: () => _handleLogout(context, ref),
           icon: const Icon(Icons.logout_rounded, size: 18, color: AppColors.error),
           label: const Text(
-            'Keluar dari Akun',
-            style: TextStyle(
-              fontWeight: FontWeight.w700,
-              fontSize: 13.5,
-              color: AppColors.error,
-            ),
+            'Keluar',
+            style: TextStyle(fontWeight: FontWeight.w700, fontSize: 14, color: AppColors.error),
           ),
-          style: OutlinedButton.styleFrom(
-            padding: const EdgeInsets.symmetric(vertical: 13),
-            side: const BorderSide(color: Color(0xFFFCA5A5)),
+          style: TextButton.styleFrom(
+            padding: const EdgeInsets.symmetric(vertical: 14),
             backgroundColor: const Color(0xFFFEF2F2),
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
           ),

@@ -74,7 +74,7 @@ class _KasirTabViewState extends ConsumerState<KasirTabView> {
         Column(
           children: [
             Padding(
-              padding: const EdgeInsets.fromLTRB(10, 10, 10, 8),
+              padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
               child: KasirHeaderBar(
                 products: allProducts,
                 count: filtered.length,
@@ -91,12 +91,13 @@ class _KasirTabViewState extends ConsumerState<KasirTabView> {
               child: filtered.isEmpty
                   ? _buildEmptyState()
                   : GridView.builder(
-                      padding: const EdgeInsets.fromLTRB(10, 8, 10, 90),
+                      physics: const BouncingScrollPhysics(),
+                      padding: const EdgeInsets.fromLTRB(16, 10, 16, 96),
                       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                         crossAxisCount: 2,
                         childAspectRatio: 0.82,
-                        crossAxisSpacing: 10,
-                        mainAxisSpacing: 10,
+                        crossAxisSpacing: 12,
+                        mainAxisSpacing: 12,
                       ),
                       itemCount: filtered.length,
                       itemBuilder: (context, index) {
