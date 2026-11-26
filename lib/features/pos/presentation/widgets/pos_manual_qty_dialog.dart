@@ -112,11 +112,10 @@ class _PosManualQtyDialogState extends State<PosManualQtyDialog> {
               style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w800),
               decoration: InputDecoration(
                 labelText: 'Jumlah (${widget.unitName})',
-                hintText: 'Masukkan jumlah...',
+                hintText: '0',
                 errorText: _errorText,
                 suffixText: widget.unitName,
-                helperText: 'Stok tersedia: ${widget.maxStock.toStringAsFixed(0)} ${widget.unitName}',
-                border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                helperText: 'Stok: ${widget.maxStock.toStringAsFixed(0)} ${widget.unitName}',
               ),
               onSubmitted: (_) => _submit(),
             ),

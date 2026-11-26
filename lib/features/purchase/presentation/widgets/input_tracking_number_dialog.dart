@@ -198,10 +198,7 @@ class _InputTrackingNumberDialogState extends State<InputTrackingNumberDialog> {
                         },
                       )
                     : null,
-                filled: true,
-                fillColor: AppColors.surfaceInput,
-                border: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: const BorderSide(color: AppColors.border)),
-                contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 11),
+                contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
               ),
               onChanged: (_) => setState(() {}),
             ),
@@ -249,9 +246,6 @@ class _InputTrackingNumberDialogState extends State<InputTrackingNumberDialog> {
                         },
                       )
                     : null,
-                filled: true,
-                fillColor: AppColors.surfaceInput,
-                border: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: const BorderSide(color: AppColors.border)),
                 contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
               ),
               onChanged: (_) => setState(() {}),

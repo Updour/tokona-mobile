@@ -69,11 +69,8 @@ class _AppLockSettingsSheetState extends ConsumerState<AppLockSettingsSheet> {
               obscureText: true,
               textAlign: TextAlign.center,
               style: const TextStyle(fontSize: 22, letterSpacing: 8, fontWeight: FontWeight.w800),
-              decoration: InputDecoration(
+              decoration: const InputDecoration(
                 counterText: '',
-                filled: true,
-                fillColor: const Color(0xFFF8FAFC),
-                border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: Color(0xFFCBD5E1))),
               ),
             ),
           ],

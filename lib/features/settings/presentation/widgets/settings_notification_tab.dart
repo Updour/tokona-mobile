@@ -25,19 +25,10 @@ class SettingsNotificationTab extends StatelessWidget {
           children: [
             TextField(
               controller: paylaterNameController,
-              decoration: InputDecoration(
+              decoration: const InputDecoration(
                 labelText: 'Nama Layanan',
                 hintText: 'SPayLater / GoPayLater',
                 isDense: true,
-                contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(10),
-                  borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
-                ),
-                enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(10),
-                  borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
-                ),
               ),
               onChanged: (v) => onChanged(draft.copyWith(paylaterName: v.trim().isEmpty ? 'SPayLater' : v.trim())),
             ),

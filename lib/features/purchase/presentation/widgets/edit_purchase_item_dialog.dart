@@ -249,13 +249,7 @@ class _EditPurchaseItemDialogState extends State<EditPurchaseItemDialog> {
       hintText: hint,
       prefixText: prefixText,
       prefixStyle: const TextStyle(fontWeight: FontWeight.w700, fontSize: 13, color: AppColors.textPrimary),
-      prefixIcon: Icon(prefixIcon, size: 18, color: AppColors.textSecondary),
-      filled: true,
-      fillColor: AppColors.surfaceInput,
-      contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-      border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: AppColors.border)),
-      enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: AppColors.border)),
-      focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: AppColors.primary, width: 1.5)),
+      prefixIcon: Icon(prefixIcon, size: 18, color: const Color(0xFF64748B)),
     );
   }
 }

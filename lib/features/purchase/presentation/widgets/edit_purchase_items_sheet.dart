@@ -284,13 +284,7 @@ class _EditPurchaseItemsSheetState extends ConsumerState<EditPurchaseItemsSheet>
     return InputDecoration(
       labelText: label,
       hintText: hint,
-      prefixIcon: Icon(icon, size: 18, color: AppColors.textSecondary),
-      filled: true,
-      fillColor: AppColors.surfaceInput,
-      contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-      border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: AppColors.border)),
-      enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: AppColors.border)),
-      focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: AppColors.primary, width: 1.5)),
+      prefixIcon: Icon(icon, size: 18, color: const Color(0xFF64748B)),
     );
   }
 }

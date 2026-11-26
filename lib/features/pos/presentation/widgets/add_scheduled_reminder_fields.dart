@@ -107,12 +107,10 @@ class AddScheduledReminderFields extends StatelessWidget {
       children: [
         TextFormField(
           controller: nameController,
-          decoration: InputDecoration(
-            labelText: 'Nama Pelanggan *',
+          decoration: const InputDecoration(
+            labelText: 'Nama Pelanggan',
             hintText: 'Bu Sri / Pak Anton',
-            prefixIcon: const Icon(Icons.person_rounded, size: 20),
-            border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-            contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+            prefixIcon: Icon(Icons.person_rounded, size: 20),
           ),
           validator: (v) => (v == null || v.trim().isEmpty) ? 'Nama pelanggan wajib diisi' : null,
         ),
@@ -144,13 +142,11 @@ class AddScheduledReminderFields extends StatelessWidget {
     return TextFormField(
       controller: phoneController,
       keyboardType: TextInputType.phone,
-      decoration: InputDecoration(
-        labelText: 'Nomor Handphone *',
+      decoration: const InputDecoration(
+        labelText: 'No. HP',
         hintText: '08xxxxxxxxxx',
-        prefixIcon: const Icon(Icons.chat_bubble_outline_rounded, color: Color(0xFF059669), size: 20),
-        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-        contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-        helperText: 'Wajib diisi untuk pengiriman pesan pengingat',
+        prefixIcon: Icon(Icons.chat_bubble_outline_rounded, color: Color(0xFF059669), size: 20),
+        helperText: 'Untuk kirim pengingat WA',
       ),
       validator: (v) {
         if (v == null || v.trim().isEmpty) return 'Nomor Handphone wajib diisi';

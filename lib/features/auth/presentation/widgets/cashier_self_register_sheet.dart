@@ -150,36 +150,30 @@ class _CashierSelfRegisterSheetState extends ConsumerState<CashierSelfRegisterSh
               TextFormField(
                 controller: _fullNameController,
                 textInputAction: TextInputAction.next,
-                decoration: InputDecoration(
-                  labelText: 'Nama Lengkap Kasir',
+                decoration: const InputDecoration(
+                  labelText: 'Nama Lengkap',
                   hintText: 'Siti Aisyah',
-                  prefixIcon: const Icon(Icons.badge_outlined, size: 20),
-                  filled: true,
-                  fillColor: Colors.white,
-                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: Color(0xFFE2E8F0))),
+                  prefixIcon: Icon(Icons.badge_outlined, size: 20),
                 ),
-                validator: (v) => (v == null || v.trim().isEmpty) ? 'Nama lengkap wajib diisi' : null,
+                validator: (v) => (v == null || v.trim().isEmpty) ? 'Nama wajib diisi' : null,
               ),
-              const SizedBox(height: 10),
+              const SizedBox(height: 12),
               TextFormField(
                 controller: _usernameController,
                 textInputAction: TextInputAction.next,
                 inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'[a-zA-Z0-9_]'))],
-                decoration: InputDecoration(
-                  labelText: 'Username (untuk login)',
+                decoration: const InputDecoration(
+                  labelText: 'Username',
                   hintText: 'kasir_siti',
-                  prefixIcon: const Icon(Icons.alternate_email_rounded, size: 20),
-                  filled: true,
-                  fillColor: Colors.white,
-                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: Color(0xFFE2E8F0))),
+                  prefixIcon: Icon(Icons.alternate_email_rounded, size: 20),
                 ),
                 validator: (v) {
                   if (v == null || v.trim().isEmpty) return 'Username wajib diisi';
-                  if (v.trim().length < 3) return 'Minimal 3 karakter';
+                  if (v.trim().length < 3) return 'Min. 3 karakter';
                   return null;
                 },
               ),
-              const SizedBox(height: 10),
+              const SizedBox(height: 12),
               Row(
                 children: [
                   Expanded(
@@ -190,13 +184,10 @@ class _CashierSelfRegisterSheetState extends ConsumerState<CashierSelfRegisterSh
                       maxLength: 6,
                       textInputAction: TextInputAction.next,
                       inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                      decoration: InputDecoration(
+                      decoration: const InputDecoration(
                         labelText: 'PIN (6 Angka)',
                         counterText: '',
-                        prefixIcon: const Icon(Icons.lock_outline_rounded, size: 20),
-                        filled: true,
-                        fillColor: Colors.white,
-                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: Color(0xFFE2E8F0))),
+                        prefixIcon: Icon(Icons.lock_outline_rounded, size: 20),
                       ),
                       validator: (v) {
                         if (v == null || v.isEmpty) return 'Wajib diisi';
@@ -221,9 +212,6 @@ class _CashierSelfRegisterSheetState extends ConsumerState<CashierSelfRegisterSh
                           icon: Icon(_obscurePin ? Icons.visibility_outlined : Icons.visibility_off_outlined, size: 18),
                           onPressed: () => setState(() => _obscurePin = !_obscurePin),
                         ),
-                        filled: true,
-                        fillColor: Colors.white,
-                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: Color(0xFFE2E8F0))),
                       ),
                       validator: (v) => (v == null || v.isEmpty) ? 'Wajib diisi' : null,
                     ),

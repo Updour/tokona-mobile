@@ -185,30 +185,27 @@ class _AddPaymentAccountDialogState extends ConsumerState<AddPaymentAccountDialo
             TextField(
               controller: _nameController,
               textCapitalization: TextCapitalization.words,
-              decoration: InputDecoration(
-                labelText: 'Nama Akun *',
-                hintText: ' Bank BCA, QRIS Toko, Kas Laci',
-                border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+              decoration: const InputDecoration(
+                labelText: 'Nama Akun',
+                hintText: 'Bank BCA / QRIS / Kas',
               ),
             ),
             const SizedBox(height: 12),
             TextField(
               controller: _numberController,
               keyboardType: TextInputType.number,
-              decoration: InputDecoration(
-                labelText: 'Nomor Rekening',
-                hintText: ' 8801234567',
-                border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+              decoration: const InputDecoration(
+                labelText: 'No. Rekening',
+                hintText: '8801234567',
               ),
             ),
             const SizedBox(height: 12),
             TextField(
               controller: _holderController,
               textCapitalization: TextCapitalization.words,
-              decoration: InputDecoration(
-                labelText: 'Atas Nama (A.N.)',
-                hintText: ' Toko Makmur',
-                border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+              decoration: const InputDecoration(
+                labelText: 'Atas Nama',
+                hintText: 'Toko Makmur',
               ),
             ),
             const SizedBox(height: 12),
@@ -216,11 +213,10 @@ class _AddPaymentAccountDialogState extends ConsumerState<AddPaymentAccountDialo
               controller: _initialBalanceController,
               keyboardType: TextInputType.number,
               inputFormatters: [CurrencyTextInputFormatter()],
-              decoration: InputDecoration(
-                labelText: 'Saldo Awal (Rp)',
+              decoration: const InputDecoration(
+                labelText: 'Saldo Awal',
                 hintText: '0',
                 prefixText: 'Rp',
-                border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
               ),
             ),
             if (isEditing) ...[
@@ -229,13 +225,12 @@ class _AddPaymentAccountDialogState extends ConsumerState<AddPaymentAccountDialo
                 controller: _currentBalanceController,
                 keyboardType: TextInputType.number,
                 inputFormatters: [CurrencyTextInputFormatter()],
-                decoration: InputDecoration(
-                  labelText: 'Reset Saldo Saat Ini (Rp)',
+                decoration: const InputDecoration(
+                  labelText: 'Reset Saldo',
                   hintText: '0',
                   prefixText: 'Rp',
-                  helperText: 'Ubah ke 0 atau nominal baru untuk mereset saldo yang minus',
-                  helperStyle: const TextStyle(color: Color(0xFF0F766E), fontSize: 11),
-                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                  helperText: 'Ubah ke 0 atau nominal baru',
+                  helperStyle: TextStyle(color: Color(0xFF0F766E), fontSize: 11),
                 ),
               ),
             ],

@@ -168,12 +168,9 @@ class _OfflinePairingSheetState extends ConsumerState<OfflinePairingSheet> {
                 controller: _manualCodeController,
                 maxLines: 3,
                 style: const TextStyle(fontSize: 12, fontFamily: 'monospace'),
-                decoration: InputDecoration(
-                  hintText: 'Tempel teks format JSON pairing di sini...',
-                  hintStyle: const TextStyle(fontSize: 11.5, color: AppColors.textMuted),
-                  filled: true,
-                  fillColor: const Color(0xFFF8FAFC),
-                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: const BorderSide(color: Color(0xFFE2E8F0))),
+                decoration: const InputDecoration(
+                  hintText: 'Tempel kode pairing di sini...',
+                  hintStyle: TextStyle(fontSize: 12, color: AppColors.textMuted),
                 ),
               ),
               const SizedBox(height: 8),
