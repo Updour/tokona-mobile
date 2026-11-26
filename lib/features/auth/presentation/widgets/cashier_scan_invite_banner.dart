@@ -52,31 +52,30 @@ class CashierScanInviteBanner extends ConsumerWidget {
       color: Colors.transparent,
       child: InkWell(
         onTap: () => _handleScan(context, ref),
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(14),
         child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
           decoration: BoxDecoration(
-            color: const Color(0xFFF0FDFA),
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: const Color(0xFF99F6E4), width: 1.1),
+            color: Colors.white.withValues(alpha: 0.85),
+            borderRadius: BorderRadius.circular(14),
             boxShadow: [
               BoxShadow(
-                color: const Color(0xFF0F766E).withValues(alpha: 0.08),
-                blurRadius: 6,
-                offset: const Offset(0, 1.5),
+                color: const Color(0xFF0F172A).withValues(alpha: 0.04),
+                blurRadius: 12,
+                offset: const Offset(0, 4),
               ),
             ],
           ),
           child: const Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(Icons.qr_code_scanner_rounded, size: 16, color: Color(0xFF0F766E)),
-              SizedBox(width: 5),
+              Icon(Icons.qr_code_scanner_rounded, size: 17, color: Color(0xFF0D9488)),
+              SizedBox(width: 8),
               Text(
-                'Scan QR',
+                'Gabung sebagai Kasir? Scan QR Toko',
                 style: TextStyle(
-                  fontSize: 11.5,
-                  fontWeight: FontWeight.w800,
+                  fontSize: 12.5,
+                  fontWeight: FontWeight.w700,
                   color: Color(0xFF0F766E),
                   letterSpacing: -0.1,
                 ),

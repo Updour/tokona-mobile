@@ -51,7 +51,9 @@ class AuthTextField extends StatelessWidget {
             TextSpan(
               text: label,
               style: AppTypography.labelMedium.copyWith(
-                color: AppColors.textPrimary,
+                color: const Color(0xFF334155),
+                fontWeight: FontWeight.w600,
+                fontSize: 12.5,
               ),
               children: const [
                 TextSpan(
@@ -68,10 +70,12 @@ class AuthTextField extends StatelessWidget {
           Text(
             label,
             style: AppTypography.labelMedium.copyWith(
-              color: AppColors.textPrimary,
+              color: const Color(0xFF334155),
+              fontWeight: FontWeight.w600,
+              fontSize: 12.5,
             ),
           ),
-        const SizedBox(height: 6),
+        const SizedBox(height: 7),
         TextFormField(
           controller: controller,
           readOnly: readOnly,
@@ -83,11 +87,42 @@ class AuthTextField extends StatelessWidget {
           validator: validator,
           onChanged: onChanged,
           scrollPadding: const EdgeInsets.only(bottom: 120),
-          style: AppTypography.bodyLarge,
+          style: AppTypography.bodyLarge.copyWith(
+            fontSize: 14.5,
+            fontWeight: FontWeight.w500,
+            color: const Color(0xFF0F172A),
+          ),
           decoration: InputDecoration(
             hintText: hint,
+            hintStyle: const TextStyle(
+              fontSize: 13.5,
+              color: Color(0xFF94A3B8),
+              fontWeight: FontWeight.w400,
+            ),
+            filled: true,
+            fillColor: const Color(0xFFF1F5F9).withValues(alpha: 0.75),
+            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 15),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(14),
+              borderSide: BorderSide(
+                color: const Color(0xFFE2E8F0).withValues(alpha: 0.8),
+                width: 1,
+              ),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(14),
+              borderSide: const BorderSide(color: AppColors.primary, width: 1.6),
+            ),
+            errorBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(14),
+              borderSide: const BorderSide(color: AppColors.error, width: 1),
+            ),
+            focusedErrorBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(14),
+              borderSide: const BorderSide(color: AppColors.error, width: 1.5),
+            ),
             prefixIcon: prefixIcon != null
-                ? Icon(prefixIcon, size: 20, color: AppColors.textSecondary)
+                ? Icon(prefixIcon, size: 19, color: const Color(0xFF64748B))
                 : null,
             suffixIcon: isPassword
                 ? IconButton(
@@ -95,8 +130,8 @@ class AuthTextField extends StatelessWidget {
                       obscureText
                           ? Icons.visibility_outlined
                           : Icons.visibility_off_outlined,
-                      size: 20,
-                      color: AppColors.textSecondary,
+                      size: 19,
+                      color: const Color(0xFF64748B),
                     ),
                     onPressed: onToggleVisibility,
                   )

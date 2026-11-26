@@ -59,8 +59,8 @@ class _AuthScreenState extends ConsumerState<AuthScreen> with SingleTickerProvid
       if (next == true && prev != true) {
         await AppLoadingOverlay.show(
           context,
-          title: 'Menyiapkan Kasir & Toko...',
-          subtitle: 'Memuat katalog produk, hak akses & konfigurasi kasir.',
+          title: 'Membuka Toko...',
+          subtitle: 'Menyiapkan produk & meja kasir, sebentar ya.',
           icon: Icons.storefront_rounded,
           duration: const Duration(milliseconds: 1800),
         );
@@ -110,39 +110,56 @@ class _AuthScreenState extends ConsumerState<AuthScreen> with SingleTickerProvid
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
                                 const AuthHeaderWidget(),
-                                const SizedBox(height: 18),
+                                const SizedBox(height: 22),
                                 Container(
                                   decoration: BoxDecoration(
                                     color: Colors.white,
-                                    borderRadius: BorderRadius.circular(24),
-                                    border: Border.all(color: const Color(0xFFE2E8F0)),
+                                    borderRadius: BorderRadius.circular(28),
                                     boxShadow: [
-                                      BoxShadow(color: const Color(0xFF0F172A).withValues(alpha: 0.07), blurRadius: 30, offset: const Offset(0, 10)),
-                                      BoxShadow(color: const Color(0xFF0D9488).withValues(alpha: 0.04), blurRadius: 10, offset: const Offset(0, 2)),
+                                      BoxShadow(
+                                        color: const Color(0xFF0F172A).withValues(alpha: 0.06),
+                                        blurRadius: 36,
+                                        offset: const Offset(0, 14),
+                                      ),
+                                      BoxShadow(
+                                        color: const Color(0xFF0D9488).withValues(alpha: 0.03),
+                                        blurRadius: 12,
+                                        offset: const Offset(0, 2),
+                                      ),
                                     ],
                                   ),
-                                  padding: const EdgeInsets.fromLTRB(22, 18, 22, 22),
+                                  padding: const EdgeInsets.fromLTRB(24, 24, 24, 24),
                                   child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.stretch,
                                     children: [
-                                      Row(
-                                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                        crossAxisAlignment: CrossAxisAlignment.center,
+                                      Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
                                         children: [
                                           Text(
-                                            isRegisterMode ? 'Buka Toko Baru' : 'Masuk ke Kasir',
+                                            isRegisterMode ? 'Buka Toko Baru' : 'Selamat Datang',
                                             style: const TextStyle(
-                                              fontSize: 16,
+                                              fontSize: 19,
                                               fontWeight: FontWeight.w800,
                                               color: AppColors.textPrimary,
-                                              letterSpacing: -0.2,
+                                              letterSpacing: -0.4,
                                             ),
                                           ),
-                                          const CashierScanInviteBanner(),
+                                          const SizedBox(height: 3),
+                                          Text(
+                                            isRegisterMode
+                                                ? 'Siapkan kasir digitalmu dalam hitungan detik'
+                                                : 'Masuk untuk mulai kelola tokomu hari ini',
+                                            style: const TextStyle(
+                                              fontSize: 12.5,
+                                              color: Color(0xFF64748B),
+                                              fontWeight: FontWeight.w400,
+                                            ),
+                                          ),
                                         ],
                                       ),
-                                      const SizedBox(height: 14),
-                                      _buildModeSelector(isRegisterMode),
                                       const SizedBox(height: 18),
+                                      _buildModeSelector(isRegisterMode),
+                                      const SizedBox(height: 20),
                                       AnimatedCrossFade(
                                         firstChild: LoginFormWidget(
                                           isLoading: authState.isLoading,
@@ -166,7 +183,9 @@ class _AuthScreenState extends ConsumerState<AuthScreen> with SingleTickerProvid
                                     ],
                                   ),
                                 ),
-                                const SizedBox(height: 18),
+                                const SizedBox(height: 16),
+                                const CashierScanInviteBanner(),
+                                const SizedBox(height: 16),
                                 _buildFooter(),
                               ],
                             ),
@@ -189,10 +208,21 @@ class _AuthScreenState extends ConsumerState<AuthScreen> with SingleTickerProvid
       child: IgnorePointer(
         child: Stack(
           children: [
-            Positioned(top: -80, left: -80, child: Container(width: 260, height: 260, decoration: BoxDecoration(shape: BoxShape.circle, color: const Color(0xFF0D9488).withValues(alpha: 0.12)))),
-            Positioned(bottom: -100, right: -80, child: Container(width: 280, height: 280, decoration: BoxDecoration(shape: BoxShape.circle, color: const Color(0xFF0284C7).withValues(alpha: 0.09)))),
+            Positioned(top: -120, left: -100, child: _glowCircle(340, const Color(0xFF0D9488), 0.14)),
+            Positioned(bottom: -140, right: -100, child: _glowCircle(360, const Color(0xFF0EA5E9), 0.10)),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _glowCircle(double size, Color color, double alpha) {
+    return Container(
+      width: size,
+      height: size,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        gradient: RadialGradient(colors: [color.withValues(alpha: alpha), Colors.transparent]),
       ),
     );
   }
@@ -204,73 +234,48 @@ class _AuthScreenState extends ConsumerState<AuthScreen> with SingleTickerProvid
       child: Row(
         children: [
           Expanded(
-            child: _buildSelectorTab(
-              title: 'Masuk Akun',
-              icon: Icons.login_rounded,
-              isSelected: !isRegisterMode,
-              onTap: () {
-                HapticFeedback.selectionClick();
-                setState(() => _isRegisterModeOverride = false);
-              },
-            ),
+            child: _buildSelectorTab('Masuk', Icons.login_rounded, !isRegisterMode, () {
+              HapticFeedback.selectionClick();
+              setState(() => _isRegisterModeOverride = false);
+            }),
           ),
           Expanded(
-            child: _buildSelectorTab(
-              title: 'Buka Toko Baru',
-              icon: Icons.add_business_rounded,
-              isSelected: isRegisterMode,
-              onTap: () {
-                HapticFeedback.selectionClick();
-                setState(() => _isRegisterModeOverride = true);
-              },
-            ),
+            child: _buildSelectorTab('Daftar Toko', Icons.add_business_rounded, isRegisterMode, () {
+              HapticFeedback.selectionClick();
+              setState(() => _isRegisterModeOverride = true);
+            }),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildSelectorTab({
-    required String title,
-    required IconData icon,
-    required bool isSelected,
-    required VoidCallback onTap,
-  }) {
+  Widget _buildSelectorTab(String title, IconData icon, bool isSelected, VoidCallback onTap) {
     return InkWell(
       onTap: onTap,
-      borderRadius: BorderRadius.circular(10),
+      borderRadius: BorderRadius.circular(11),
       child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
+        duration: const Duration(milliseconds: 220),
+        curve: Curves.easeOutCubic,
         padding: const EdgeInsets.symmetric(vertical: 10),
         decoration: BoxDecoration(
           color: isSelected ? Colors.white : Colors.transparent,
-          borderRadius: BorderRadius.circular(10),
+          borderRadius: BorderRadius.circular(11),
           boxShadow: isSelected
-              ? [
-                  BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.08),
-                    blurRadius: 8,
-                    offset: const Offset(0, 2),
-                  ),
-                ]
+              ? [BoxShadow(color: Colors.black.withValues(alpha: 0.06), blurRadius: 8, offset: const Offset(0, 2))]
               : null,
         ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
-              icon,
-              size: 15,
-              color: isSelected ? AppColors.primary : const Color(0xFF64748B),
-            ),
+            Icon(icon, size: 15, color: isSelected ? AppColors.primary : const Color(0xFF64748B)),
             const SizedBox(width: 6),
             Text(
               title,
-              textAlign: TextAlign.center,
               style: TextStyle(
                 color: isSelected ? AppColors.primary : const Color(0xFF64748B),
                 fontWeight: isSelected ? FontWeight.w800 : FontWeight.w600,
-                fontSize: 12.5,
+                fontSize: 13,
               ),
             ),
           ],
@@ -280,12 +285,15 @@ class _AuthScreenState extends ConsumerState<AuthScreen> with SingleTickerProvid
   }
 
   Widget _buildFooter() {
-    return Row(
+    return const Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        Container(width: 7, height: 7, decoration: const BoxDecoration(shape: BoxShape.circle, color: Color(0xFF10B981))),
-        const SizedBox(width: 6),
-        const Text('Tokona POS • Mode Offline Aktif', style: TextStyle(fontSize: 11, color: Color(0xFF94A3B8), fontWeight: FontWeight.w600)),
+        Icon(Icons.verified_user_outlined, size: 13, color: Color(0xFF10B981)),
+        SizedBox(width: 6),
+        Text(
+          'Tokona POS • Aman & Bisa Dipakai Offline',
+          style: TextStyle(fontSize: 11.5, color: Color(0xFF94A3B8), fontWeight: FontWeight.w500),
+        ),
       ],
     );
   }

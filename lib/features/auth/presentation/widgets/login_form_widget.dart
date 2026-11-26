@@ -55,12 +55,12 @@ class _LoginFormWidgetState extends State<LoginFormWidget> {
         children: [
           AuthTextField(
             controller: _usernameController,
-            label: 'Nama Pengguna / Nomor HP',
-            hint: 'Rohman / 081234567890',
+            label: 'Username atau No. HP',
+            hint: 'Contoh: budi atau 081234567890',
             prefixIcon: Icons.person_outline_rounded,
             validator: (value) {
               if (value == null || value.trim().isEmpty) {
-                return 'Nama pengguna / nomor WA wajib diisi';
+                return 'Username atau nomor HP wajib diisi ya';
               }
               return null;
             },
@@ -68,8 +68,8 @@ class _LoginFormWidgetState extends State<LoginFormWidget> {
           const SizedBox(height: 16),
           AuthTextField(
             controller: _passwordController,
-            label: 'Kata Sandi',
-            hint: 'Masukkan kata sandi',
+            label: 'Password',
+            hint: 'Masukkan password Anda',
             prefixIcon: Icons.lock_outline_rounded,
             isPassword: true,
             obscureText: _obscurePassword,
@@ -79,12 +79,12 @@ class _LoginFormWidgetState extends State<LoginFormWidget> {
             },
             validator: (value) {
               if (value == null || value.isEmpty) {
-                return 'Kata sandi wajib diisi';
+                return 'Password tidak boleh kosong';
               }
               return null;
             },
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: 6),
           Align(
             alignment: Alignment.centerRight,
             child: InkWell(
@@ -92,13 +92,13 @@ class _LoginFormWidgetState extends State<LoginFormWidget> {
                 HapticFeedback.lightImpact();
                 ForgotPasswordBottomSheet.show(context);
               },
-              borderRadius: BorderRadius.circular(6),
+              borderRadius: BorderRadius.circular(8),
               child: const Padding(
-                padding: EdgeInsets.symmetric(horizontal: 4, vertical: 4),
+                padding: EdgeInsets.symmetric(horizontal: 6, vertical: 6),
                 child: Text(
-                  'Lupa Kata Sandi?',
+                  'Lupa Password?',
                   style: TextStyle(
-                    fontSize: 12,
+                    fontSize: 12.5,
                     fontWeight: FontWeight.w600,
                     color: AppColors.primary,
                   ),
@@ -106,12 +106,12 @@ class _LoginFormWidgetState extends State<LoginFormWidget> {
               ),
             ),
           ),
-          const SizedBox(height: 14),
+          const SizedBox(height: 16),
           AnimatedScale(
             scale: _isButtonPressed ? 0.97 : 1.0,
             duration: const Duration(milliseconds: 100),
             child: Container(
-              height: 48,
+              height: 50,
               decoration: BoxDecoration(
                 gradient: widget.isLoading
                     ? null
@@ -126,7 +126,7 @@ class _LoginFormWidgetState extends State<LoginFormWidget> {
                     ? null
                     : [
                         BoxShadow(
-                          color: const Color(0xFF0D9488).withValues(alpha: 0.35),
+                          color: const Color(0xFF0D9488).withValues(alpha: 0.28),
                           blurRadius: 16,
                           offset: const Offset(0, 6),
                         ),
@@ -156,14 +156,14 @@ class _LoginFormWidgetState extends State<LoginFormWidget> {
                               ),
                               SizedBox(width: 10),
                               Text(
-                                'Memverifikasi...',
+                                'Sebentar, lagi dicek...',
                                 style: TextStyle(color: Colors.white, fontWeight: FontWeight.w700, fontSize: 13.5),
                               ),
                             ],
                           )
                         : const Text(
-                            'Masuk ke Toko',
-                            style: TextStyle(color: Colors.white, fontWeight: FontWeight.w800, fontSize: 14),
+                            'Masuk Sekarang',
+                            style: TextStyle(color: Colors.white, fontWeight: FontWeight.w800, fontSize: 14.5),
                           ),
                   ),
                 ),
@@ -171,43 +171,22 @@ class _LoginFormWidgetState extends State<LoginFormWidget> {
             ),
           ),
           const SizedBox(height: 18),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-            decoration: BoxDecoration(
-              color: const Color(0xFFF8FAFC),
-              borderRadius: BorderRadius.circular(10),
-              border: Border.all(color: const Color(0xFFE2E8F0)),
-            ),
-            child: const Row(
-              children: [
-                Icon(Icons.shield_outlined, size: 15, color: Color(0xFF0D9488)),
-                SizedBox(width: 8),
-                Expanded(
-                  child: Text(
-                    'Data tersimpan aman & bekerja 100% offline di perangkat ini.',
-                    style: TextStyle(fontSize: 10.5, color: Color(0xFF64748B), height: 1.3),
-                  ),
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(height: 12),
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               const Text(
-                'Belum punya toko?',
+                'Baru pakai Tokona?',
                 style: TextStyle(fontSize: 12.5, color: Color(0xFF64748B)),
               ),
               TextButton(
                 onPressed: widget.isLoading ? null : widget.onSwitchToRegister,
                 style: TextButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
                   minimumSize: Size.zero,
                   tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                 ),
                 child: const Text(
-                  'Buka Toko Baru',
+                  'Buat Toko Sekarang',
                   style: TextStyle(
                     fontSize: 12.5,
                     fontWeight: FontWeight.w800,

@@ -49,91 +49,73 @@ class _AuthHeaderWidgetState extends State<AuthHeaderWidget> with SingleTickerPr
               child: child,
             );
           },
-          child: Stack(
-            alignment: Alignment.center,
-            children: [
-              Container(
-                width: 78,
-                height: 78,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: AppColors.primary.withValues(alpha: 0.15),
-                ),
+          child: Container(
+            width: 68,
+            height: 68,
+            decoration: BoxDecoration(
+              gradient: const LinearGradient(
+                colors: [Color(0xFF0F766E), Color(0xFF0D9488), Color(0xFF14B8A6)],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
               ),
-              Container(
-                width: 66,
-                height: 66,
-                decoration: BoxDecoration(
-                  gradient: const LinearGradient(
-                    colors: [Color(0xFF0F766E), Color(0xFF0D9488), Color(0xFF14B8A6)],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                  ),
-                  borderRadius: BorderRadius.circular(22),
-                  boxShadow: [
-                    BoxShadow(
-                      color: const Color(0xFF0D9488).withValues(alpha: 0.38),
-                      blurRadius: 22,
-                      offset: const Offset(0, 10),
-                    ),
-                  ],
+              borderRadius: BorderRadius.circular(22),
+              boxShadow: [
+                BoxShadow(
+                  color: const Color(0xFF0D9488).withValues(alpha: 0.28),
+                  blurRadius: 24,
+                  offset: const Offset(0, 10),
                 ),
-                child: const Center(
-                  child: Icon(
-                    Icons.storefront_rounded,
-                    size: 34,
-                    color: Colors.white,
-                  ),
-                ),
+              ],
+            ),
+            child: const Center(
+              child: Icon(
+                Icons.storefront_rounded,
+                size: 34,
+                color: Colors.white,
               ),
-            ],
+            ),
           ),
         ),
-        const SizedBox(height: 14),
+        const SizedBox(height: 16),
         Row(
           mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             const Text(
               'Tokona',
               style: TextStyle(
-                fontSize: 27,
+                fontSize: 28,
                 fontWeight: FontWeight.w900,
                 color: Color(0xFF0F172A),
-                letterSpacing: -0.8,
+                letterSpacing: -0.9,
               ),
             ),
-            const SizedBox(width: 4),
+            const SizedBox(width: 6),
             Container(
-              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+              padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2.5),
               decoration: BoxDecoration(
-                color: const Color(0xFF0D9488),
-                borderRadius: BorderRadius.circular(6),
+                color: AppColors.primary.withValues(alpha: 0.12),
+                borderRadius: BorderRadius.circular(8),
               ),
               child: const Text(
                 'POS',
-                style: TextStyle(fontSize: 10, fontWeight: FontWeight.w900, color: Colors.white, letterSpacing: 0.5),
+                style: TextStyle(
+                  fontSize: 10.5,
+                  fontWeight: FontWeight.w800,
+                  color: Color(0xFF0F766E),
+                  letterSpacing: 0.6,
+                ),
               ),
             ),
           ],
         ),
-        const SizedBox(height: 6),
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-          decoration: BoxDecoration(
-            color: const Color(0xFFF1F5F9),
-            borderRadius: BorderRadius.circular(20),
-            border: Border.all(color: const Color(0xFFE2E8F0)),
-          ),
-          child: const Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(Icons.storefront_outlined, size: 13, color: Color(0xFF0D9488)),
-              SizedBox(width: 4),
-              Text(
-                'Aplikasi Kasir Ritel & Manajemen Toko',
-                style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: Color(0xFF64748B)),
-              ),
-            ],
+        const SizedBox(height: 4),
+        const Text(
+          'Kelola kasir, stok & cuan lebih mudah',
+          style: TextStyle(
+            fontSize: 13,
+            fontWeight: FontWeight.w500,
+            color: Color(0xFF64748B),
           ),
         ),
       ],

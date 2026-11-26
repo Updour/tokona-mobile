@@ -65,38 +65,38 @@ class _RegisterFormWidgetState extends State<RegisterFormWidget> {
           AuthTextField(
             controller: _storeNameController,
             label: 'Nama Toko',
-            hint: 'Toko Berkah Mandiri',
+            hint: 'Contoh: Warung Maju Jaya',
             prefixIcon: Icons.store_rounded,
-            validator: (v) => (v == null || v.trim().isEmpty) ? 'Nama toko wajib diisi' : null,
+            validator: (v) => (v == null || v.trim().isEmpty) ? 'Nama toko jangan dikosongkan ya' : null,
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 14),
           AuthTextField(
             controller: _ownerNameController,
-            label: 'Nama Pengguna',
-            hint: 'Rohman (otomatis jadi akun login)',
+            label: 'Nama Pemilik (Untuk Login)',
+            hint: 'Contoh: Budi Santoso',
             prefixIcon: Icons.badge_outlined,
             validator: (v) => (v == null || v.trim().isEmpty) ? 'Nama pemilik wajib diisi' : null,
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 14),
           AuthTextField(
             controller: _phoneController,
-            label: 'Nomor WhatsApp Toko',
-            hint: '081234567890 (Aktif)',
+            label: 'No. WhatsApp Aktif',
+            hint: 'Contoh: 081234567890',
             prefixIcon: Icons.phone_android_rounded,
             keyboardType: TextInputType.phone,
             validator: (v) {
               if (v != null && v.trim().isNotEmpty) {
                 if (!WhatsAppService.isValidWhatsAppNumber(v.trim())) {
-                  return 'Format WA tidak valid (minimal 10 digit, cth: 08123456789)';
+                  return 'Format nomor WA belum pas (minimal 10 digit)';
                 }
               }
               return null;
             },
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 14),
           AuthTextField(
             controller: _passwordController,
-            label: 'Kata Sandi',
+            label: 'Buat Password',
             hint: 'Minimal 6 karakter',
             prefixIcon: Icons.lock_outline_rounded,
             isPassword: true,
@@ -104,8 +104,8 @@ class _RegisterFormWidgetState extends State<RegisterFormWidget> {
             textInputAction: TextInputAction.done,
             onToggleVisibility: () => setState(() => _obscurePassword = !_obscurePassword),
             validator: (v) {
-              if (v == null || v.isEmpty) return 'Kata sandi wajib diisi';
-              if (v.length < 6) return 'Minimal 6 karakter';
+              if (v == null || v.isEmpty) return 'Buat password dulu ya';
+              if (v.length < 6) return 'Minimal 6 karakter ya';
               return null;
             },
           ),
@@ -159,26 +159,26 @@ class _RegisterFormWidgetState extends State<RegisterFormWidget> {
                               ),
                               SizedBox(width: 10),
                               Text(
-                                'Menyiapkan Toko...',
+                                'Lagi nyiapin tokomu...',
                                 style: TextStyle(color: Colors.white, fontWeight: FontWeight.w700, fontSize: 13.5),
                               ),
                             ],
                           )
                         : const Text(
-                            'Buka Toko Sekarang',
-                            style: TextStyle(color: Colors.white, fontWeight: FontWeight.w800, fontSize: 14),
+                            'Mulai Buka Toko',
+                            style: TextStyle(color: Colors.white, fontWeight: FontWeight.w800, fontSize: 14.5),
                           ),
                   ),
                 ),
               ),
             ),
           ),
-          const SizedBox(height: 14),
+          const SizedBox(height: 16),
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               const Text(
-                'Sudah punya toko?',
+                'Sudah punya akun toko?',
                 style: TextStyle(fontSize: 12.5, color: Color(0xFF64748B)),
               ),
               TextButton(
