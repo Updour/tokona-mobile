@@ -156,7 +156,7 @@ List<ProfileMenuGroup> buildProfileMenuGroups(BuildContext context, AlertNotific
           color: const Color(0xFF4338CA),
           bg: const Color(0xFFEEF2FF),
           title: 'Modal Toko & Prive',
-          subtitle: 'Kelola suntikan modal awal dan penarikan laba',
+          subtitle: 'Catat pemasukan, modal & tarik kas',
           onTap: () => StoreCapitalManagementSheet.show(context),
         ),
         ProfileMenuItem(

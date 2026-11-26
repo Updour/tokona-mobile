@@ -97,7 +97,7 @@ class ProfileSettingsSheet extends ConsumerWidget {
                   icon: Icons.storefront_rounded,
                   color: AppColors.primary,
                   title: 'Informasi Toko',
-                  subtitle: '${store?.name ?? "Tokona Store"} • Klik untuk edit nama, alamat & nomor',
+                  subtitle: '${store?.name ?? "Toko"} • Edit nama & alamat',
                   trailing: Container(
                     padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                     decoration: BoxDecoration(color: AppColors.primaryContainer, borderRadius: BorderRadius.circular(8)),
@@ -113,7 +113,7 @@ class ProfileSettingsSheet extends ConsumerWidget {
                     icon: Icons.admin_panel_settings_rounded,
                     color: const Color(0xFF0F766E),
                     title: 'Hak Akses & Izin Menu',
-                    subtitle: 'Atur menu & fitur dinamis untuk Kasir dan Admin',
+                    subtitle: 'Atur akses Kasir & Admin',
                     trailing: Container(
                       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                       decoration: BoxDecoration(color: const Color(0xFFCCFBF1), borderRadius: BorderRadius.circular(8)),
@@ -143,7 +143,7 @@ class ProfileSettingsSheet extends ConsumerWidget {
                     icon: Icons.history_toggle_off_rounded,
                     color: const Color(0xFFD97706),
                     title: 'Log Aktivitas',
-                    subtitle: 'Monitoring multi-perangkat, login & aksi staf',
+                    subtitle: 'Pantau aktivitas & login staf',
                     trailing: Container(
                       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                       decoration: BoxDecoration(color: const Color(0xFFFEF3C7), borderRadius: BorderRadius.circular(8)),
@@ -174,7 +174,7 @@ class ProfileSettingsSheet extends ConsumerWidget {
                   icon: Icons.cloud_sync_rounded,
                   color: AppColors.primary,
                   title: 'Sinkronisasi Data',
-                  subtitle: 'Atur jeda polling (15 dtk s/d 1 jam) & auto-sync',
+                  subtitle: 'Atur jeda sinkronisasi otomatis',
                   trailing: Container(
                     padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                     decoration: BoxDecoration(color: AppColors.primaryContainer, borderRadius: BorderRadius.circular(8)),
@@ -189,7 +189,7 @@ class ProfileSettingsSheet extends ConsumerWidget {
                   icon: Icons.print_outlined,
                   color: const Color(0xFF4F46E5),
                   title: 'Printer Struk & Layout',
-                  subtitle: 'Format 58mm / 80mm • Header & Footer Dinamis • ESC/POS',
+                  subtitle: 'Kertas 58mm / 80mm & struk nota',
                   onTap: () {
                     Navigator.of(context).pop();
                     ThermalPrinterSettingsSheet.show(context);
