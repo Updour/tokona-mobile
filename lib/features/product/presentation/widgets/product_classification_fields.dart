@@ -170,10 +170,13 @@ class _ProductClassificationFieldsState extends State<ProductClassificationField
           key: ValueKey('cat_$currentVal'),
           initialValue: currentVal,
           isExpanded: true,
-          decoration: InputDecoration(
-            prefixIcon: const Icon(Icons.category_outlined, size: 20, color: AppColors.textSecondary),
-            contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
-            border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+          dropdownColor: Colors.white,
+          borderRadius: BorderRadius.circular(18),
+          elevation: 8,
+          icon: const Icon(Icons.keyboard_arrow_down_rounded, color: Color(0xFF64748B)),
+          decoration: const InputDecoration(
+            prefixIcon: Icon(Icons.category_outlined, size: 20, color: Color(0xFF64748B)),
+            contentPadding: EdgeInsets.symmetric(horizontal: 14, vertical: 14),
           ),
           items: items.map((cat) {
             return DropdownMenuItem(
@@ -204,7 +207,7 @@ class _ProductClassificationFieldsState extends State<ProductClassificationField
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Tipe Barang',
+          'Tipe',
           style: AppTypography.labelMedium.copyWith(color: AppColors.textPrimary),
         ),
         const SizedBox(height: 6),
@@ -212,10 +215,13 @@ class _ProductClassificationFieldsState extends State<ProductClassificationField
           key: ValueKey('type_$currentVal'),
           initialValue: currentVal,
           isExpanded: true,
-          decoration: InputDecoration(
-            prefixIcon: const Icon(Icons.widgets_outlined, size: 20, color: AppColors.textSecondary),
-            contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
-            border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+          dropdownColor: Colors.white,
+          borderRadius: BorderRadius.circular(18),
+          elevation: 8,
+          icon: const Icon(Icons.keyboard_arrow_down_rounded, color: Color(0xFF64748B)),
+          decoration: const InputDecoration(
+            prefixIcon: Icon(Icons.widgets_outlined, size: 20, color: Color(0xFF64748B)),
+            contentPadding: EdgeInsets.symmetric(horizontal: 14, vertical: 14),
           ),
           items: items.map((type) {
             return DropdownMenuItem(

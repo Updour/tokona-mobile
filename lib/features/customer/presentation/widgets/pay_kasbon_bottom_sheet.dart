@@ -170,15 +170,15 @@ class _PayKasbonBottomSheetState extends ConsumerState<PayKasbonBottomSheet> {
                 keyboardType: TextInputType.number,
                 autofocus: true,
                 inputFormatters: [CurrencyTextInputFormatter()],
-                decoration: InputDecoration(labelText: 'Nominal Bayar (Rp) *', hintText: '0', prefixText: 'Rp', errorText: errorText, prefixIcon: const Icon(Icons.payments_outlined, size: 20)),
+                decoration: InputDecoration(labelText: 'Nominal Bayar', hintText: '0', prefixText: 'Rp', errorText: errorText, prefixIcon: const Icon(Icons.payments_outlined, size: 20)),
               ),
               const SizedBox(height: 12),
               InkWell(
                 onTap: _pickDate,
-                borderRadius: BorderRadius.circular(12),
+                borderRadius: BorderRadius.circular(14),
                 child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-                  decoration: BoxDecoration(color: AppColors.surfaceElevated, borderRadius: BorderRadius.circular(12), border: Border.all(color: AppColors.border)),
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                  decoration: BoxDecoration(color: const Color(0xFFF1F5F9).withValues(alpha: 0.72), borderRadius: BorderRadius.circular(14)),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
@@ -191,10 +191,14 @@ class _PayKasbonBottomSheetState extends ConsumerState<PayKasbonBottomSheet> {
               const SizedBox(height: 12),
               if (accounts.isNotEmpty) ...[
                 DropdownButtonFormField<String>(
-                  value: _selectedAccountId,
-                  decoration: const InputDecoration(labelText: 'Masuk ke Rekening / Kas Toko', prefixIcon: Icon(Icons.account_balance_wallet_outlined, size: 20)),
+                  initialValue: _selectedAccountId,
+                  dropdownColor: Colors.white,
+                  borderRadius: BorderRadius.circular(18),
+                  elevation: 8,
+                  icon: const Icon(Icons.keyboard_arrow_down_rounded, color: Color(0xFF64748B)),
+                  decoration: const InputDecoration(labelText: 'Masuk ke Akun', prefixIcon: Icon(Icons.account_balance_wallet_outlined, size: 20)),
                   items: [
-                    const DropdownMenuItem(value: null, child: Text('Tanpa Hubungkan Rekening')),
+                    const DropdownMenuItem(value: null, child: Text('Tanpa rekening')),
                     ...accounts.map((acc) => DropdownMenuItem(value: acc.id, child: Text(acc.accountNumber != null && acc.accountNumber!.isNotEmpty ? '${acc.name} (${acc.accountNumber})' : acc.name))),
                   ],
                   onChanged: (val) {
@@ -208,7 +212,7 @@ class _PayKasbonBottomSheetState extends ConsumerState<PayKasbonBottomSheet> {
               ],
               TextField(
                 controller: _notesController,
-                decoration: const InputDecoration(labelText: 'Catatan (Opsional)', hintText: 'Titip tetangga / transfer bank', prefixIcon: Icon(Icons.edit_note_rounded, size: 20)),
+                decoration: const InputDecoration(labelText: 'Catatan', hintText: 'Transfer / tunai', prefixIcon: Icon(Icons.edit_note_rounded, size: 20)),
               ),
               const SizedBox(height: 18),
               SizedBox(

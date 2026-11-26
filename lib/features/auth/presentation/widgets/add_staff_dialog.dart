@@ -137,27 +137,31 @@ class _AddStaffDialogState extends ConsumerState<AddStaffDialog> {
                 TextFormField(
                   controller: _passwordController,
                   obscureText: _obscurePassword,
-                  decoration: _inputDecoration('Kata Sandi Awal', Icons.lock_outline_rounded).copyWith(
+                  decoration: _inputDecoration('Password', Icons.lock_outline_rounded).copyWith(
                     suffixIcon: IconButton(
                       icon: Icon(_obscurePassword ? Icons.visibility_off_rounded : Icons.visibility_rounded, size: 18),
                       onPressed: () => setState(() => _obscurePassword = !_obscurePassword),
                     ),
                   ),
-                  validator: (v) => (v == null || v.length < 6) ? 'Kata sandi minimal 6 karakter' : null,
+                  validator: (v) => (v == null || v.length < 6) ? 'Min. 6 karakter' : null,
                 ),
                 const SizedBox(height: 12),
                 DropdownButtonFormField<UserRole>(
                   initialValue: _selectedRole,
                   isExpanded: true,
+                  dropdownColor: Colors.white,
+                  borderRadius: BorderRadius.circular(18),
+                  elevation: 8,
+                  icon: const Icon(Icons.keyboard_arrow_down_rounded, color: Color(0xFF64748B)),
                   decoration: _inputDecoration('Jabatan', Icons.shield_outlined),
                   items: const [
                     DropdownMenuItem(
                       value: UserRole.cashier,
-                      child: Text('Kasir (Transaksi & Nota)', overflow: TextOverflow.ellipsis),
+                      child: Text('Kasir', overflow: TextOverflow.ellipsis),
                     ),
                     DropdownMenuItem(
                       value: UserRole.manager,
-                      child: Text('Admin (Operasional)', overflow: TextOverflow.ellipsis),
+                      child: Text('Admin', overflow: TextOverflow.ellipsis),
                     ),
                   ],
                   onChanged: (val) {
@@ -188,14 +192,8 @@ class _AddStaffDialogState extends ConsumerState<AddStaffDialog> {
   InputDecoration _inputDecoration(String label, IconData icon) {
     return InputDecoration(
       labelText: label,
-      labelStyle: const TextStyle(fontSize: 12, color: AppColors.textSecondary),
+      labelStyle: const TextStyle(fontSize: 12.5, color: Color(0xFF475569), fontWeight: FontWeight.w600),
       prefixIcon: Icon(icon, size: 18, color: const Color(0xFF64748B)),
-      filled: true,
-      fillColor: const Color(0xFFF8FAFC),
-      contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 11),
-      border: OutlineInputBorder(borderRadius: BorderRadius.circular(11), borderSide: const BorderSide(color: Color(0xFFE2E8F0))),
-      enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(11), borderSide: const BorderSide(color: Color(0xFFE2E8F0))),
-      focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(11), borderSide: const BorderSide(color: AppColors.primary, width: 1.5)),
     );
   }
 }
