@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:tokona/core/theme/app_colors.dart';
-import 'package:tokona/core/theme/app_typography.dart';
 import 'package:tokona/core/utils/currency_formatter.dart';
 import 'package:tokona/core/utils/product_name_formatter.dart';
+import 'package:tokona/core/widgets/modern_sheet_widgets.dart';
 import 'package:tokona/features/product/domain/dtos/create_product_dto.dart';
 import 'package:tokona/features/product/domain/dtos/create_product_price_tier_dto.dart';
 import 'package:tokona/features/product/domain/dtos/create_product_unit_dto.dart';
@@ -73,6 +74,7 @@ class _AddProductBottomSheetState extends ConsumerState<AddProductBottomSheet> {
   final List<CreateProductUnitDto> _packagingUnits = [];
   final List<CreateProductPriceTierDto> _priceTiers = [];
   bool _isSubmitting = false;
+  bool _showAdvanced = false;
 
   @override
   void dispose() {
@@ -122,55 +124,31 @@ class _AddProductBottomSheetState extends ConsumerState<AddProductBottomSheet> {
     return Container(
       decoration: BoxDecoration(
         color: AppColors.surface,
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.12),
-            blurRadius: 24,
+            color: const Color(0xFF0F172A).withValues(alpha: 0.14),
+            blurRadius: 28,
             offset: const Offset(0, -6),
           ),
         ],
       ),
-      padding: EdgeInsets.fromLTRB(20, 16, 20, MediaQuery.of(context).viewInsets.bottom + 20),
+      padding: EdgeInsets.fromLTRB(20, 12, 20, MediaQuery.of(context).viewInsets.bottom + 20),
       constraints: BoxConstraints(maxHeight: MediaQuery.of(context).size.height * 0.9),
       child: Form(
         key: _formKey,
         child: SingleChildScrollView(
+          physics: const BouncingScrollPhysics(),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Center(
-                child: Container(
-                  width: 40,
-                  height: 4,
-                  decoration: BoxDecoration(
-                    color: AppColors.border,
-                    borderRadius: BorderRadius.circular(2),
-                  ),
-                ),
+              ModernSheetHeader(
+                title: 'Tambah Produk',
+                subtitle: 'Isi info dasar, opsi lain bisa nanti',
+                icon: Icons.add_box_rounded,
+                onClose: () => Navigator.of(context).pop(),
               ),
-              const SizedBox(height: 12),
-              Row(
-                children: [
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text('Tambah Master Produk', style: AppTypography.headingSmall.copyWith(fontSize: 16), maxLines: 1, overflow: TextOverflow.ellipsis),
-                        const SizedBox(height: 2),
-                        Text('Kelola satuan dasar, HPP modal, dan kemasan bertingkat', style: AppTypography.bodySmall.copyWith(fontSize: 11), maxLines: 1, overflow: TextOverflow.ellipsis),
-                      ],
-                    ),
-                  ),
-                  IconButton(
-                    icon: const Icon(Icons.close_rounded, color: AppColors.textMuted, size: 20),
-                    padding: EdgeInsets.zero,
-                    constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
-                    onPressed: () => Navigator.of(context).pop(),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 14),
+              const SizedBox(height: 16),
               AddProductBaseForm(
                 nameController: _nameController,
                 skuController: _skuController,
@@ -191,42 +169,84 @@ class _AddProductBottomSheetState extends ConsumerState<AddProductBottomSheet> {
                 onExpiredAtChanged: (dt) => setState(() => _expiredAt = dt),
                 selectedDeviceTag: _deviceTag,
                 onDeviceTagChanged: (dev) => setState(() => _deviceTag = dev),
+                showAdvancedFields: _showAdvanced,
+              ),
+              const SizedBox(height: 16),
+              InkWell(
+                onTap: () {
+                  HapticFeedback.selectionClick();
+                  setState(() => _showAdvanced = !_showAdvanced);
+                },
+                borderRadius: BorderRadius.circular(14),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                  decoration: BoxDecoration(
+                    color: _showAdvanced ? AppColors.primaryContainer.withValues(alpha: 0.45) : const Color(0xFFF1F5F9),
+                    borderRadius: BorderRadius.circular(14),
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(
+                        _showAdvanced ? Icons.expand_less_rounded : Icons.tune_rounded,
+                        size: 18,
+                        color: AppColors.primaryDark,
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          _showAdvanced ? 'Sembunyikan Opsi Tambahan' : 'Opsi Tambahan (Foto, SKU, Kategori, Grosir)',
+                          style: const TextStyle(fontSize: 12.5, fontWeight: FontWeight.w700, color: AppColors.primaryDark),
+                        ),
+                      ),
+                      Icon(
+                        _showAdvanced ? Icons.keyboard_arrow_up_rounded : Icons.keyboard_arrow_down_rounded,
+                        size: 18,
+                        color: AppColors.primaryDark,
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              AnimatedCrossFade(
+                duration: const Duration(milliseconds: 240),
+                crossFadeState: _showAdvanced ? CrossFadeState.showSecond : CrossFadeState.showFirst,
+                firstChild: const SizedBox.shrink(),
+                secondChild: Column(
+                  children: [
+                    const SizedBox(height: 18),
+                    PackagingTierSection(
+                      packagingUnits: _packagingUnits,
+                      baseCostPrice: CurrencyFormatter.parse(_costPriceController.text),
+                      onAddUnit: (unit) => setState(() => _packagingUnits.add(unit)),
+                      onRemoveUnit: (index) => setState(() => _packagingUnits.removeAt(index)),
+                    ),
+                    const SizedBox(height: 18),
+                    PriceTierSection(
+                      priceTiers: _priceTiers,
+                      baseUnit: _baseUnitController.text.trim().isNotEmpty ? _baseUnitController.text.trim() : 'Pcs',
+                      baseCostPrice: CurrencyFormatter.parse(_costPriceController.text),
+                      baseSellingPrice: CurrencyFormatter.parse(_sellingPriceController.text),
+                      onAddTier: (tier) => setState(() => _priceTiers.add(tier)),
+                      onRemoveTier: (index) => setState(() => _priceTiers.removeAt(index)),
+                    ),
+                  ],
+                ),
               ),
               const SizedBox(height: 20),
-              PackagingTierSection(
-                packagingUnits: _packagingUnits,
-                baseCostPrice: CurrencyFormatter.parse(_costPriceController.text),
-                onAddUnit: (unit) => setState(() => _packagingUnits.add(unit)),
-                onRemoveUnit: (index) => setState(() => _packagingUnits.removeAt(index)),
-              ),
-              const SizedBox(height: 20),
-              PriceTierSection(
-                priceTiers: _priceTiers,
-                baseUnit: _baseUnitController.text.trim().isNotEmpty ? _baseUnitController.text.trim() : 'Pcs',
-                baseCostPrice: CurrencyFormatter.parse(_costPriceController.text),
-                baseSellingPrice: CurrencyFormatter.parse(_sellingPriceController.text),
-                onAddTier: (tier) => setState(() => _priceTiers.add(tier)),
-                onRemoveTier: (index) => setState(() => _priceTiers.removeAt(index)),
-              ),
-              const SizedBox(height: 24),
               Row(
                 children: [
                   Expanded(
                     child: SizedBox(
                       height: 50,
-                      child: OutlinedButton(
+                      child: TextButton(
                         onPressed: () => Navigator.of(context).pop(),
-                        style: OutlinedButton.styleFrom(
-                          side: const BorderSide(color: AppColors.border),
+                        style: TextButton.styleFrom(
+                          backgroundColor: const Color(0xFFF1F5F9),
                           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
                         ),
                         child: const Text(
-                          'BATAL',
-                          style: TextStyle(
-                            color: AppColors.textSecondary,
-                            fontWeight: FontWeight.w700,
-                            fontSize: 13,
-                          ),
+                          'Batal',
+                          style: TextStyle(color: Color(0xFF475569), fontWeight: FontWeight.w700, fontSize: 14),
                         ),
                       ),
                     ),
@@ -264,7 +284,7 @@ class _AddProductBottomSheetState extends ConsumerState<AddProductBottomSheet> {
                                   valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
                                 ),
                               )
-                            : const Text('SIMPAN PRODUK', style: TextStyle(fontWeight: FontWeight.w700)),
+                            : const Text('Simpan Produk', style: TextStyle(fontWeight: FontWeight.w800, fontSize: 14.5)),
                       ),
                     ),
                   ),

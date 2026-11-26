@@ -32,6 +32,7 @@ class AddProductBaseForm extends StatelessWidget {
   final ValueChanged<DateTime?>? onExpiredAtChanged;
   final String? selectedDeviceTag;
   final ValueChanged<String?>? onDeviceTagChanged;
+  final bool showAdvancedFields;
 
   const AddProductBaseForm({
     super.key,
@@ -56,6 +57,7 @@ class AddProductBaseForm extends StatelessWidget {
     this.onExpiredAtChanged,
     this.selectedDeviceTag,
     this.onDeviceTagChanged,
+    this.showAdvancedFields = true,
   });
 
   @override
@@ -63,7 +65,7 @@ class AddProductBaseForm extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        if (onImageChanged != null) ...[
+        if (showAdvancedFields && onImageChanged != null) ...[
           ProductImagePickerWidget(
             imagePath: imagePath,
             productName: nameController.text.isNotEmpty ? nameController.text : 'Foto Produk',
@@ -74,8 +76,8 @@ class AddProductBaseForm extends StatelessWidget {
         ],
         AuthTextField(
           controller: nameController,
-          label: 'Nama Barang',
-          hint: 'Indomie Goreng Spesial',
+          label: 'Nama Produk',
+          hint: 'Indomie Goreng',
           isRequired: true,
           prefixIcon: Icons.inventory_2_outlined,
           textCapitalization: TextCapitalization.words,
@@ -87,104 +89,79 @@ class AddProductBaseForm extends StatelessWidget {
           validator: (val) {
             final trimmed = val?.trim() ?? '';
             if (trimmed.isEmpty) {
-              return 'Nama barang wajib diisi';
+              return 'Isi nama produk dulu';
             }
             if (trimmed.length < 3) {
-              return 'Nama barang minimal 3 huruf';
+              return 'Minimal 3 huruf';
             }
             return null;
           },
         ),
-        const SizedBox(height: 12),
-        AuthTextField(
-          controller: skuController,
-          label: 'SKU',
-          hint: 'SDPGRG-2810-482A',
-          prefixIcon: Icons.qr_code_scanner_outlined,
-          suffixIcon: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              IconButton(
-                icon: const Icon(Icons.refresh_rounded, color: AppColors.primary, size: 20),
-                tooltip: 'Buat SKU Otomatis',
-                onPressed: () {
-                  skuController.text = SkuGenerator.generate(nameController.text);
-                },
-              ),
-              IconButton(
-                icon: const Icon(Icons.camera_alt_outlined, color: AppColors.primary, size: 20),
-                tooltip: 'Pindai Barcode Fisik',
-                onPressed: () async {
-                  final code = await CameraBarcodeScanner.scan(
-                    context,
-                    title: 'Pindai Barcode Produk',
-                  );
-                  if (code != null) {
-                    skuController.text = code;
-                  }
-                },
-              ),
-            ],
-          ),
-        ),
-        const SizedBox(height: 12),
-        ProductClassificationFields(
-          selectedCategory: selectedCategory,
-          onCategoryChanged: onCategoryChanged,
-          selectedProductType: selectedProductType,
-          onProductTypeChanged: onProductTypeChanged,
-          minStockAlertController: minStockAlertController,
-          availableCategories: availableCategories,
-          availableProductTypes: availableProductTypes,
-        ),
-        if (onExpiredAtChanged != null) ...[
+        if (showAdvancedFields) ...[
           const SizedBox(height: 12),
-          ProductExpiryDateField(
-            expiredAt: expiredAt,
-            onChanged: onExpiredAtChanged!,
-          ),
-        ],
-        if (onDeviceTagChanged != null) ...[
-          const SizedBox(height: 12),
-          ProductDeviceSelector(
-            selectedDevice: selectedDeviceTag,
-            onDeviceSelected: onDeviceTagChanged!,
-          ),
-        ],
-        const SizedBox(height: 12),
-        Row(
-          children: [
-            Expanded(
-              child: AuthTextField(
-                controller: baseUnitController,
-                label: 'Satuan Dasar',
-                hint: 'Pcs / Btr / Kg',
-                isRequired: true,
-                prefixIcon: Icons.straighten_outlined,
-                validator: (val) => (val == null || val.trim().isEmpty) ? 'Wajib diisi' : null,
-              ),
+          AuthTextField(
+            controller: skuController,
+            label: 'SKU / Barcode',
+            hint: 'Otomatis jika kosong',
+            prefixIcon: Icons.qr_code_scanner_outlined,
+            suffixIcon: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                IconButton(
+                  icon: const Icon(Icons.refresh_rounded, color: AppColors.primary, size: 20),
+                  tooltip: 'Buat SKU',
+                  onPressed: () {
+                    skuController.text = SkuGenerator.generate(nameController.text);
+                  },
+                ),
+                IconButton(
+                  icon: const Icon(Icons.camera_alt_outlined, color: AppColors.primary, size: 20),
+                  tooltip: 'Scan Barcode',
+                  onPressed: () async {
+                    final code = await CameraBarcodeScanner.scan(
+                      context,
+                      title: 'Scan Barcode',
+                    );
+                    if (code != null) {
+                      skuController.text = code;
+                    }
+                  },
+                ),
+              ],
             ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: AuthTextField(
-                controller: stockController,
-                label: isStockEditable ? 'Stok Awal' : 'Stok Fisik',
-                hint: '0',
-                readOnly: !isStockEditable,
-                prefixIcon: isStockEditable ? Icons.layers_outlined : Icons.lock_outline_rounded,
-                keyboardType: TextInputType.number,
-                inputFormatters: [CurrencyTextInputFormatter()],
-              ),
+          ),
+          const SizedBox(height: 12),
+          ProductClassificationFields(
+            selectedCategory: selectedCategory,
+            onCategoryChanged: onCategoryChanged,
+            selectedProductType: selectedProductType,
+            onProductTypeChanged: onProductTypeChanged,
+            minStockAlertController: minStockAlertController,
+            availableCategories: availableCategories,
+            availableProductTypes: availableProductTypes,
+          ),
+          if (onExpiredAtChanged != null) ...[
+            const SizedBox(height: 12),
+            ProductExpiryDateField(
+              expiredAt: expiredAt,
+              onChanged: onExpiredAtChanged!,
             ),
           ],
-        ),
-        const SizedBox(height: 12),
+          if (onDeviceTagChanged != null) ...[
+            const SizedBox(height: 12),
+            ProductDeviceSelector(
+              selectedDevice: selectedDeviceTag,
+              onDeviceSelected: onDeviceTagChanged!,
+            ),
+          ],
+        ],
+        const SizedBox(height: 14),
         Row(
           children: [
             Expanded(
               child: AuthTextField(
                 controller: costPriceController,
-                label: 'HPP Modal (Dasar)',
+                label: 'Harga Modal',
                 hint: '0',
                 isRequired: true,
                 prefixIcon: Icons.account_balance_wallet_outlined,
@@ -201,7 +178,7 @@ class AddProductBaseForm extends StatelessWidget {
             Expanded(
               child: AuthTextField(
                 controller: sellingPriceController,
-                label: 'Harga Jual (Dasar)',
+                label: 'Harga Jual',
                 hint: '0',
                 isRequired: true,
                 prefixIcon: Icons.payments_outlined,
@@ -212,6 +189,33 @@ class AddProductBaseForm extends StatelessWidget {
                   if (CurrencyFormatter.parse(val) <= 0) return 'Harus > 0';
                   return null;
                 },
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 14),
+        Row(
+          children: [
+            Expanded(
+              child: AuthTextField(
+                controller: stockController,
+                label: isStockEditable ? 'Stok Awal' : 'Stok Fisik',
+                hint: '0',
+                readOnly: !isStockEditable,
+                prefixIcon: isStockEditable ? Icons.layers_outlined : Icons.lock_outline_rounded,
+                keyboardType: TextInputType.number,
+                inputFormatters: [CurrencyTextInputFormatter()],
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: AuthTextField(
+                controller: baseUnitController,
+                label: 'Satuan',
+                hint: 'Pcs / Kg',
+                isRequired: true,
+                prefixIcon: Icons.straighten_outlined,
+                validator: (val) => (val == null || val.trim().isEmpty) ? 'Wajib diisi' : null,
               ),
             ),
           ],
