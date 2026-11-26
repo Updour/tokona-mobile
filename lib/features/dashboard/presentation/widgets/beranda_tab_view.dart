@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:tokona/core/services/in_app_notification_service.dart';
 import 'package:tokona/core/services/native_push_notification_service.dart';
 import 'package:tokona/core/theme/app_colors.dart';
+import 'package:tokona/core/widgets/modern_animations.dart';
 import 'package:tokona/features/auth/domain/models/store_model.dart';
 import 'package:tokona/features/auth/domain/models/user_model.dart';
 import 'package:tokona/features/backup/presentation/controllers/scheduled_backup_controller.dart';
@@ -157,27 +158,41 @@ class _BerandaTabViewState extends ConsumerState<BerandaTabView> {
       },
       child: ListView(
         physics: const AlwaysScrollableScrollPhysics(parent: BouncingScrollPhysics()),
-        padding: const EdgeInsets.fromLTRB(10, 10, 10, 40),
+        padding: const EdgeInsets.fromLTRB(16, 12, 16, 48),
         children: [
-          BerandaHeaderBar(
-            store: store,
-            user: user,
-            onNavigateTab: onNavigateTab,
+          FadeSlideIn(
+            child: BerandaHeaderBar(
+              store: store,
+              user: user,
+              onNavigateTab: onNavigateTab,
+            ),
           ),
-          const SizedBox(height: 14),
+          const SizedBox(height: 16),
           const StoreProfileIncompleteBanner(),
-          BerandaSwipeableCards(onNavigateTab: onNavigateTab),
-          const SizedBox(height: 14),
-          BerandaQuickShortcuts(onNavigateTab: onNavigateTab),
+          FadeSlideIn(
+            delay: const Duration(milliseconds: 60),
+            child: BerandaSwipeableCards(onNavigateTab: onNavigateTab),
+          ),
           const SizedBox(height: 16),
-          BerandaBusinessMetricsSection(onNavigateTab: onNavigateTab),
+          FadeSlideIn(
+            delay: const Duration(milliseconds: 110),
+            child: BerandaQuickShortcuts(onNavigateTab: onNavigateTab),
+          ),
+          const SizedBox(height: 18),
+          FadeSlideIn(
+            delay: const Duration(milliseconds: 160),
+            child: BerandaBusinessMetricsSection(onNavigateTab: onNavigateTab),
+          ),
+          const SizedBox(height: 18),
+          const FadeSlideIn(
+            delay: Duration(milliseconds: 200),
+            child: DailySalesChartCard(),
+          ),
           const SizedBox(height: 16),
-          const DailySalesChartCard(),
-          const SizedBox(height: 14),
           const BerandaActiveOrdersCard(),
-          const SizedBox(height: 14),
+          const SizedBox(height: 16),
           const BerandaBookingMonitorCard(),
-          const SizedBox(height: 14),
+          const SizedBox(height: 16),
           BerandaTopProductsCard(
             onNavigateToProducts: () => onNavigateTab?.call(1),
           ),

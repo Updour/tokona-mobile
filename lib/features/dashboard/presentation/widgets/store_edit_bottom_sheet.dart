@@ -279,13 +279,7 @@ class _StoreEditBottomSheetState extends ConsumerState<StoreEditBottomSheet> {
       hintText: hint,
       helperText: helper,
       helperStyle: const TextStyle(fontSize: 11, color: AppColors.textMuted),
-      prefixIcon: Icon(prefixIcon, size: 18, color: AppColors.textSecondary),
-      filled: true,
-      fillColor: AppColors.surfaceElevated,
-      contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-      border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: AppColors.border)),
-      enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: AppColors.border)),
-      focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: AppColors.primary, width: 1.5)),
+      prefixIcon: Icon(prefixIcon, size: 18, color: const Color(0xFF64748B)),
     );
   }
 }
