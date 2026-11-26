@@ -65,15 +65,20 @@ class _AppLoadingOverlayState extends State<AppLoadingOverlay> with SingleTicker
       child: Center(
         child: Container(
           margin: const EdgeInsets.symmetric(horizontal: 40),
-          padding: const EdgeInsets.fromLTRB(24, 28, 24, 24),
+          padding: const EdgeInsets.fromLTRB(26, 30, 26, 26),
           decoration: BoxDecoration(
             color: Colors.white,
-            borderRadius: BorderRadius.circular(24),
+            borderRadius: BorderRadius.circular(28),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withValues(alpha: 0.14),
-                blurRadius: 30,
-                offset: const Offset(0, 10),
+                color: const Color(0xFF0F172A).withValues(alpha: 0.16),
+                blurRadius: 36,
+                offset: const Offset(0, 14),
+              ),
+              BoxShadow(
+                color: AppColors.primary.withValues(alpha: 0.10),
+                blurRadius: 18,
+                offset: const Offset(0, 6),
               ),
             ],
           ),
@@ -83,16 +88,20 @@ class _AppLoadingOverlayState extends State<AppLoadingOverlay> with SingleTicker
               ScaleTransition(
                 scale: _scaleAnimation,
                 child: Container(
-                  width: 64,
-                  height: 64,
+                  width: 66,
+                  height: 66,
                   decoration: BoxDecoration(
-                    color: const Color(0xFFCCFBF1),
+                    gradient: const LinearGradient(
+                      colors: [Color(0xFFCCFBF1), Color(0xFF99F6E4)],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                    ),
                     shape: BoxShape.circle,
                     boxShadow: [
                       BoxShadow(
-                        color: AppColors.primary.withValues(alpha: 0.25),
-                        blurRadius: 16,
-                        offset: const Offset(0, 4),
+                        color: AppColors.primary.withValues(alpha: 0.28),
+                        blurRadius: 18,
+                        offset: const Offset(0, 6),
                       ),
                     ],
                   ),

@@ -31,19 +31,19 @@ class ReportKpiCards extends StatelessWidget {
     final isProfitable = summary.grossProfit >= 0;
 
     return Container(
-      padding: const EdgeInsets.all(18),
+      padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [const Color(0xFF0F172A), AppColors.primaryDark],
+        gradient: const LinearGradient(
+          colors: [Color(0xFF0F172A), Color(0xFF0F766E), Color(0xFF0D9488)],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
-        borderRadius: BorderRadius.circular(18),
+        borderRadius: BorderRadius.circular(24),
         boxShadow: [
           BoxShadow(
-            color: AppColors.primary.withValues(alpha: 0.14),
-            blurRadius: 16,
-            offset: const Offset(0, 6),
+            color: AppColors.primary.withValues(alpha: 0.24),
+            blurRadius: 22,
+            offset: const Offset(0, 8),
           ),
         ],
       ),
@@ -53,15 +53,12 @@ class ReportKpiCards extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text('Omset Penjualan Bersih', style: AppTypography.bodySmall.copyWith(color: Colors.white70, fontSize: 12.5)),
+              Text('Omset Bersih', style: AppTypography.bodySmall.copyWith(color: Colors.white70, fontSize: 12.5)),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 3.5),
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                 decoration: BoxDecoration(
-                  color: (isProfitable ? const Color(0xFF10B981) : const Color(0xFFEF4444)).withValues(alpha: 0.2),
+                  color: (isProfitable ? const Color(0xFF10B981) : const Color(0xFFEF4444)).withValues(alpha: 0.22),
                   borderRadius: BorderRadius.circular(20),
-                  border: Border.all(
-                    color: (isProfitable ? const Color(0xFF10B981) : const Color(0xFFEF4444)).withValues(alpha: 0.4),
-                  ),
                 ),
                 child: Text(
                   'Margin ${summary.profitMargin.toStringAsFixed(1)}%',
@@ -83,8 +80,8 @@ class ReportKpiCards extends StatelessWidget {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 11),
             decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.08),
-              borderRadius: BorderRadius.circular(13),
+              color: Colors.white.withValues(alpha: 0.10),
+              borderRadius: BorderRadius.circular(14),
             ),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -92,7 +89,7 @@ class ReportKpiCards extends StatelessWidget {
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text('Estimasi Laba Kotor', style: TextStyle(color: Colors.white60, fontSize: 10.5)),
+                    const Text('Laba Kotor', style: TextStyle(color: Colors.white60, fontSize: 10.5)),
                     const SizedBox(height: 2),
                     Text(
                       CurrencyFormatter.format(summary.grossProfit),
@@ -127,18 +124,12 @@ class ReportKpiCards extends StatelessWidget {
     return Container(
       decoration: BoxDecoration(
         color: AppColors.surface,
-        borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: const Color(0xFFE2E8F0), width: 0.9),
+        borderRadius: BorderRadius.circular(24),
         boxShadow: [
           BoxShadow(
-            color: const Color(0xFF0F172A).withValues(alpha: 0.04),
-            blurRadius: 18,
-            offset: const Offset(0, 6),
-          ),
-          BoxShadow(
-            color: const Color(0xFF0F172A).withValues(alpha: 0.02),
-            blurRadius: 6,
-            offset: const Offset(0, 2),
+            color: const Color(0xFF0F172A).withValues(alpha: 0.055),
+            blurRadius: 22,
+            offset: const Offset(0, 8),
           ),
         ],
       ),
