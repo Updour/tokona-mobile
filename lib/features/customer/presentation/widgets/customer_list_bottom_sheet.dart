@@ -121,9 +121,9 @@ class _CustomerListBottomSheetState extends ConsumerState<CustomerListBottomShee
     return Container(
       decoration: const BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(22)),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
         boxShadow: [
-          BoxShadow(color: Color(0x140F172A), blurRadius: 20, offset: Offset(0, -4)),
+          BoxShadow(color: Color(0x180F172A), blurRadius: 28, offset: Offset(0, -6)),
         ],
       ),
       padding: EdgeInsets.fromLTRB(16, 12, 16, MediaQuery.of(context).viewInsets.bottom + 14),
@@ -133,19 +133,19 @@ class _CustomerListBottomSheetState extends ConsumerState<CustomerListBottomShee
         children: [
           Center(
             child: Container(
-              width: 38,
-              height: 4,
-              decoration: BoxDecoration(color: const Color(0xFFE2E8F0), borderRadius: BorderRadius.circular(2)),
+              width: 40,
+              height: 4.5,
+              decoration: BoxDecoration(color: const Color(0xFFCBD5E1).withValues(alpha: 0.7), borderRadius: BorderRadius.circular(3)),
             ),
           ),
-          const SizedBox(height: 10),
+          const SizedBox(height: 12),
           Row(
             children: [
               Expanded(
                 child: Row(
                   children: [
                     Flexible(
-                      child: Text('Data Pelanggan', style: AppTypography.headingSmall.copyWith(fontSize: 14.5, fontWeight: FontWeight.w800), maxLines: 1, overflow: TextOverflow.ellipsis),
+                      child: Text('Pelanggan', style: AppTypography.headingSmall.copyWith(fontSize: 16, fontWeight: FontWeight.w800), maxLines: 1, overflow: TextOverflow.ellipsis),
                     ),
                     const SizedBox(width: 5),
                     Container(

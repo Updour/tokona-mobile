@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:tokona/core/theme/app_colors.dart';
 import 'package:tokona/core/theme/app_typography.dart';
 import 'package:tokona/core/widgets/app_dialog.dart';
+import 'package:tokona/core/widgets/modern_sheet_widgets.dart';
 import 'package:tokona/features/auth/presentation/controllers/auth_controller.dart';
 import 'package:tokona/features/supplier/domain/models/supplier_model.dart';
 import 'package:tokona/features/supplier/presentation/controllers/supplier_controller.dart';
@@ -86,71 +87,55 @@ class _SupplierListBottomSheetState extends ConsumerState<SupplierListBottomShee
     return Container(
       decoration: const BoxDecoration(
         color: AppColors.surface,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+        boxShadow: [
+          BoxShadow(color: Color(0x180F172A), blurRadius: 28, offset: Offset(0, -6)),
+        ],
       ),
-      padding: const EdgeInsets.fromLTRB(20, 16, 20, 24),
+      padding: const EdgeInsets.fromLTRB(20, 12, 20, 24),
       constraints: BoxConstraints(maxHeight: MediaQuery.of(context).size.height * 0.85),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Center(
-            child: Container(
-              width: 40,
-              height: 4,
-              decoration: BoxDecoration(color: AppColors.border, borderRadius: BorderRadius.circular(2)),
+          ModernSheetHeader(
+            title: 'Supplier',
+            subtitle: '${state.suppliers.length} rekanan terdaftar',
+            icon: Icons.local_shipping_rounded,
+            onClose: () => Navigator.of(context).pop(),
+            trailingAction: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                IconButton(
+                  icon: Icon(
+                    _isSearchVisible ? Icons.search_off_rounded : Icons.search_rounded,
+                    color: _isSearchVisible ? AppColors.primary : const Color(0xFF64748B),
+                    size: 20,
+                  ),
+                  tooltip: 'Cari',
+                  padding: EdgeInsets.zero,
+                  constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
+                  onPressed: () {
+                    setState(() {
+                      _isSearchVisible = !_isSearchVisible;
+                      if (!_isSearchVisible && _searchController.text.isNotEmpty) {
+                        _searchController.clear();
+                        _onSearch('');
+                      }
+                    });
+                  },
+                ),
+                IconButton(
+                  icon: const Icon(Icons.person_add_rounded, color: AppColors.primary, size: 20),
+                  tooltip: 'Tambah',
+                  padding: EdgeInsets.zero,
+                  constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
+                  onPressed: () => AddSupplierBottomSheet.show(
+                    context,
+                    onCreate: (dto) => ref.read(supplierListProvider.notifier).createSupplier(storeId, dto),
+                  ),
+                ),
+              ],
             ),
-          ),
-          const SizedBox(height: 12),
-          Row(
-            children: [
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text('Master Supplier & Distributor', style: AppTypography.headingSmall.copyWith(fontSize: 16, fontWeight: FontWeight.w700), maxLines: 1, overflow: TextOverflow.ellipsis),
-                    const SizedBox(height: 1),
-                    Text('${state.suppliers.length} rekanan supplier terdaftar', style: AppTypography.bodySmall.copyWith(fontSize: 11), maxLines: 1, overflow: TextOverflow.ellipsis),
-                  ],
-                ),
-              ),
-              IconButton(
-                icon: Icon(
-                  _isSearchVisible ? Icons.search_off_rounded : Icons.search_rounded,
-                  color: _isSearchVisible ? AppColors.primary : AppColors.textPrimary,
-                  size: 21,
-                ),
-                tooltip: 'Cari Supplier',
-                padding: EdgeInsets.zero,
-                constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
-                onPressed: () {
-                  setState(() {
-                    _isSearchVisible = !_isSearchVisible;
-                    if (!_isSearchVisible && _searchController.text.isNotEmpty) {
-                      _searchController.clear();
-                      _onSearch('');
-                    }
-                  });
-                },
-              ),
-              const SizedBox(width: 4),
-              IconButton(
-                icon: const Icon(Icons.person_add_rounded, color: AppColors.primary, size: 21),
-                tooltip: 'Tambah Supplier',
-                padding: EdgeInsets.zero,
-                constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
-                onPressed: () => AddSupplierBottomSheet.show(
-                  context,
-                  onCreate: (dto) => ref.read(supplierListProvider.notifier).createSupplier(storeId, dto),
-                ),
-              ),
-              const SizedBox(width: 4),
-              IconButton(
-                icon: const Icon(Icons.close_rounded, color: AppColors.textPrimary, size: 20),
-                padding: EdgeInsets.zero,
-                constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
-                onPressed: () => Navigator.of(context).pop(),
-              ),
-            ],
           ),
           if (_isSearchVisible) ...[
             const SizedBox(height: 10),
