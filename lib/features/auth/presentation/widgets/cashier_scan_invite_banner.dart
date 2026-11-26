@@ -72,7 +72,7 @@ class CashierScanInviteBanner extends ConsumerWidget {
               Icon(Icons.qr_code_scanner_rounded, size: 17, color: Color(0xFF0D9488)),
               SizedBox(width: 8),
               Text(
-                'Gabung sebagai Kasir? Scan QR Toko',
+                'Kasir? Scan QR Toko',
                 style: TextStyle(
                   fontSize: 12.5,
                   fontWeight: FontWeight.w700,

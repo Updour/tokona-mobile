@@ -62,25 +62,25 @@ class _RegisterFormWidgetState extends State<RegisterFormWidget> {
         children: [
           AuthTextField(
             controller: _ownerNameController,
-            label: 'Nama Pengguna',
-            hint: 'Contoh: Budi Santoso',
+            label: 'Nama',
+            hint: 'Budi Santoso',
             prefixIcon: Icons.person_outline_rounded,
             textCapitalization: TextCapitalization.words,
-            validator: (v) => (v == null || v.trim().isEmpty) ? 'Nama pengguna wajib diisi ya' : null,
+            validator: (v) => (v == null || v.trim().isEmpty) ? 'Isi nama dulu' : null,
           ),
           const SizedBox(height: 16),
           AuthTextField(
             controller: _phoneController,
-            label: 'No. HP / WhatsApp',
-            hint: 'Contoh: 081234567890',
+            label: 'No. HP / WA',
+            hint: '08123456789',
             prefixIcon: Icons.phone_android_rounded,
             keyboardType: TextInputType.phone,
             validator: (v) {
               if (v == null || v.trim().isEmpty) {
-                return 'No. HP / WhatsApp wajib diisi ya';
+                return 'Isi no. HP / WA';
               }
               if (!WhatsAppService.isValidWhatsAppNumber(v.trim())) {
-                return 'Format nomor belum pas (minimal 10 digit)';
+                return 'No. HP minimal 10 digit';
               }
               return null;
             },
@@ -89,15 +89,15 @@ class _RegisterFormWidgetState extends State<RegisterFormWidget> {
           AuthTextField(
             controller: _passwordController,
             label: 'Password',
-            hint: 'Minimal 6 karakter',
+            hint: 'Min. 6 karakter',
             prefixIcon: Icons.lock_outline_rounded,
             isPassword: true,
             obscureText: _obscurePassword,
             textInputAction: TextInputAction.done,
             onToggleVisibility: () => setState(() => _obscurePassword = !_obscurePassword),
             validator: (v) {
-              if (v == null || v.isEmpty) return 'Buat password dulu ya';
-              if (v.length < 6) return 'Minimal 6 karakter ya';
+              if (v == null || v.isEmpty) return 'Isi password';
+              if (v.length < 6) return 'Min. 6 karakter';
               return null;
             },
           ),
@@ -108,7 +108,7 @@ class _RegisterFormWidgetState extends State<RegisterFormWidget> {
               SizedBox(width: 6),
               Expanded(
                 child: Text(
-                  'Nama toko & alamat bisa dilengkapi setelah masuk',
+                  'Nama toko & alamat diisi nanti',
                   style: TextStyle(fontSize: 11.5, color: Color(0xFF64748B), fontWeight: FontWeight.w500),
                 ),
               ),
@@ -164,13 +164,13 @@ class _RegisterFormWidgetState extends State<RegisterFormWidget> {
                               ),
                               SizedBox(width: 10),
                               Text(
-                                'Lagi nyiapin akunmu...',
+                                'Menyimpan...',
                                 style: TextStyle(color: Colors.white, fontWeight: FontWeight.w700, fontSize: 14),
                               ),
                             ],
                           )
                         : const Text(
-                            'Daftar Sekarang',
+                            'Daftar',
                             style: TextStyle(color: Colors.white, fontWeight: FontWeight.w800, fontSize: 15, letterSpacing: 0.2),
                           ),
                   ),
@@ -194,7 +194,7 @@ class _RegisterFormWidgetState extends State<RegisterFormWidget> {
                   tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                 ),
                 child: const Text(
-                  'Masuk di Sini',
+                  'Masuk',
                   style: TextStyle(fontSize: 12.5, fontWeight: FontWeight.w800, color: Color(0xFF0D9488)),
                 ),
               ),

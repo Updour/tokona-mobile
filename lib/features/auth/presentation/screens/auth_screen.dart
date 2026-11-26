@@ -59,8 +59,8 @@ class _AuthScreenState extends ConsumerState<AuthScreen> with SingleTickerProvid
       if (next == true && prev != true) {
         await AppLoadingOverlay.show(
           context,
-          title: 'Membuka Toko...',
-          subtitle: 'Menyiapkan produk & meja kasir, sebentar ya.',
+          title: 'Sebentar ya...',
+          subtitle: 'Menyiapkan data tokomu',
           icon: Icons.storefront_rounded,
           duration: const Duration(milliseconds: 1800),
         );
@@ -128,7 +128,7 @@ class _AuthScreenState extends ConsumerState<AuthScreen> with SingleTickerProvid
                                         crossAxisAlignment: CrossAxisAlignment.start,
                                         children: [
                                           Text(
-                                            isRegisterMode ? 'Buat Akun Baru' : 'Selamat Datang',
+                                            isRegisterMode ? 'Daftar Akun' : 'Selamat Datang',
                                             style: const TextStyle(
                                               fontSize: 20,
                                               fontWeight: FontWeight.w800,
@@ -139,8 +139,8 @@ class _AuthScreenState extends ConsumerState<AuthScreen> with SingleTickerProvid
                                           const SizedBox(height: 4),
                                           Text(
                                             isRegisterMode
-                                                ? 'Cukup 3 langkah cepat, sisanya bisa nanti'
-                                                : 'Masuk untuk mulai kelola tokomu hari ini',
+                                                ? 'Isi data singkat untuk mulai'
+                                                : 'Masuk ke akun tokomu',
                                             style: const TextStyle(
                                               fontSize: 12.5,
                                               color: Color(0xFF64748B),
@@ -291,7 +291,7 @@ class _AuthScreenState extends ConsumerState<AuthScreen> with SingleTickerProvid
       children: [
         Icon(Icons.verified_user_outlined, size: 13, color: Color(0xFF10B981)),
         SizedBox(width: 6),
-        Text('Tokona POS • Aman & Bisa Dipakai Offline', style: TextStyle(fontSize: 11.5, color: Color(0xFF94A3B8), fontWeight: FontWeight.w500)),
+        Text('Bisa dipakai offline • Data aman', style: TextStyle(fontSize: 11.5, color: Color(0xFF94A3B8), fontWeight: FontWeight.w500)),
       ],
     );
   }

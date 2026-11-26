@@ -55,12 +55,12 @@ class _LoginFormWidgetState extends State<LoginFormWidget> {
         children: [
           AuthTextField(
             controller: _usernameController,
-            label: 'Username atau No. HP',
-            hint: 'Contoh: budi atau 081234567890',
+            label: 'Username / No. HP',
+            hint: 'budi / 08123456789',
             prefixIcon: Icons.person_outline_rounded,
             validator: (value) {
               if (value == null || value.trim().isEmpty) {
-                return 'Username atau nomor HP wajib diisi ya';
+                return 'Isi username atau no. HP';
               }
               return null;
             },
@@ -69,7 +69,7 @@ class _LoginFormWidgetState extends State<LoginFormWidget> {
           AuthTextField(
             controller: _passwordController,
             label: 'Password',
-            hint: 'Masukkan password Anda',
+            hint: 'Ketik password',
             prefixIcon: Icons.lock_outline_rounded,
             isPassword: true,
             obscureText: _obscurePassword,
@@ -79,7 +79,7 @@ class _LoginFormWidgetState extends State<LoginFormWidget> {
             },
             validator: (value) {
               if (value == null || value.isEmpty) {
-                return 'Password tidak boleh kosong';
+                return 'Isi password dulu';
               }
               return null;
             },
@@ -156,13 +156,13 @@ class _LoginFormWidgetState extends State<LoginFormWidget> {
                               ),
                               SizedBox(width: 10),
                               Text(
-                                'Sebentar, lagi dicek...',
+                                'Masuk...',
                                 style: TextStyle(color: Colors.white, fontWeight: FontWeight.w700, fontSize: 14),
                               ),
                             ],
                           )
                         : const Text(
-                            'Masuk Sekarang',
+                            'Masuk',
                             style: TextStyle(color: Colors.white, fontWeight: FontWeight.w800, fontSize: 15, letterSpacing: 0.2),
                           ),
                   ),
@@ -175,7 +175,7 @@ class _LoginFormWidgetState extends State<LoginFormWidget> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               const Text(
-                'Baru pakai Tokona?',
+                'Belum punya akun?',
                 style: TextStyle(fontSize: 12.5, color: Color(0xFF64748B)),
               ),
               TextButton(
@@ -186,7 +186,7 @@ class _LoginFormWidgetState extends State<LoginFormWidget> {
                   tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                 ),
                 child: const Text(
-                  'Buat Toko Sekarang',
+                  'Daftar',
                   style: TextStyle(
                     fontSize: 12.5,
                     fontWeight: FontWeight.w800,

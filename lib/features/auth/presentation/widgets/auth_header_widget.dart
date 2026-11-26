@@ -111,7 +111,7 @@ class _AuthHeaderWidgetState extends State<AuthHeaderWidget> with SingleTickerPr
         ),
         const SizedBox(height: 4),
         const Text(
-          'Kelola kasir, stok & cuan lebih mudah',
+          'Kasir pintar untuk tokomu',
           style: TextStyle(
             fontSize: 13,
             fontWeight: FontWeight.w500,
