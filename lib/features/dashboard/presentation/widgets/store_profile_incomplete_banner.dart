@@ -55,25 +55,28 @@ class StoreProfileIncompleteBanner extends ConsumerWidget {
 
     String missingDesc;
     if (isAddressMissing && isPhoneMissing) {
-      missingDesc = 'Alamat & no. telepon toko belum diisi.';
+      missingDesc = 'Nama, alamat & no. HP toko belum lengkap.';
     } else if (isAddressMissing) {
       missingDesc = 'Alamat toko belum diisi.';
     } else {
-      missingDesc = 'Nomor WhatsApp toko belum diisi.';
+      missingDesc = 'No. WhatsApp toko belum diisi.';
     }
 
     return Container(
-      margin: const EdgeInsets.only(bottom: 14),
-      padding: const EdgeInsets.all(12),
+      margin: const EdgeInsets.only(bottom: 16),
+      padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: const Color(0xFFFFFBEB),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: const Color(0xFFFDE68A)),
+        gradient: const LinearGradient(
+          colors: [Color(0xFFFFFBEB), Color(0xFFFEF3C7)],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: const Color(0xFFD97706).withValues(alpha: 0.06),
-            blurRadius: 10,
-            offset: const Offset(0, 3),
+            color: const Color(0xFFD97706).withValues(alpha: 0.12),
+            blurRadius: 18,
+            offset: const Offset(0, 6),
           ),
         ],
       ),
@@ -81,52 +84,53 @@ class StoreProfileIncompleteBanner extends ConsumerWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Container(
-            padding: const EdgeInsets.all(8),
+            padding: const EdgeInsets.all(10),
             decoration: BoxDecoration(
-              color: const Color(0xFFFEF3C7),
-              borderRadius: BorderRadius.circular(10),
+              color: Colors.white.withValues(alpha: 0.85),
+              borderRadius: BorderRadius.circular(14),
             ),
-            child: const Icon(Icons.storefront_outlined, color: Color(0xFFD97706), size: 20),
+            child: const Icon(Icons.storefront_rounded, color: Color(0xFFD97706), size: 22),
           ),
-          const SizedBox(width: 10),
+          const SizedBox(width: 12),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Row(
-                  children: [
-                    Text(
-                      'Lengkapi Profil Toko',
-                      style: TextStyle(fontWeight: FontWeight.w800, fontSize: 13, color: Color(0xFF92400E)),
-                    ),
-                    SizedBox(width: 6),
-                    Text('(Wajib)', style: TextStyle(fontSize: 10.5, fontWeight: FontWeight.w700, color: AppColors.error)),
-                  ],
+                const Text(
+                  'Lengkapi Info Toko',
+                  style: TextStyle(fontWeight: FontWeight.w800, fontSize: 13.5, color: Color(0xFF92400E)),
                 ),
-                const SizedBox(height: 2),
+                const SizedBox(height: 3),
                 Text(
-                  '$missingDesc Lengkapi profil untuk mengaktifkan cetak nota & input produk.',
-                  style: const TextStyle(fontSize: 11, color: Color(0xFFB45309), height: 1.3),
+                  '$missingDesc Isi sekarang agar nota & fitur produk aktif.',
+                  style: const TextStyle(fontSize: 11.5, color: Color(0xFFB45309), height: 1.35),
                 ),
-                const SizedBox(height: 8),
+                const SizedBox(height: 10),
                 InkWell(
                   onTap: () => StoreEditBottomSheet.show(context, store: store),
-                  borderRadius: BorderRadius.circular(8),
+                  borderRadius: BorderRadius.circular(10),
                   child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
                     decoration: BoxDecoration(
-                      color: const Color(0xFFD97706),
-                      borderRadius: BorderRadius.circular(8),
+                      gradient: const LinearGradient(colors: [Color(0xFFD97706), Color(0xFFF59E0B)]),
+                      borderRadius: BorderRadius.circular(10),
+                      boxShadow: [
+                        BoxShadow(
+                          color: const Color(0xFFD97706).withValues(alpha: 0.25),
+                          blurRadius: 8,
+                          offset: const Offset(0, 3),
+                        ),
+                      ],
                     ),
                     child: const Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         Text(
                           'Lengkapi Sekarang',
-                          style: TextStyle(fontSize: 11, fontWeight: FontWeight.w800, color: Colors.white),
+                          style: TextStyle(fontSize: 11.5, fontWeight: FontWeight.w800, color: Colors.white),
                         ),
                         SizedBox(width: 4),
-                        Icon(Icons.arrow_forward_rounded, color: Colors.white, size: 13),
+                        Icon(Icons.arrow_forward_rounded, color: Colors.white, size: 14),
                       ],
                     ),
                   ),

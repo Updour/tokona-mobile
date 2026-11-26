@@ -20,6 +20,7 @@ class _StoreCapitalTypeSelectorState extends State<StoreCapitalTypeSelector> {
 
   static const List<(String, String, IconData, Color)> _types = [
     ('TARIK_MODAL', 'Tarik Kas', Icons.remove_circle_outline_rounded, Color(0xFFDC2626)),
+    ('PEMASUKAN_LAIN', 'Pemasukan Toko', Icons.trending_up_rounded, Color(0xFF10B981)),
     ('TAMBAH_MODAL', 'Tambah Modal', Icons.add_circle_outline_rounded, Color(0xFF0D9488)),
     ('MODAL_AWAL', 'Modal Awal', Icons.flag_outlined, Color(0xFF2563EB)),
   ];

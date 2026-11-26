@@ -98,16 +98,15 @@ class _BerandaQuickShortcutsState extends ConsumerState<BerandaQuickShortcuts> {
     }
 
     return Container(
-      padding: const EdgeInsets.fromLTRB(10, 14, 10, 10),
+      padding: const EdgeInsets.fromLTRB(12, 16, 12, 12),
       decoration: BoxDecoration(
         color: AppColors.surface,
-        borderRadius: BorderRadius.circular(22),
-        border: Border.all(color: AppColors.border.withValues(alpha: 0.55), width: 0.6),
+        borderRadius: BorderRadius.circular(24),
         boxShadow: [
           BoxShadow(
-            color: const Color(0xFF0F172A).withValues(alpha: 0.03),
-            blurRadius: 14,
-            offset: const Offset(0, 4),
+            color: const Color(0xFF0F172A).withValues(alpha: 0.055),
+            blurRadius: 22,
+            offset: const Offset(0, 8),
           ),
         ],
       ),

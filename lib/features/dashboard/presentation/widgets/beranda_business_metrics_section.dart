@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:tokona/core/theme/app_colors.dart';
 import 'package:tokona/core/theme/app_typography.dart';
 import 'package:tokona/core/utils/currency_formatter.dart';
+import 'package:tokona/core/widgets/modern_animations.dart';
 import 'package:tokona/features/dashboard/presentation/widgets/card_background_sparkline_painter.dart';
 import 'package:tokona/features/pos/presentation/controllers/sale_history_controller.dart';
 import 'package:tokona/features/purchase/presentation/controllers/active_orders_controller.dart';
@@ -143,29 +144,26 @@ class BerandaBusinessMetricsSection extends ConsumerWidget {
     String? badgeText,
     required VoidCallback onTap,
   }) {
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(16),
-        child: Container(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              colors: gradient,
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-            ),
-            borderRadius: BorderRadius.circular(16),
-            boxShadow: [
-              BoxShadow(
-                color: gradient.first.withValues(alpha: 0.28),
-                blurRadius: 10,
-                offset: const Offset(0, 4),
-              ),
-            ],
+    return BouncyTap(
+      onTap: onTap,
+      child: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            colors: gradient,
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
           ),
-          clipBehavior: Clip.antiAlias,
-          child: Stack(
+          borderRadius: BorderRadius.circular(20),
+          boxShadow: [
+            BoxShadow(
+              color: gradient.first.withValues(alpha: 0.30),
+              blurRadius: 16,
+              offset: const Offset(0, 6),
+            ),
+          ],
+        ),
+        clipBehavior: Clip.antiAlias,
+        child: Stack(
             children: [
               Positioned.fill(
                 child: CustomPaint(
@@ -258,7 +256,6 @@ class BerandaBusinessMetricsSection extends ConsumerWidget {
             ],
           ),
         ),
-      ),
-    );
+      );
   }
 }

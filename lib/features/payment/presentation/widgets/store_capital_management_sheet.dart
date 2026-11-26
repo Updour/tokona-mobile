@@ -165,6 +165,7 @@ class _StoreCapitalManagementSheetState extends ConsumerState<StoreCapitalManage
   Widget _buildFilterChips(String? storeId, dynamic state, dynamic notifier) {
     final types = [
       ('ALL', 'Semua'),
+      ('PEMASUKAN_LAIN', 'Pemasukan'),
       ('TAMBAH_MODAL', 'Tambahan'),
       ('MODAL_AWAL', 'Modal Awal'),
       ('TARIK_MODAL', 'Tarik Kas'),

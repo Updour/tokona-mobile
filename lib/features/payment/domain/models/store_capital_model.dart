@@ -28,6 +28,7 @@ class StoreCapitalModel {
   });
 
   bool get isWithdrawal => type == 'TARIK_MODAL';
+  bool get isIncome => type == 'PEMASUKAN_LAIN';
 
   String get typeLabel {
     switch (type) {
@@ -35,6 +36,8 @@ class StoreCapitalModel {
         return 'Modal Awal';
       case 'TARIK_MODAL':
         return 'Tarik Kas (Prive)';
+      case 'PEMASUKAN_LAIN':
+        return 'Pemasukan Toko';
       case 'TAMBAH_MODAL':
       default:
         return 'Tambahan Modal';

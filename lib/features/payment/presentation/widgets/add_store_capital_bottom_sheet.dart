@@ -154,15 +154,19 @@ class _AddStoreCapitalBottomSheetState extends ConsumerState<AddStoreCapitalBott
 
     final title = _isWithdrawal
         ? 'Tarik Kas Toko (Prive)'
-        : _selectedType == 'MODAL_AWAL'
-            ? 'Catat Modal Awal'
-            : 'Tambah Modal Toko';
+        : _selectedType == 'PEMASUKAN_LAIN'
+            ? 'Catat Pemasukan Toko'
+            : _selectedType == 'MODAL_AWAL'
+                ? 'Catat Modal Awal'
+                : 'Tambah Modal Toko';
 
     final btnLabel = _isWithdrawal
         ? 'Simpan Penarikan Kas'
-        : _selectedType == 'MODAL_AWAL'
-            ? 'Simpan Modal Awal'
-            : 'Simpan Tambahan Modal';
+        : _selectedType == 'PEMASUKAN_LAIN'
+            ? 'Simpan Pemasukan Toko'
+            : _selectedType == 'MODAL_AWAL'
+                ? 'Simpan Modal Awal'
+                : 'Simpan Tambahan Modal';
 
     final selectedAcc = accounts.where((a) => a.id == _selectedAccountId).firstOrNull;
     final currentAccBalance = selectedAcc?.currentBalance ?? totalStoreBalance;

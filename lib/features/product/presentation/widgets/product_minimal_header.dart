@@ -57,7 +57,7 @@ class ProductMinimalHeader extends StatelessWidget {
                 style: const TextStyle(fontSize: 13.5, color: AppColors.textPrimary, fontWeight: FontWeight.w600),
                 onChanged: onSearchChanged,
                 decoration: const InputDecoration(
-                  hintText: 'Cari nama produk / SKU...',
+                  hintText: 'Cari produk...',
                   hintStyle: TextStyle(fontSize: 13, color: AppColors.textMuted, fontWeight: FontWeight.normal),
                   filled: false,
                   fillColor: Colors.transparent,

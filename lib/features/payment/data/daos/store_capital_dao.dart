@@ -59,7 +59,7 @@ class StoreCapitalDao {
     final rows = await db.rawQuery('''
       SELECT
         COALESCE(SUM(CASE WHEN ${DatabaseTables.columnCapitalType} = 'MODAL_AWAL' THEN ${DatabaseTables.columnCapitalAmount} ELSE 0 END), 0) as initial_capital,
-        COALESCE(SUM(CASE WHEN ${DatabaseTables.columnCapitalType} = 'TAMBAH_MODAL' THEN ${DatabaseTables.columnCapitalAmount} ELSE 0 END), 0) as added_capital,
+        COALESCE(SUM(CASE WHEN ${DatabaseTables.columnCapitalType} IN ('TAMBAH_MODAL', 'PEMASUKAN_LAIN') THEN ${DatabaseTables.columnCapitalAmount} ELSE 0 END), 0) as added_capital,
         COALESCE(SUM(CASE WHEN ${DatabaseTables.columnCapitalType} = 'TARIK_MODAL' THEN ${DatabaseTables.columnCapitalAmount} ELSE 0 END), 0) as withdrawn_capital
       FROM ${DatabaseTables.storeCapitals}
       WHERE ${DatabaseTables.columnCapitalStoreId} = ?
