@@ -10,7 +10,9 @@ class AppTheme {
   static ThemeData get lightTheme {
     return ThemeData(
       useMaterial3: true,
-      splashFactory: InkRipple.splashFactory,
+      splashFactory: InkSparkle.splashFactory,
+      splashColor: AppColors.primary.withValues(alpha: 0.07),
+      highlightColor: AppColors.primary.withValues(alpha: 0.03),
       scaffoldBackgroundColor: AppColors.background,
       colorScheme: const ColorScheme(
         brightness: Brightness.light,
