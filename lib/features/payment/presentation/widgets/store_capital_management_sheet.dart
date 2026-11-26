@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:tokona/core/theme/app_colors.dart';
-import 'package:tokona/core/theme/app_typography.dart';
 import 'package:tokona/core/utils/currency_formatter.dart';
+import 'package:tokona/core/widgets/modern_sheet_widgets.dart';
 import 'package:tokona/features/auth/presentation/controllers/auth_controller.dart';
 import 'package:tokona/features/payment/presentation/controllers/payment_account_controller.dart';
 import 'package:tokona/features/payment/presentation/controllers/store_capital_controller.dart';
@@ -51,49 +51,20 @@ class _StoreCapitalManagementSheetState extends ConsumerState<StoreCapitalManage
       child: Container(
         decoration: const BoxDecoration(
           color: AppColors.surface,
-          borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+          borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
         ),
-        padding: const EdgeInsets.fromLTRB(20, 14, 20, 16),
+        padding: const EdgeInsets.fromLTRB(20, 12, 20, 16),
         constraints: BoxConstraints(maxHeight: MediaQuery.of(context).size.height * 0.9),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Center(
-              child: Container(
-                width: 40,
-                height: 4,
-                decoration: BoxDecoration(
-                  color: AppColors.border,
-                  borderRadius: BorderRadius.circular(2),
-                ),
-              ),
+            ModernSheetHeader(
+              title: 'Kas & Modal Toko',
+              subtitle: 'Catat pemasukan, modal & tarik kas',
+              icon: Icons.account_balance_wallet_rounded,
+              onClose: () => Navigator.of(context).pop(),
             ),
-            const SizedBox(height: 12),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text('Modal Usaha & Tambahan', style: AppTypography.headingSmall.copyWith(fontSize: 16)),
-                      Text(
-                        'Catatan modal awal, suntikan modal & prive',
-                        style: AppTypography.bodySmall,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(width: 8),
-                IconButton(
-                  icon: const Icon(Icons.close_rounded, color: AppColors.textMuted),
-                  onPressed: () => Navigator.of(context).pop(),
-                ),
-              ],
-            ),
-            const SizedBox(height: 12),
+            const SizedBox(height: 14),
             StoreCapitalKpiCard(state: state, totalStoreBalance: totalStoreBalance),
             const SizedBox(height: 12),
             Row(
@@ -163,7 +134,7 @@ class _StoreCapitalManagementSheetState extends ConsumerState<StoreCapitalManage
   }
 
   Widget _buildFilterChips(String? storeId, dynamic state, dynamic notifier) {
-    final types = [
+    const types = <(String, String)>[
       ('ALL', 'Semua'),
       ('PEMASUKAN_LAIN', 'Pemasukan'),
       ('TAMBAH_MODAL', 'Tambahan'),
@@ -171,32 +142,12 @@ class _StoreCapitalManagementSheetState extends ConsumerState<StoreCapitalManage
       ('TARIK_MODAL', 'Tarik Kas'),
     ];
 
-    return SingleChildScrollView(
-      scrollDirection: Axis.horizontal,
-      child: Row(
-        children: types.map((t) {
-          final isSelected = state.selectedType == t.$1;
-          return Padding(
-            padding: const EdgeInsets.only(right: 6),
-            child: ChoiceChip(
-              label: Text(t.$2),
-              selected: isSelected,
-              onSelected: (val) {
-                if (val && storeId != null) notifier.setTypeFilter(t.$1, storeId);
-              },
-              selectedColor: AppColors.primary,
-              labelStyle: TextStyle(
-                fontSize: 11,
-                fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
-                color: isSelected ? Colors.white : AppColors.textSecondary,
-              ),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-              padding: const EdgeInsets.symmetric(horizontal: 4),
-              visualDensity: VisualDensity.compact,
-            ),
-          );
-        }).toList(),
-      ),
+    return ModernFilterChips<String>(
+      items: types,
+      selectedValue: state.selectedType as String,
+      onSelected: (val) {
+        if (storeId != null) notifier.setTypeFilter(val, storeId);
+      },
     );
   }
 
@@ -209,9 +160,9 @@ class _StoreCapitalManagementSheetState extends ConsumerState<StoreCapitalManage
           children: [
             Icon(Icons.account_balance_wallet_outlined, size: 48, color: AppColors.textMuted),
             SizedBox(height: 12),
-            Text('Belum ada catatan modal usaha', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 13)),
+            Text('Belum ada catatan kas', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 13.5)),
             SizedBox(height: 4),
-            Text('Klik tombol Catat untuk memasukkan modal awal atau tambahan modal', style: TextStyle(fontSize: 11.5, color: AppColors.textSecondary), textAlign: TextAlign.center),
+            Text('Tap Tambah Modal atau Pemasukan untuk mulai mencatat', style: TextStyle(fontSize: 11.5, color: AppColors.textSecondary), textAlign: TextAlign.center),
           ],
         ),
       ),

@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:tokona/core/theme/app_colors.dart';
 import 'package:tokona/core/utils/currency_formatter.dart';
+import 'package:tokona/core/widgets/modern_sheet_widgets.dart';
 import 'package:tokona/features/product/domain/models/device_stock_summary.dart';
 import 'package:tokona/features/product/domain/models/product_filter_state.dart';
 
@@ -123,44 +125,32 @@ class _ProductFilterBottomSheetState extends State<ProductFilterBottomSheet> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      decoration: const BoxDecoration(color: AppColors.surface, borderRadius: BorderRadius.vertical(top: Radius.circular(24))),
-      padding: EdgeInsets.fromLTRB(20, 14, 20, 20 + MediaQuery.of(context).viewInsets.bottom),
+      decoration: const BoxDecoration(color: AppColors.surface, borderRadius: BorderRadius.vertical(top: Radius.circular(28))),
+      padding: EdgeInsets.fromLTRB(20, 12, 20, 20 + MediaQuery.of(context).viewInsets.bottom),
       constraints: BoxConstraints(maxHeight: MediaQuery.of(context).size.height * 0.85),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Center(child: Container(width: 38, height: 4, decoration: BoxDecoration(color: AppColors.border, borderRadius: BorderRadius.circular(2)))),
-          const SizedBox(height: 12),
-          Row(
-            children: [
-              Expanded(
-                child: Row(
-                  children: [
-                    Container(padding: const EdgeInsets.all(6), decoration: BoxDecoration(color: AppColors.primaryContainer, borderRadius: BorderRadius.circular(8)), child: const Icon(Icons.tune_rounded, color: AppColors.primaryDark, size: 17)),
-                    const SizedBox(width: 8),
-                    const Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                      Text('Filter & Urutkan Produk', style: TextStyle(fontSize: 14.5, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
-                      Text('Sesuaikan kriteria tampilan katalog', style: TextStyle(fontSize: 10.5, color: AppColors.textSecondary)),
-                    ])),
-                  ],
-                ),
+          ModernSheetHeader(
+            title: 'Filter Produk',
+            subtitle: 'Atur urutan & rentang katalog',
+            icon: Icons.tune_rounded,
+            onClose: () => Navigator.of(context).pop(),
+            trailingAction: InkWell(
+              onTap: _handleReset,
+              borderRadius: BorderRadius.circular(12),
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                decoration: BoxDecoration(color: const Color(0xFFFEF2F2), borderRadius: BorderRadius.circular(12)),
+                child: const Row(mainAxisSize: MainAxisSize.min, children: [
+                  Icon(Icons.restart_alt_rounded, size: 14, color: Color(0xFFDC2626)),
+                  SizedBox(width: 4),
+                  Text('Reset', style: TextStyle(color: Color(0xFFDC2626), fontWeight: FontWeight.w800, fontSize: 11.5)),
+                ]),
               ),
-              InkWell(
-                onTap: _handleReset,
-                borderRadius: BorderRadius.circular(8),
-                child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 4.5),
-                  decoration: BoxDecoration(color: const Color(0xFFFEF2F2), borderRadius: BorderRadius.circular(8), border: Border.all(color: const Color(0xFFFECACA), width: 0.6)),
-                  child: const Row(mainAxisSize: MainAxisSize.min, children: [
-                    Icon(Icons.restart_alt_rounded, size: 13, color: Color(0xFFDC2626)),
-                    SizedBox(width: 3),
-                    Text('Reset', style: TextStyle(color: Color(0xFFDC2626), fontWeight: FontWeight.w800, fontSize: 11)),
-                  ]),
-                ),
-              ),
-            ],
+            ),
           ),
-          const Divider(height: 16),
+          const Divider(height: 22),
           Expanded(
             child: ListView(
               children: [
@@ -231,27 +221,49 @@ class _ProductFilterBottomSheetState extends State<ProductFilterBottomSheet> {
   }
 
   InputDecoration _decor(String hint) {
-    const b = OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(10)), borderSide: BorderSide(color: AppColors.border, width: 0.6));
     return InputDecoration(
-      hintText: hint, prefixText: 'Rp',
-      prefixStyle: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.textSecondary),
-      hintStyle: const TextStyle(fontSize: 12, color: AppColors.textMuted),
-      isDense: true, filled: true, fillColor: AppColors.surfaceElevated,
-      contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 9),
-      border: b, enabledBorder: b,
-      focusedBorder: const OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(10)), borderSide: BorderSide(color: AppColors.primary, width: 1.2)),
+      hintText: hint,
+      prefixText: 'Rp',
+      prefixStyle: const TextStyle(fontSize: 12.5, fontWeight: FontWeight.w700, color: AppColors.textSecondary),
+      isDense: true,
+      contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
     );
   }
 
   Widget _title(String text) {
-    return Padding(padding: const EdgeInsets.only(bottom: 6), child: Text(text.toUpperCase(), style: const TextStyle(fontSize: 10.5, fontWeight: FontWeight.w800, color: AppColors.textSecondary, letterSpacing: 0.4)));
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8),
+      child: Text(text.toUpperCase(), style: const TextStyle(fontSize: 10.5, fontWeight: FontWeight.w800, color: AppColors.textSecondary, letterSpacing: 0.5)),
+    );
   }
 
   Widget _chip(String label, bool isSelected, ValueChanged<bool> onSelected, {Color color = AppColors.primary}) {
-    return ChoiceChip(
-      label: Text(label), selected: isSelected, onSelected: onSelected, selectedColor: color,
-      labelStyle: TextStyle(fontSize: 11, fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500, color: isSelected ? Colors.white : AppColors.textPrimary),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+    return InkWell(
+      onTap: () {
+        HapticFeedback.selectionClick();
+        onSelected(!isSelected);
+      },
+      borderRadius: BorderRadius.circular(20),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        curve: Curves.easeOutCubic,
+        padding: const EdgeInsets.symmetric(horizontal: 13, vertical: 7.5),
+        decoration: BoxDecoration(
+          color: isSelected ? color : const Color(0xFFF1F5F9),
+          borderRadius: BorderRadius.circular(20),
+          boxShadow: isSelected
+              ? [BoxShadow(color: color.withValues(alpha: 0.25), blurRadius: 8, offset: const Offset(0, 3))]
+              : null,
+        ),
+        child: Text(
+          label,
+          style: TextStyle(
+            fontSize: 11.5,
+            fontWeight: isSelected ? FontWeight.w700 : FontWeight.w600,
+            color: isSelected ? Colors.white : const Color(0xFF475569),
+          ),
+        ),
+      ),
     );
   }
 }
