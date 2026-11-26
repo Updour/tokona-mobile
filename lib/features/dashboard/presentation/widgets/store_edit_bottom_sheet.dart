@@ -240,6 +240,7 @@ class _StoreEditBottomSheetState extends ConsumerState<StoreEditBottomSheet> {
                 decoration: _buildInputDecoration(
                   hint: 'Alamat toko, jalan, kelurahan, kota untuk dicetak pada nota',
                   prefixIcon: Icons.location_on_outlined,
+                  helper: 'Tips: Bisa tambahkan No. Toko/Ruko/Patokan di depan jalan',
                 ),
               ),
               const SizedBox(height: 22),
@@ -273,10 +274,11 @@ class _StoreEditBottomSheetState extends ConsumerState<StoreEditBottomSheet> {
     );
   }
 
-  InputDecoration _buildInputDecoration({required String hint, required IconData prefixIcon}) {
+  InputDecoration _buildInputDecoration({required String hint, required IconData prefixIcon, String? helper}) {
     return InputDecoration(
       hintText: hint,
-      hintStyle: const TextStyle(fontSize: 12.5, color: AppColors.textMuted),
+      helperText: helper,
+      helperStyle: const TextStyle(fontSize: 11, color: AppColors.textMuted),
       prefixIcon: Icon(prefixIcon, size: 18, color: AppColors.textSecondary),
       filled: true,
       fillColor: AppColors.surfaceElevated,
