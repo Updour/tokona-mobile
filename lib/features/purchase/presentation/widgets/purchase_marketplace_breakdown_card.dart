@@ -38,7 +38,6 @@ class _PurchaseMarketplaceBreakdownCardState extends State<PurchaseMarketplaceBr
   double get _shippingFee => CurrencyFormatter.parse(widget.shippingFeeController.text);
   double get _shippingDiscount => CurrencyFormatter.parse(widget.shippingDiscountController.text);
   double get _voucherDiscount => CurrencyFormatter.parse(widget.voucherDiscountController.text);
-  double get _serviceFee => CurrencyFormatter.parse(widget.serviceFeeController.text);
 
   double get _netShipping => (_shippingFee - _shippingDiscount).clamp(0.0, double.infinity);
   double get _totalDiscount => _shippingDiscount + _voucherDiscount;
@@ -71,11 +70,11 @@ class _PurchaseMarketplaceBreakdownCardState extends State<PurchaseMarketplaceBr
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Rincian Biaya & Diskon Marketplace',
+                      'Detail Biaya Marketplace',
                       style: TextStyle(fontSize: 12.5, fontWeight: FontWeight.w700, color: AppColors.textPrimary),
                     ),
                     Text(
-                      'Ongkir, layanan & voucher pengadaan',
+                      'Ongkir & Layanan',
                       style: TextStyle(fontSize: 10.5, color: AppColors.textMuted),
                     ),
                   ],
@@ -111,7 +110,7 @@ class _PurchaseMarketplaceBreakdownCardState extends State<PurchaseMarketplaceBr
                       ),
                       const SizedBox(width: 4),
                       Text(
-                        _isDetailMode ? 'Ada Diskon' : '+ Diskon/Voucher',
+                        _isDetailMode ? 'Ada Diskon' : '+ Voucher',
                         style: TextStyle(
                           fontSize: 10.5,
                           fontWeight: FontWeight.w700,

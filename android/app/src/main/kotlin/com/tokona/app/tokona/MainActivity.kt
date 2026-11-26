@@ -6,15 +6,25 @@ import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
+import android.location.Geocoder
+import android.location.Location
+import android.location.LocationListener
+import android.location.LocationManager
 import android.os.Build
+import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.provider.ContactsContract
 import android.provider.Settings
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
+import androidx.core.content.ContextCompat
+import android.content.pm.PackageManager
 import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.EventChannel
 import io.flutter.plugin.common.MethodChannel
+import java.util.Locale
 
 class MainActivity : FlutterActivity() {
     private val channelName = "com.tokona.app/native_notifications"
@@ -22,7 +32,9 @@ class MainActivity : FlutterActivity() {
     private val contactChannelName = "com.tokona.app/native_contacts"
     private val pickContactRequestCode = 9042
     private val pickAddressRequestCode = 9043
+    private val locationPermissionRequestCode = 9044
     private var pendingContactResult: MethodChannel.Result? = null
+    private var pendingLocationResult: MethodChannel.Result? = null
 
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
@@ -116,6 +128,24 @@ class MainActivity : FlutterActivity() {
                         result.error("ERR_ADDRESS", e.message, null)
                     }
                 }
+                "getCurrentLocationAddress" -> {
+                    if (pendingLocationResult != null) {
+                        result.error("BUSY", "Sedang mengambil lokasi GPS...", null)
+                        return@setMethodCallHandler
+                    }
+                    if (!hasLocationPermission()) {
+                        pendingLocationResult = result
+                        requestPermissions(
+                            arrayOf(
+                                android.Manifest.permission.ACCESS_FINE_LOCATION,
+                                android.Manifest.permission.ACCESS_COARSE_LOCATION
+                            ),
+                            locationPermissionRequestCode
+                        )
+                    } else {
+                        fetchLocationAndAddress(result)
+                    }
+                }
                 else -> result.notImplemented()
             }
         }
@@ -201,6 +231,221 @@ class MainActivity : FlutterActivity() {
         }
         @Suppress("DEPRECATION")
         super.onActivityResult(requestCode, resultCode, data)
+    }
+
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<out String>,
+        grantResults: IntArray
+    ) {
+        if (requestCode == locationPermissionRequestCode) {
+            val callback = pendingLocationResult
+            pendingLocationResult = null
+            val isGranted = grantResults.isNotEmpty() && grantResults.any { it == PackageManager.PERMISSION_GRANTED }
+            if (isGranted) {
+                if (callback != null) {
+                    fetchLocationAndAddress(callback)
+                }
+            } else {
+                callback?.error("PERMISSION_DENIED", "Izin akses lokasi ditolak pengguna", null)
+            }
+            return
+        }
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+    }
+
+    private fun hasLocationPermission(): Boolean {
+        val fine = ContextCompat.checkSelfPermission(
+            this,
+            android.Manifest.permission.ACCESS_FINE_LOCATION
+        ) == PackageManager.PERMISSION_GRANTED
+        val coarse = ContextCompat.checkSelfPermission(
+            this,
+            android.Manifest.permission.ACCESS_COARSE_LOCATION
+        ) == PackageManager.PERMISSION_GRANTED
+        return fine || coarse
+    }
+
+    private fun fetchLocationAndAddress(callback: MethodChannel.Result) {
+        val locationManager = getSystemService(Context.LOCATION_SERVICE) as? LocationManager
+        if (locationManager == null) {
+            callback.error("NO_SERVICE", "Layanan lokasi tidak tersedia pada perangkat", null)
+            return
+        }
+
+        val isGpsEnabled = try {
+            locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)
+        } catch (_: Exception) {
+            false
+        }
+        val isNetworkEnabled = try {
+            locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)
+        } catch (_: Exception) {
+            false
+        }
+
+        if (!isGpsEnabled && !isNetworkEnabled) {
+            callback.error("LOCATION_DISABLED", "GPS/Layanan lokasi HP sedang dinonaktifkan. Silakan aktifkan lokasi di pengaturan HP.", null)
+            return
+        }
+
+        // 1. Coba ambil lokasi terakhir (Last Known Location)
+        var bestLocation: Location? = null
+        try {
+            if (isGpsEnabled) {
+                val loc = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER)
+                if (loc != null) bestLocation = loc
+            }
+            if (isNetworkEnabled) {
+                val loc = locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER)
+                if (loc != null && (bestLocation == null || loc.time > bestLocation.time)) {
+                    bestLocation = loc
+                }
+            }
+        } catch (_: SecurityException) {}
+
+        // Bila ada lokasi yang fresh (kurang dari 5 menit lalu), langsung pakai
+        val now = System.currentTimeMillis()
+        if (bestLocation != null && (now - bestLocation.time) < 300_000) {
+            geocodeLocation(bestLocation, callback)
+            return
+        }
+
+        // 2. Jika tidak ada / sudah usang, request update lokasi dengan timeout 12 detik
+        var completed = false
+        val mainHandler = Handler(Looper.getMainLooper())
+
+        val locationListener = object : LocationListener {
+            override fun onLocationChanged(loc: Location) {
+                if (completed) return
+                completed = true
+                try {
+                    locationManager.removeUpdates(this)
+                } catch (_: Exception) {}
+                geocodeLocation(loc, callback)
+            }
+            @Deprecated("Deprecated in Java")
+            override fun onStatusChanged(provider: String?, status: Int, extras: Bundle?) {}
+            override fun onProviderEnabled(provider: String) {}
+            override fun onProviderDisabled(provider: String) {}
+        }
+
+        val timeoutRunnable = Runnable {
+            if (completed) return@Runnable
+            completed = true
+            try {
+                locationManager.removeUpdates(locationListener)
+            } catch (_: Exception) {}
+            if (bestLocation != null) {
+                geocodeLocation(bestLocation, callback)
+            } else {
+                callback.error("TIMEOUT", "Gagal mengunci sinyal GPS. Pastikan berada di tempat terbuka atau aktifkan koneksi internet.", null)
+            }
+        }
+
+        try {
+            if (isGpsEnabled) {
+                locationManager.requestLocationUpdates(
+                    LocationManager.GPS_PROVIDER,
+                    1000L,
+                    5f,
+                    locationListener,
+                    Looper.getMainLooper()
+                )
+            }
+            if (isNetworkEnabled) {
+                locationManager.requestLocationUpdates(
+                    LocationManager.NETWORK_PROVIDER,
+                    1000L,
+                    5f,
+                    locationListener,
+                    Looper.getMainLooper()
+                )
+            }
+            mainHandler.postDelayed(timeoutRunnable, 12000L)
+        } catch (e: SecurityException) {
+            if (bestLocation != null) {
+                geocodeLocation(bestLocation, callback)
+            } else {
+                callback.error("PERMISSION_ERROR", e.message ?: "Izin lokasi tidak mencukupi", null)
+            }
+        } catch (e: Exception) {
+            if (bestLocation != null) {
+                geocodeLocation(bestLocation, callback)
+            } else {
+                callback.error("ERR_LOCATION", e.message ?: "Gagal mendapatkan lokasi", null)
+            }
+        }
+    }
+
+    private fun geocodeLocation(location: Location, callback: MethodChannel.Result) {
+        Thread {
+            try {
+                val geocoder = Geocoder(this, Locale("id", "ID"))
+                @Suppress("DEPRECATION")
+                val addresses = geocoder.getFromLocation(location.latitude, location.longitude, 1)
+                Handler(Looper.getMainLooper()).post {
+                    if (!addresses.isNullOrEmpty()) {
+                        val addr = addresses[0]
+                        val thoroughfare = addr.thoroughfare ?: ""
+                        val subThoroughfare = addr.subThoroughfare ?: ""
+                        val street = if (thoroughfare.isNotEmpty() && subThoroughfare.isNotEmpty()) {
+                            "$thoroughfare No. $subThoroughfare"
+                        } else thoroughfare.ifEmpty { subThoroughfare }
+
+                        val village = addr.subLocality ?: ""
+                        val district = addr.locality ?: ""
+                        val city = addr.subAdminArea ?: ""
+                        val province = addr.adminArea ?: ""
+                        val postalCode = addr.postalCode ?: ""
+                        val fullAddress = addr.getAddressLine(0) ?: ""
+
+                        val resultMap = mapOf(
+                            "latitude" to location.latitude,
+                            "longitude" to location.longitude,
+                            "formattedAddress" to fullAddress,
+                            "street" to street,
+                            "village" to village,
+                            "district" to district,
+                            "city" to city,
+                            "province" to province,
+                            "postalCode" to postalCode
+                        )
+                        callback.success(resultMap)
+                    } else {
+                        callback.success(
+                            mapOf(
+                                "latitude" to location.latitude,
+                                "longitude" to location.longitude,
+                                "formattedAddress" to "Lokasi GPS (${location.latitude}, ${location.longitude})",
+                                "street" to "",
+                                "village" to "",
+                                "district" to "",
+                                "city" to "",
+                                "province" to "",
+                                "postalCode" to ""
+                            )
+                        )
+                    }
+                }
+            } catch (e: Exception) {
+                Handler(Looper.getMainLooper()).post {
+                    callback.success(
+                        mapOf(
+                            "latitude" to location.latitude,
+                            "longitude" to location.longitude,
+                            "formattedAddress" to "Lokasi GPS (${location.latitude}, ${location.longitude})",
+                            "street" to "",
+                            "village" to "",
+                            "district" to "",
+                            "city" to "",
+                            "province" to "",
+                            "postalCode" to ""
+                        )
+                    )
+                }
+            }
+        }.start()
     }
 
     private fun showPushNotification(id: Int, title: String, body: String) {
