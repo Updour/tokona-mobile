@@ -102,7 +102,7 @@ class StoreProfileIncompleteBanner extends ConsumerWidget {
                 ),
                 const SizedBox(height: 3),
                 Text(
-                  '$missingDesc Isi sekarang agar nota & fitur produk aktif.',
+                  '$missingDesc Isi dulu untuk cetak nota & tambah produk.',
                   style: const TextStyle(fontSize: 11.5, color: Color(0xFFB45309), height: 1.35),
                 ),
                 const SizedBox(height: 10),
@@ -126,7 +126,7 @@ class StoreProfileIncompleteBanner extends ConsumerWidget {
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         Text(
-                          'Lengkapi Sekarang',
+                          'Lengkapi',
                           style: TextStyle(fontSize: 11.5, fontWeight: FontWeight.w800, color: Colors.white),
                         ),
                         SizedBox(width: 4),

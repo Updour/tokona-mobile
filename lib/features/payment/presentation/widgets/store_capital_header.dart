@@ -39,8 +39,8 @@ class StoreCapitalHeader extends StatelessWidget {
                     const SizedBox(height: 1),
                     Text(
                       isWithdrawal
-                          ? 'Tarik uang kas / laba toko untuk keperluan pribadi'
-                          : 'Kelola suntikan dana operasional dan modal toko',
+                          ? 'Ambil uang kas untuk keperluan pribadi'
+                          : 'Catat dana masuk atau modal toko',
                       style: AppTypography.bodySmall.copyWith(fontSize: 11),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,

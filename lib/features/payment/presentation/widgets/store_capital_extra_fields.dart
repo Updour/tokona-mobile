@@ -32,18 +32,18 @@ class StoreCapitalExtraFields extends StatelessWidget {
         TextField(
           controller: sourceController,
           decoration: InputDecoration(
-            labelText: isWithdrawal ? 'Penerima (Opsional)' : 'Sumber Dana (Opsional)',
-            hintText: isWithdrawal ? 'Nama Pemilik' : 'Dana Pribadi / Pinjaman Bank',
+            labelText: isWithdrawal ? 'Diterima oleh' : 'Sumber dana',
+            hintText: isWithdrawal ? 'Nama penerima' : 'Kas pribadi / Jasa / Lainnya',
             prefixIcon: const Icon(Icons.source_outlined, size: 20),
           ),
         ),
         const SizedBox(height: 12),
         TextField(
           controller: notesController,
-          decoration: InputDecoration(
-            labelText: 'Catatan (Opsional)',
-            hintText: isWithdrawal ? 'Keperluan pribadi' : 'Untuk tambahan stok barang',
-            prefixIcon: const Icon(Icons.notes_rounded, size: 20),
+          decoration: const InputDecoration(
+            labelText: 'Catatan',
+            hintText: 'Tulis catatan singkat...',
+            prefixIcon: Icon(Icons.notes_rounded, size: 20),
           ),
         ),
       ],

@@ -156,8 +156,8 @@ class _StoreEditBottomSheetState extends ConsumerState<StoreEditBottomSheet> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text('Pengaturan Outlet & Toko', style: AppTypography.headingSmall.copyWith(fontSize: 16), maxLines: 1, overflow: TextOverflow.ellipsis),
-                        Text('Kelola nama, alamat, dan kontak outlet', style: AppTypography.bodySmall.copyWith(fontSize: 11), maxLines: 1, overflow: TextOverflow.ellipsis),
+                        Text('Info Toko', style: AppTypography.headingSmall.copyWith(fontSize: 16), maxLines: 1, overflow: TextOverflow.ellipsis),
+                        Text('Atur nama, no. HP & alamat toko', style: AppTypography.bodySmall.copyWith(fontSize: 11), maxLines: 1, overflow: TextOverflow.ellipsis),
                       ],
                     ),
                   ),
@@ -170,18 +170,18 @@ class _StoreEditBottomSheetState extends ConsumerState<StoreEditBottomSheet> {
                 ],
               ),
               const Divider(height: 20),
-              _buildFieldLabel('Nama Toko*'),
+              _buildFieldLabel('Nama Toko'),
               TextFormField(
                 controller: _nameController,
                 textCapitalization: TextCapitalization.words,
-                decoration: _buildInputDecoration(hint: 'Toko Bangun Kerja Jaya', prefixIcon: Icons.store_rounded),
-                validator: (val) => (val == null || val.trim().isEmpty) ? 'Nama toko wajib diisi' : null,
+                decoration: _buildInputDecoration(hint: 'Warung Maju Jaya', prefixIcon: Icons.store_rounded),
+                validator: (val) => (val == null || val.trim().isEmpty) ? 'Isi nama toko dulu' : null,
               ),
               const SizedBox(height: 14),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  _buildFieldLabel('Nomor Handphone (WhatsApp)'),
+                  _buildFieldLabel('No. HP / WhatsApp'),
                   InkWell(
                     onTap: _pickFromPhone,
                     borderRadius: BorderRadius.circular(6),
@@ -191,7 +191,7 @@ class _StoreEditBottomSheetState extends ConsumerState<StoreEditBottomSheet> {
                         children: [
                           Icon(Icons.contacts_rounded, size: 12.5, color: AppColors.primary),
                           SizedBox(width: 3.5),
-                          Text('Ambil Kontak HP', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: AppColors.primary)),
+                          Text('Dari Kontak', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: AppColors.primary)),
                         ],
                       ),
                     ),
@@ -201,13 +201,13 @@ class _StoreEditBottomSheetState extends ConsumerState<StoreEditBottomSheet> {
               TextFormField(
                 controller: _phoneController,
                 keyboardType: TextInputType.phone,
-                decoration: _buildInputDecoration(hint: '081234567890', prefixIcon: Icons.phone_android_rounded),
+                decoration: _buildInputDecoration(hint: '08123456789', prefixIcon: Icons.phone_android_rounded),
               ),
               const SizedBox(height: 14),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  _buildFieldLabel('Alamat Lengkap Toko'),
+                  _buildFieldLabel('Alamat Toko'),
                   InkWell(
                     onTap: _isLocating ? null : _pickAddressFromGps,
                     borderRadius: BorderRadius.circular(6),
@@ -225,7 +225,7 @@ class _StoreEditBottomSheetState extends ConsumerState<StoreEditBottomSheet> {
                             const Icon(Icons.my_location_rounded, size: 12.5, color: AppColors.primary),
                           const SizedBox(width: 4),
                           Text(
-                            _isLocating ? 'Mencari GPS...' : 'Ambil Lokasi GPS HP',
+                            _isLocating ? 'Mencari...' : 'Pakai GPS',
                             style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: AppColors.primary),
                           ),
                         ],
@@ -238,9 +238,9 @@ class _StoreEditBottomSheetState extends ConsumerState<StoreEditBottomSheet> {
                 controller: _addressController,
                 maxLines: 3,
                 decoration: _buildInputDecoration(
-                  hint: 'Alamat toko, jalan, kelurahan, kota untuk dicetak pada nota',
+                  hint: 'Alamat lengkap untuk nota',
                   prefixIcon: Icons.location_on_outlined,
-                  helper: 'Tips: Bisa tambahkan No. Toko/Ruko/Patokan di depan jalan',
+                  helper: 'Bisa tambah no. ruko atau patokan',
                 ),
               ),
               const SizedBox(height: 22),
@@ -252,7 +252,7 @@ class _StoreEditBottomSheetState extends ConsumerState<StoreEditBottomSheet> {
                   icon: _isSaving
                       ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
                       : const Icon(Icons.save_rounded, size: 18),
-                  label: Text(_isSaving ? 'Menyimpan...' : 'Simpan Perubahan', style: const TextStyle(fontWeight: FontWeight.w700)),
+                  label: Text(_isSaving ? 'Menyimpan...' : 'Simpan', style: const TextStyle(fontWeight: FontWeight.w700)),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppColors.primary,
                     foregroundColor: Colors.white,

@@ -47,7 +47,7 @@ class BerandaBusinessMetricsSection extends ConsumerWidget {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Text(
-              'Aktivitas & Performa Toko',
+              'Ringkasan Toko',
               style: AppTypography.headingSmall.copyWith(fontSize: 14, fontWeight: FontWeight.w800),
             ),
             InkWell(
@@ -57,7 +57,7 @@ class BerandaBusinessMetricsSection extends ConsumerWidget {
                 padding: EdgeInsets.symmetric(horizontal: 4, vertical: 2),
                 child: Row(
                   children: [
-                    Text('Buka Laporan', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: AppColors.primary)),
+                    Text('Lihat Semua', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: AppColors.primary)),
                     SizedBox(width: 2),
                     Icon(Icons.chevron_right_rounded, size: 14, color: AppColors.primary),
                   ],
