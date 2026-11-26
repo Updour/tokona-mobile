@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:tokona/core/theme/app_colors.dart';
 import 'package:tokona/core/widgets/app_toast.dart';
+import 'package:tokona/core/widgets/modern_animations.dart';
 import 'package:tokona/features/auth/presentation/controllers/auth_controller.dart';
 import 'package:tokona/features/auth/presentation/screens/auth_screen.dart';
 import 'package:tokona/features/customer/presentation/controllers/customer_controller.dart';
@@ -156,8 +157,8 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> with WidgetsB
           backgroundColor: AppColors.background,
           body: SafeArea(
             bottom: false,
-            child: IndexedStack(
-              index: _currentIndex,
+            child: AnimatedTabStack(
+              currentIndex: _currentIndex,
               children: pages,
             ),
           ),

@@ -106,3 +106,63 @@ class _BouncyTapState extends State<BouncyTap> {
     );
   }
 }
+
+/// Transisi perpindahan tab yang halus (fade + slide ringan) sambil menjaga state IndexedStack tetap hidup.
+class AnimatedTabStack extends StatefulWidget {
+  final int currentIndex;
+  final List<Widget> children;
+
+  const AnimatedTabStack({
+    super.key,
+    required this.currentIndex,
+    required this.children,
+  });
+
+  @override
+  State<AnimatedTabStack> createState() => _AnimatedTabStackState();
+}
+
+class _AnimatedTabStackState extends State<AnimatedTabStack> with SingleTickerProviderStateMixin {
+  late final AnimationController _controller;
+  late final Animation<double> _fade;
+  late final Animation<Offset> _slide;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(vsync: this, duration: const Duration(milliseconds: 240));
+    _fade = CurvedAnimation(parent: _controller, curve: Curves.easeOut);
+    _slide = Tween<Offset>(begin: const Offset(0, 0.025), end: Offset.zero).animate(
+      CurvedAnimation(parent: _controller, curve: Curves.easeOutCubic),
+    );
+    _controller.value = 1.0;
+  }
+
+  @override
+  void didUpdateWidget(covariant AnimatedTabStack oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.currentIndex != widget.currentIndex) {
+      _controller.forward(from: 0.0);
+    }
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return FadeTransition(
+      opacity: _fade,
+      child: SlideTransition(
+        position: _slide,
+        child: IndexedStack(
+          index: widget.currentIndex,
+          children: widget.children,
+        ),
+      ),
+    );
+  }
+}
