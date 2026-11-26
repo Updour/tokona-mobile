@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:tokona/core/theme/app_colors.dart';
+import 'package:tokona/core/widgets/app_dialog.dart';
 import 'package:tokona/core/widgets/app_toast.dart';
+import 'package:tokona/core/widgets/modern_sheet_widgets.dart';
 import 'package:tokona/features/auth/domain/models/store_model.dart';
 import 'package:tokona/features/auth/domain/models/user_model.dart';
 import 'package:tokona/features/auth/presentation/controllers/auth_controller.dart';
@@ -52,16 +54,12 @@ class _StaffManagementSheetState extends ConsumerState<StaffManagementSheet> {
   }
 
   Future<void> _deleteStaff(UserModel user) async {
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: const Text('Hapus Pengguna?'),
-        content: Text('Yakin ingin menghapus akses untuk ${user.fullName} (@${user.username})?'),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Batal')),
-          TextButton(onPressed: () => Navigator.pop(ctx, true), child: const Text('Hapus', style: TextStyle(color: AppColors.error))),
-        ],
-      ),
+    final confirmed = await AppDialog.showConfirmation(
+      context,
+      title: 'Hapus Pengguna?',
+      message: 'Yakin ingin menghapus akses untuk ${user.fullName} (@${user.username})?',
+      confirmText: 'Hapus',
+      isDestructive: true,
     );
 
     if (confirmed == true) {
@@ -98,38 +96,20 @@ class _StaffManagementSheetState extends ConsumerState<StaffManagementSheet> {
     return Container(
       decoration: const BoxDecoration(
         color: AppColors.surface,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(22)),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
       ),
-      padding: const EdgeInsets.fromLTRB(18, 12, 18, 24),
+      padding: const EdgeInsets.fromLTRB(20, 12, 20, 24),
       constraints: BoxConstraints(maxHeight: MediaQuery.of(context).size.height * 0.85),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Center(
-            child: Container(width: 36, height: 4, decoration: BoxDecoration(color: const Color(0xFFCBD5E1), borderRadius: BorderRadius.circular(2))),
+          ModernSheetHeader(
+            title: 'Kelola Karyawan',
+            subtitle: 'Daftar kasir, admin & pairing',
+            icon: Icons.group_rounded,
+            onClose: () => Navigator.pop(context),
           ),
-          const SizedBox(height: 12),
-          Row(
-            children: [
-              Container(
-                padding: const EdgeInsets.all(7),
-                decoration: BoxDecoration(color: AppColors.primaryContainer, borderRadius: BorderRadius.circular(10)),
-                child: const Icon(Icons.group_rounded, color: AppColors.primaryDark, size: 22),
-              ),
-              const SizedBox(width: 10),
-              const Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text('Manajemen Pengguna', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
-                    Text('Daftar kasir, admin & pairing offline', style: TextStyle(fontSize: 11, color: AppColors.textSecondary)),
-                  ],
-                ),
-              ),
-              IconButton(onPressed: () => Navigator.pop(context), icon: const Icon(Icons.close_rounded, size: 20, color: AppColors.textMuted)),
-            ],
-          ),
-          const SizedBox(height: 14),
+          const SizedBox(height: 16),
           Row(
             children: [
               Expanded(

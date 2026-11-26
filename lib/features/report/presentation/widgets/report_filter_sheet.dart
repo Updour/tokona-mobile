@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:tokona/core/theme/app_colors.dart';
+import 'package:tokona/core/widgets/modern_sheet_widgets.dart';
 import 'package:tokona/features/report/domain/models/report_filter_type.dart';
 
 class ReportFilterSheet extends StatefulWidget {
@@ -100,73 +101,42 @@ class _ReportFilterSheetState extends State<ReportFilterSheet> {
       child: Container(
         decoration: const BoxDecoration(
           color: Colors.white,
-          borderRadius: BorderRadius.vertical(top: Radius.circular(22)),
+          borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
           boxShadow: [
-            BoxShadow(color: Color(0x140F172A), blurRadius: 20, offset: Offset(0, -4)),
+            BoxShadow(color: Color(0x180F172A), blurRadius: 28, offset: Offset(0, -6)),
           ],
         ),
-        padding: const EdgeInsets.fromLTRB(16, 12, 16, 18),
+        padding: const EdgeInsets.fromLTRB(20, 12, 20, 20),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           mainAxisSize: MainAxisSize.min,
           children: [
-            Center(
-              child: Container(
-                width: 38,
-                height: 4,
-                decoration: BoxDecoration(color: const Color(0xFFE2E8F0), borderRadius: BorderRadius.circular(2)),
-              ),
-            ),
-            const SizedBox(height: 10),
-            Row(
-              children: [
-                Expanded(
-                  child: Row(
+            ModernSheetHeader(
+              title: 'Filter Periode',
+              subtitle: 'Pilih rentang waktu laporan',
+              icon: Icons.tune_rounded,
+              onClose: () => Navigator.of(context).pop(),
+              trailingAction: InkWell(
+                onTap: () {
+                  widget.onApply(ReportFilterType.today, null, null);
+                  Navigator.of(context).pop();
+                },
+                borderRadius: BorderRadius.circular(12),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                  decoration: BoxDecoration(color: const Color(0xFFFEF2F2), borderRadius: BorderRadius.circular(12)),
+                  child: const Row(
+                    mainAxisSize: MainAxisSize.min,
                     children: [
-                      Container(
-                        padding: const EdgeInsets.all(6),
-                        decoration: BoxDecoration(color: const Color(0xFFF1F5F9), borderRadius: BorderRadius.circular(8)),
-                        child: const Icon(Icons.tune_rounded, color: Color(0xFF334155), size: 16),
-                      ),
-                      const SizedBox(width: 8),
-                      const Expanded(
-                        child: Text(
-                          'Filter Periode Laporan',
-                          style: TextStyle(fontSize: 14.5, fontWeight: FontWeight.w700, color: AppColors.textPrimary),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ),
+                      Icon(Icons.restart_alt_rounded, size: 13.5, color: Color(0xFFDC2626)),
+                      SizedBox(width: 4),
+                      Text('Reset', style: TextStyle(color: Color(0xFFDC2626), fontWeight: FontWeight.w800, fontSize: 11.5)),
                     ],
                   ),
                 ),
-                const SizedBox(width: 8),
-                InkWell(
-                  onTap: () {
-                    widget.onApply(ReportFilterType.today, null, null);
-                    Navigator.of(context).pop();
-                  },
-                  borderRadius: BorderRadius.circular(8),
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 4.5),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFFEF2F2),
-                      borderRadius: BorderRadius.circular(8),
-                      border: Border.all(color: const Color(0xFFFECACA)),
-                    ),
-                    child: const Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(Icons.restart_alt_rounded, size: 12.5, color: Color(0xFFDC2626)),
-                        SizedBox(width: 3),
-                        Text('Reset', style: TextStyle(color: Color(0xFFDC2626), fontWeight: FontWeight.w800, fontSize: 10.5)),
-                      ],
-                    ),
-                  ),
-                ),
-              ],
+              ),
             ),
-            const Divider(height: 18, color: Color(0xFFF1F5F9)),
+            const Divider(height: 22),
             Wrap(
               spacing: 6,
               runSpacing: 6,

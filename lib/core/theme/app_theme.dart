@@ -84,6 +84,25 @@ class AppTheme {
           borderRadius: BorderRadius.circular(20),
         ),
       ),
+      dialogTheme: DialogThemeData(
+        backgroundColor: AppColors.surface,
+        surfaceTintColor: Colors.transparent,
+        elevation: 18,
+        shadowColor: const Color(0xFF0F172A).withValues(alpha: 0.18),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(26),
+        ),
+        titleTextStyle: AppTypography.headingSmall.copyWith(fontSize: 17, fontWeight: FontWeight.w800),
+        contentTextStyle: AppTypography.bodyMedium.copyWith(color: AppColors.textSecondary, height: 1.4),
+      ),
+      chipTheme: ChipThemeData(
+        backgroundColor: const Color(0xFFF1F5F9),
+        selectedColor: AppColors.primary,
+        side: BorderSide.none,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        labelStyle: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: Color(0xFF475569)),
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+      ),
       pageTransitionsTheme: const PageTransitionsTheme(
         builders: {
           TargetPlatform.android: CupertinoPageTransitionsBuilder(),
@@ -91,16 +110,17 @@ class AppTheme {
         },
       ),
       dividerTheme: DividerThemeData(
-        color: const Color(0xFFE2E8F0).withValues(alpha: 0.7),
+        color: const Color(0xFFE2E8F0).withValues(alpha: 0.65),
         thickness: 1,
         space: 1,
       ),
-      bottomSheetTheme: const BottomSheetThemeData(
+      bottomSheetTheme: BottomSheetThemeData(
         backgroundColor: Colors.transparent,
         surfaceTintColor: Colors.transparent,
+        modalBarrierColor: const Color(0xFF0F172A).withValues(alpha: 0.45),
         elevation: 0,
         modalElevation: 0,
-        shape: RoundedRectangleBorder(
+        shape: const RoundedRectangleBorder(
           borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
         ),
         clipBehavior: Clip.antiAliasWithSaveLayer,

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:tokona/core/theme/app_colors.dart';
 import 'package:tokona/core/widgets/app_dialog.dart';
+import 'package:tokona/core/widgets/modern_sheet_widgets.dart';
 import 'package:tokona/features/auth/presentation/controllers/auth_controller.dart';
 import 'package:tokona/features/payment/domain/models/payment_account_model.dart';
 import 'package:tokona/features/payment/presentation/controllers/payment_account_controller.dart';
@@ -70,18 +71,23 @@ class _PaymentAccountManagementSheetState extends ConsumerState<PaymentAccountMa
     return Container(
       decoration: const BoxDecoration(
         color: AppColors.surface,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
       ),
       constraints: BoxConstraints(maxHeight: MediaQuery.of(context).size.height * 0.9),
       child: SafeArea(
         top: false,
         child: Padding(
-          padding: const EdgeInsets.fromLTRB(18, 12, 18, 16),
+          padding: const EdgeInsets.fromLTRB(20, 12, 20, 16),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              _buildHeader(context),
-              const SizedBox(height: 12),
+              ModernSheetHeader(
+                title: 'Akun Pembayaran & Kas',
+                subtitle: 'Rekening bank, QRIS & kas toko',
+                icon: Icons.account_balance_rounded,
+                onClose: () => Navigator.of(context).pop(),
+              ),
+              const SizedBox(height: 14),
               PaymentStoreWalletCard(accounts: accounts, totalBalance: totalBalance),
               const SizedBox(height: 14),
               _buildFilterChips(accounts.length),
@@ -112,83 +118,16 @@ class _PaymentAccountManagementSheetState extends ConsumerState<PaymentAccountMa
     );
   }
 
-  Widget _buildHeader(BuildContext context) {
-    return Column(
-      children: [
-        Center(
-          child: Container(
-            width: 38,
-            height: 4,
-            decoration: BoxDecoration(color: AppColors.border, borderRadius: BorderRadius.circular(2)),
-          ),
-        ),
-        const SizedBox(height: 12),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            const Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Akun Pembayaran & Kas',
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.w800, color: AppColors.textPrimary),
-                ),
-                Text(
-                  'Master rekening bank, QRIS, & modal kas toko',
-                  style: TextStyle(fontSize: 11, color: AppColors.textSecondary),
-                ),
-              ],
-            ),
-            IconButton(
-              onPressed: () => Navigator.of(context).pop(),
-              icon: const Icon(Icons.close_rounded, color: AppColors.textMuted, size: 20),
-              padding: EdgeInsets.zero,
-              constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
-            ),
-          ],
-        ),
-      ],
-    );
-  }
-
   Widget _buildFilterChips(int totalCount) {
-    return SingleChildScrollView(
-      scrollDirection: Axis.horizontal,
-      child: Row(
-        children: [
-          _buildChip('Semua ($totalCount)', 'ALL'),
-          const SizedBox(width: 6),
-          _buildChip('Rekening Bank', 'BANK'),
-          const SizedBox(width: 6),
-          _buildChip('Kas Laci', 'CASH'),
-          const SizedBox(width: 6),
-          _buildChip('QRIS & E-Wallet', 'EWALLET'),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildChip(String label, String value) {
-    final isSelected = _selectedFilter == value;
-    return InkWell(
-      onTap: () => setState(() => _selectedFilter = value),
-      borderRadius: BorderRadius.circular(8),
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-        decoration: BoxDecoration(
-          color: isSelected ? AppColors.primaryContainer : const Color(0xFFF1F5F9),
-          borderRadius: BorderRadius.circular(8),
-          border: Border.all(color: isSelected ? AppColors.primary : AppColors.border),
-        ),
-        child: Text(
-          label,
-          style: TextStyle(
-            fontSize: 11,
-            fontWeight: isSelected ? FontWeight.w800 : FontWeight.w600,
-            color: isSelected ? AppColors.primaryDark : const Color(0xFF475569),
-          ),
-        ),
-      ),
+    return ModernFilterChips<String>(
+      items: [
+        ('ALL', 'Semua ($totalCount)'),
+        ('BANK', 'Bank'),
+        ('CASH', 'Kas Laci'),
+        ('EWALLET', 'QRIS & E-Wallet'),
+      ],
+      selectedValue: _selectedFilter,
+      onSelected: (val) => setState(() => _selectedFilter = val),
     );
   }
 
@@ -199,9 +138,9 @@ class _PaymentAccountManagementSheetState extends ConsumerState<PaymentAccountMa
         children: [
           Icon(Icons.account_balance_wallet_outlined, size: 36, color: AppColors.textMuted),
           SizedBox(height: 8),
-          Text('Belum ada akun di kategori ini', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 13)),
+          Text('Belum ada akun di sini', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 13)),
           SizedBox(height: 2),
-          Text('Tekan tombol di bawah untuk menambah rekening baru', style: TextStyle(fontSize: 11, color: AppColors.textSecondary)),
+          Text('Tap tombol di bawah untuk menambah akun', style: TextStyle(fontSize: 11, color: AppColors.textSecondary)),
         ],
       ),
     );
@@ -214,13 +153,13 @@ class _PaymentAccountManagementSheetState extends ConsumerState<PaymentAccountMa
         onPressed: () => AddPaymentAccountDialog.show(context),
         icon: const Icon(Icons.add_rounded, size: 18, color: Colors.white),
         label: const Text(
-          'Tambah Rekening / QRIS / Kas',
-          style: TextStyle(fontWeight: FontWeight.w800, fontSize: 13, color: Colors.white),
+          'Tambah Akun',
+          style: TextStyle(fontWeight: FontWeight.w800, fontSize: 13.5, color: Colors.white),
         ),
         style: ElevatedButton.styleFrom(
           backgroundColor: AppColors.primary,
-          padding: const EdgeInsets.symmetric(vertical: 12),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          padding: const EdgeInsets.symmetric(vertical: 13),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
         ),
       ),
     );

@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:tokona/core/providers/alert_notification_provider.dart';
 import 'package:tokona/core/theme/app_colors.dart';
+import 'package:tokona/core/widgets/modern_sheet_widgets.dart';
 import 'package:tokona/features/dashboard/domain/models/shortcut_menu_item.dart';
 import 'package:tokona/features/dashboard/presentation/controllers/shortcut_controller.dart';
 import 'package:tokona/features/dashboard/presentation/widgets/all_menus_category_section.dart';
@@ -92,68 +93,29 @@ class _AllMenusSheetState extends ConsumerState<AllMenusSheet> {
 
   Widget _buildHeader(int pinnedCount) {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(20, 12, 16, 8),
-      child: Column(
-        children: [
-          Center(
-            child: Container(
-              width: 38,
-              height: 4,
-              decoration: BoxDecoration(
-                color: AppColors.border,
-                borderRadius: BorderRadius.circular(2),
-              ),
-            ),
+      padding: const EdgeInsets.fromLTRB(20, 12, 20, 12),
+      child: ModernSheetHeader(
+        title: 'Semua Menu',
+        subtitle: _isEditMode ? 'Pilih pintasan Beranda' : 'Semua fitur Tokona',
+        icon: Icons.grid_view_rounded,
+        onClose: () => Navigator.of(context).pop(),
+        trailingAction: TextButton.icon(
+          onPressed: () {
+            HapticFeedback.selectionClick();
+            setState(() => _isEditMode = !_isEditMode);
+          },
+          style: TextButton.styleFrom(
+            backgroundColor: _isEditMode ? AppColors.primary : const Color(0xFFF1F5F9),
+            foregroundColor: _isEditMode ? Colors.white : AppColors.primaryDark,
+            padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 6),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
           ),
-          const SizedBox(height: 12),
-          Row(
-            children: [
-              Container(
-                width: 36,
-                height: 36,
-                decoration: BoxDecoration(
-                  color: AppColors.primary.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: const Icon(Icons.grid_view_rounded, color: AppColors.primary, size: 20),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text(
-                      'Semua Menu & Fitur',
-                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.w800, color: AppColors.textPrimary),
-                    ),
-                    Text(
-                      _isEditMode ? 'Pilih pintasan untuk Beranda' : 'Katalog lengkap fitur Tokona',
-                      style: const TextStyle(fontSize: 11, color: AppColors.textSecondary),
-                    ),
-                  ],
-                ),
-              ),
-              TextButton.icon(
-                onPressed: () {
-                  HapticFeedback.selectionClick();
-                  setState(() => _isEditMode = !_isEditMode);
-                },
-                style: TextButton.styleFrom(
-                  backgroundColor: _isEditMode ? AppColors.primary : AppColors.surface,
-                  foregroundColor: _isEditMode ? Colors.white : AppColors.primary,
-                  side: BorderSide(color: _isEditMode ? AppColors.primary : AppColors.border),
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                ),
-                icon: Icon(_isEditMode ? Icons.check_rounded : Icons.edit_note_rounded, size: 16),
-                label: Text(
-                  _isEditMode ? 'Selesai' : 'Atur',
-                  style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700),
-                ),
-              ),
-            ],
+          icon: Icon(_isEditMode ? Icons.check_rounded : Icons.tune_rounded, size: 15),
+          label: Text(
+            _isEditMode ? 'Selesai' : 'Atur',
+            style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700),
           ),
-        ],
+        ),
       ),
     );
   }
